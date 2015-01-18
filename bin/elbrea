@@ -1,0 +1,76 @@
+#! /usr/bin/env python
+
+####################################################################################################
+# 
+# Elbrea - Electronic Board Reverse Engineering Assistant
+# Copyright (C) 2014 Fabrice Salvaire
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# 
+####################################################################################################
+
+####################################################################################################
+#
+# Logging
+#
+
+import Elbrea.Logging.Logging as Logging
+
+logger = Logging.setup_logging('elbrea')
+
+####################################################################################################
+
+import argparse
+
+####################################################################################################
+
+from Elbrea.GUI.Viewer.ViewerApplication import ViewerApplication
+from Elbrea.Tools.ProgramOptions import PathAction
+
+####################################################################################################
+#
+# Options
+#
+
+argument_parser = argparse.ArgumentParser(description='Elbrea Browser')
+
+argument_parser.add_argument('front_image', metavar='FRONT',
+                             action=PathAction,
+                             help='font image path')
+
+argument_parser.add_argument('back_image', metavar='BACK',
+                             action=PathAction,
+                             help='back image path')
+
+argument_parser.add_argument('--user-script',
+                             action=PathAction,
+                             default=None,
+                             help='user script to execute')
+
+argument_parser.add_argument('--user-script-args',
+                             default='',
+                             help="user script args (don't forget to quote)")
+
+args = argument_parser.parse_args()
+
+####################################################################################################
+
+application = ViewerApplication(args=args)
+application.exec_()
+
+####################################################################################################
+# 
+# End
+# 
+####################################################################################################

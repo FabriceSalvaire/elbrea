@@ -1,0 +1,8 @@
+* check for useless files in Math
+* ImageProcessing ?
+
+clean swig
+
+* Label work on numpy array
+  uint16_t -> pixel_t
+  island -> 

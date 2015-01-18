@@ -1,0 +1,110 @@
+#! /bin/bash
+
+####################################################################################################
+
+src_dir=$(readlink -f $(dirname $0))
+
+####################################################################################################
+
+TEMP=`getopt --long help,debug,verbose \
+     -n 'bootstrap' -- bootstrap "$@"`
+
+if [ $? != 0 ] ; then
+  echo "End" >&2 ;
+  exit 1 ;
+fi
+
+eval set -- "$TEMP"
+
+while true ; do
+  case "$1" in
+
+    --help)
+      cat <<EOF
+Run CMake
+
+  --help
+  --gui      run ccmake
+  --debug    enable -g
+  --verbose  enable verbose build
+EOF
+      exit 1 ;;
+
+    --init)
+      init='yes'
+      shift ;;
+
+    --gui)
+      gui='yes'
+      shift ;;
+
+    --debug)
+      debug='yes'
+      shift ;;
+
+    --verbose)
+      verbose='yes'
+      shift ;;
+
+    --)
+      shift;
+      break ;;
+
+    *)
+      echo 'Bad option' ;
+      exit 1 ;;
+  esac
+done
+
+####################################################################################################
+
+script_path=`readlink -f $0`
+source_dir=`dirname ${script_path}`
+if [ "x${PWD}" = "x${source_dir}" ]; then
+  echo -e "You attempted to run this script in the source directory,\n  cd to a build directory." >&2 ;
+  exit 1
+fi
+
+####################################################################################################
+
+PREFIX=/usr/local
+
+####################################################################################################
+
+rm -f CMakeCache.txt
+
+OPTIONS=
+
+OPTIONS+=" -D CMAKE_INSTALL_PREFIX:PATH=$PREFIX"
+
+if [ "x$debug" = "xyes" ]; then
+  OPTIONS+=" -D CMAKE_BUILD_TYPE:STRING=DEBUG"
+else
+  OPTIONS+=" -D CMAKE_BUILD_TYPE:STRING=RELEASE"
+fi
+
+if [ "x$verbose" = "xyes" ]; then
+  OPTIONS+=" -D CMAKE_VERBOSE_MAKEFILE:BOOL=ON"
+else
+  OPTIONS+=" -D CMAKE_VERBOSE_MAKEFILE:BOOL=OFF"
+fi
+
+echo "Options: $OPTIONS"
+
+OPTIONS+=" ${src_dir}"
+
+if [ "x$gui" = "xyes" ]; then
+  CMAKE=ccmake
+else
+  CMAKE=cmake
+fi
+
+echo
+echo ${CMAKE} $OPTIONS
+${CMAKE} $OPTIONS
+
+####################################################################################################
+#
+# End
+#
+####################################################################################################

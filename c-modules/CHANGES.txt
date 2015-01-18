@@ -1,0 +1,20 @@
+removed headers
+
+ImageProcessing2 -> ImageProcessing
+
+Removed files:
+  cmake/modules: FindArchitecture.cmake
+  cmake/modules: FindIPP.cmake
+  cmake/modules: FindTIFF.cmake
+  and some text files ...
+
+Removed directories:
+  modules/image-processing: component-tree
+  modules/image-processing: dev-test-1
+  modules/image-processing: ImageProcessing3
+  modules/image-processing: ipp
+  modules/image-processing: numpy-extension
+  modules: test
+
+Label:
+  removed specific codes
