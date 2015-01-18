@@ -12,7 +12,7 @@ find_package(PythonInterp)
 
 #######################################################################################################################
 
-find_program(PYTHON_CONFIG NAMES python2.7-config)
+find_program(PYTHON_CONFIG NAMES python3.4-config)
 mark_as_advanced(PYTHON_CONFIG)
 
 #######################################################################################################################
@@ -36,7 +36,7 @@ if(PYTHON_CONFIG)
 
   find_path(PYTHON_INCLUDE_PATH
     NAMES Python.h
-    PATHS "${PYTHON_PREFIX}/include/python${PYTHON_VERSION}" "/usr/include/python${PYTHON_VERSION}"
+    PATHS "${PYTHON_PREFIX}/include/python${PYTHON_VERSION}m"
     )
 
   mark_as_advanced(
