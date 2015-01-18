@@ -55,7 +55,7 @@ class IntensityProfileBaseForm(QtGui.QDialog):
 
         self._figure = Figure()
         self._axes = [self._figure.add_subplot(number_of_plots, 1, i)
-                      for i in xrange(number_of_plots)] 
+                      for i in range(number_of_plots)] 
 
         self._canvas = FigureCanvas(self._figure)
         self._canvas.setFocusPolicy(QtCore.Qt.StrongFocus)

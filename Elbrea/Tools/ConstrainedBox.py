@@ -35,7 +35,7 @@ class ConstrainedValue(object):
 
     ##############################################
         
-    def __nonzero__(self):
+    def __bool__(self):
 
         return self.constrained
         
@@ -65,7 +65,7 @@ class ConstrainedPoint(object):
     def __init__(self, x=None, y=None):
 
         self._x, self._y = [ConstrainedValue(value=x, constrained=(x is not None))
-                            for x in x, y]
+                            for x in (x, y)]
         self._number_of_constrains =  bool(self._x) + bool(self._y)
 
     ##############################################

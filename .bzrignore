@@ -3,3 +3,8 @@ doc/mamba-um.pdf
 doc/pyref.pdf
 doc/sphinx/build
 doc/sphinx/old-api
+Elbrea/C/DisjointSet.py
+Elbrea/C/Geometry.py
+Elbrea/C/ImageProcessing.py
+Elbrea/C/Labelling.py
+Elbrea/C/PlatformC.py

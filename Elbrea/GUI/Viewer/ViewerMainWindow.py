@@ -84,7 +84,7 @@ class ViewerMainWindow(MainWindowBase):
             else:
                 self._image_tool_bar.addWidget(item)
 
-        from ToolBar import ToolBar
+        from .ToolBar import ToolBar
         self.tool_bar = ToolBar(self)
 
     ##############################################

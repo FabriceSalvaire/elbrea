@@ -46,7 +46,7 @@ class TestLabel(unittest.TestCase):
         labels = {}
         total_number_of_pixels = 0
         label_max = image_buffer.max()
-        for label in xrange(label_max +1):
+        for label in range(label_max +1):
             if not label:
                 continue
             indices = np.where(image_buffer == label)
@@ -61,7 +61,7 @@ class TestLabel(unittest.TestCase):
 
         # label 0 = sea
         self.assertEqual(len(labels), labeler.islands.size() -1)
-        for label in xrange(1, labeler.islands.size()):
+        for label in range(1, labeler.islands.size()):
             cpp_island = labeler.islands[label]
             cpp_island.analyse(1)
             self.assertEqual(label, cpp_island.label)
@@ -83,8 +83,8 @@ class TestLabel(unittest.TestCase):
         image = Image(format='gray16',
                       height=template_height*height_scale_factor,
                       width=template_width*width_scale_factor)
-        for r in xrange(height_scale_factor):
-            for c in xrange(width_scale_factor):
+        for r in range(height_scale_factor):
+            for c in range(width_scale_factor):
                 r_min = r*template_height
                 r_max = r_min + template_height
                 c_min = c*template_width
@@ -92,14 +92,14 @@ class TestLabel(unittest.TestCase):
                 image.buffer[r_min:r_max,c_min:c_max] = template
         # # write_from_image(image, test_image_file_name.replace('.txt', '.tiff'))
 
-        print '\nStart Perf Loop ...'
+        print('\nStart Perf Loop ...')
         timer = Timer()
-        for i in xrange(50):
+        for i in range(50):
             labeler = Labelling.Label(0, * image.buffer.shape)
             labeler.run_length_encode(image.buffer)
             labeler.merge_segments()
             labeler.generate_islands(image.buffer)
-        print 'Perf Loop Done'
+        print('Perf Loop Done')
         timer.print_delta_time()
             
         # labelled_image = image.copy_image_format()
@@ -179,10 +179,10 @@ class TestLabel(unittest.TestCase):
 
         # label 0 = sea
         self.assertEqual(labeler.islands.size() -1, 4)
-        for label in xrange(1, labeler.islands.size()):
+        for label in range(1, labeler.islands.size()):
             cpp_island = labeler.islands[label]
             cpp_island.analyse(1)
-            print cpp_island.print_object()
+            print(cpp_island.print_object())
             island_parameters = island_map[cpp_island.intensity_min]
 
             self.assertEqual(cpp_island.intensity_min, cpp_island.intensity_max)
@@ -202,8 +202,8 @@ class TestLabel(unittest.TestCase):
             self.assertAlmostEqual(cpp_island.major_axis_angle_unweighted, angle, delta=1.)
 
             def check_length(ref_value, test_value):
-                print 'Check Length: %.3f versus %.3f' % (ref_value, test_value)
-                ref_value, test_value = [.1*x for x in ref_value, test_value]
+                print('Check Length: %.3f versus %.3f' % (ref_value, test_value))
+                ref_value, test_value = [.1*x for x in (ref_value, test_value)]
                 self.assertAlmostEqual(ref_value, test_value, places=0)
                 
             check_length(cpp_island.major_axis_weighted, 2*island_parameters['a'])

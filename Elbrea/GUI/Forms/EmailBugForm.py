@@ -58,7 +58,7 @@ class EmailBugForm(QtGui.QDialog):
 
         form = self._form
 
-        from_address = unicode(form.from_line_edit.text())
+        from_address = str(form.from_line_edit.text())
         if not from_address:
             from_address = Config.Email.from_address
         
@@ -88,18 +88,18 @@ Elbrea Version:
         platform = Platform(application)
         platform.query_opengl()
        
-        message = template_message % {'description': unicode(form.description_plain_text_edit.toPlainText()),
-                                      'elbrea_version': unicode(Version.elbrea),
-                                      'platform': unicode(platform),
+        message = template_message % {'description': str(form.description_plain_text_edit.toPlainText()),
+                                      'elbrea_version': str(Version.elbrea),
+                                      'platform': str(platform),
                                       'traceback': self._traceback,
                                       }
 
         email = Email(from_address=from_address,
-                      subject='Elbrea Bug: ' + unicode(form.subject_line_edit.text()),
+                      subject='Elbrea Bug: ' + str(form.subject_line_edit.text()),
                       recipients=Config.Email.to_address,
                       message=message,
                       )
-        recipients = unicode(form.recipients_line_edit.text())
+        recipients = str(form.recipients_line_edit.text())
         if recipients:
             email.add_recipients_from_string(recipients)
         email.send()

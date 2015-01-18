@@ -121,7 +121,7 @@ class ImageProfile(object):
         r_slices = []
         r_start = max(0, r - radius)
         r_stop = min(self._image.height, r + radius +1)
-        for r in xrange(r_start, r_stop):
+        for r in range(r_start, r_stop):
             r_slices.append((r, c1, c2))
 
         return r_slices
@@ -153,7 +153,7 @@ class ImageProfile(object):
         i_stop = len(cs) -1
         r_start = max(0, r1 - radius)
         r_stop = min(self._image.height, r2 + radius +1)
-        for r in xrange(r_start, r_stop):
+        for r in range(r_start, r_stop):
             i = i_start
             cs1 = cs[i]
             while i <= i_stop and rs_min[i] <= r:
@@ -178,7 +178,7 @@ class ImageProfile(object):
         i_stop = 0
         r_start = max(0, r2 - radius)
         r_stop = min(self._image.height, r1 + radius +1)
-        for r in xrange(r_start, r_stop):
+        for r in range(r_start, r_stop):
             i = i_start
             cs2 = cs[i]
             while i >= i_stop and rs_min[i] <= r:

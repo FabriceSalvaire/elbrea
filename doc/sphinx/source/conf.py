@@ -80,8 +80,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Elbrea'
-copyright = u'2012, Fabrice Salvaire'
+project = 'Elbrea'
+copyright = '2012, Fabrice Salvaire'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -239,7 +239,7 @@ latex_font_size = '10pt'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Elbrea.tex', u'Elbrea Documentation', u'Fabrice Salvaire', 'manual'),
+  ('index', 'Elbrea.tex', 'Elbrea Documentation', 'Fabrice Salvaire', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -273,7 +273,7 @@ latex_logo = None
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'Elbrea', u'Elbrea Documentation', [u'Fabrice Salvaire'], 1)
+    ('index', 'Elbrea', 'Elbrea Documentation', ['Fabrice Salvaire'], 1)
 ]
 
 # Example configuration for intersphinx: refer to the Python standard library.

@@ -211,10 +211,10 @@ def paint_conic(xs, ys, xe, ye, conic_parameters, paint_pixel):
     DEBUG = False
 
     if DEBUG:
-        print conic_parameters
-        print "paint_conic %i x^2 + %i x y + %i y^2 + %i x + %i y + %i = 0" % (A, B, C, D, E, F)
-        print "(%i, %i) (%i, %i)" % (xs, ys, xe, ye)
-        print A*xs**2 + B*xs*ys + C*ys**2 + D*xs + E*ys + F
+        print(conic_parameters)
+        print("paint_conic %i x^2 + %i x y + %i y^2 + %i x + %i y + %i = 0" % (A, B, C, D, E, F))
+        print("(%i, %i) (%i, %i)" % (xs, ys, xe, ye))
+        print(A*xs**2 + B*xs*ys + C*ys**2 + D*xs + E*ys + F)
 
     A *= 4
     B *= 4
@@ -313,7 +313,7 @@ def paint_conic(xs, ys, xe, ye, conic_parameters, paint_pixel):
         octant_count += 8
 
     if DEBUG:
-        print 'octant_count = %d' % (octant_count)
+        print('octant_count = %d' % (octant_count))
 
     # Now we actually draw the curve
 
@@ -323,7 +323,7 @@ def paint_conic(xs, ys, xe, ye, conic_parameters, paint_pixel):
     while octant_count > 0:
 
       if DEBUG:
-          print '-- %d -------------------------' % (octant)
+          print('-- %d -------------------------' % (octant))
 
       if odd(octant):
 
@@ -332,7 +332,7 @@ def paint_conic(xs, ys, xe, ye, conic_parameters, paint_pixel):
               paint_pixel(x,y)
 
               if DEBUG:
-                  print 'x = %3d y = %3d d = %4d' % (x, y, d)
+                  print('x = %3d y = %3d d = %4d' % (x, y, d))
 
               # Are we inside or outside?
 
@@ -368,7 +368,7 @@ def paint_conic(xs, ys, xe, ye, conic_parameters, paint_pixel):
               paint_pixel(x, y)
 
               if DEBUG:
-                  print 'x = %3d y = %3d d = %4d' % (x, y, d)
+                  print('x = %3d y = %3d d = %4d' % (x, y, d))
 
               # Are we inside or outside?
 
@@ -404,7 +404,7 @@ def paint_conic(xs, ys, xe, ye, conic_parameters, paint_pixel):
     # Draw final octant until we reach the endpoint
 
     if DEBUG:
-        print '-- %d (final) -----------------' % (octant)
+        print('-- %d (final) -----------------' % (octant))
 
     if odd(octant):
         
@@ -416,7 +416,7 @@ def paint_conic(xs, ys, xe, ye, conic_parameters, paint_pixel):
               break
 
           if DEBUG:
-              print 'x = %3d y = %3d d = %4d' % (x, y, d)
+              print('x = %3d y = %3d d = %4d' % (x, y, d))
 
           # if (DEBUG) fprintf(stderr,"x = %3d y = %3d d = %4d\n", x,y,d)
 
@@ -445,7 +445,7 @@ def paint_conic(xs, ys, xe, ye, conic_parameters, paint_pixel):
               break
 
           if DEBUG:
-              print 'x = %3d y = %3d d = %4d' % (x, y, d)
+              print('x = %3d y = %3d d = %4d' % (x, y, d))
 
           # Are we inside or outside?
 
@@ -510,7 +510,7 @@ def paint_ellipse(xm, ym, a, b, angle, paint_pixel, fill=False):
         v = [False]*n
 
         # loop over points
-        for i in xrange(n):
+        for i in range(n):
 
             # check it was not treated
             if v[i]:
@@ -522,7 +522,7 @@ def paint_ellipse(xm, ym, a, b, angle, paint_pixel, fill=False):
             y_min = y_max = ys[i]
 
             # Find the extremas for x
-            for k in xrange(n):
+            for k in range(n):
                 if k != i and xs[k] == x:
 
                     v[k] = True
@@ -588,8 +588,8 @@ def generate_spot_model(cx, cy, radius, sigma, paint_pixel):
 
     height, width = model_image.shape
 
-    for r in xrange(height):
-        for c in xrange(width):
+    for r in range(height):
+        for c in range(width):
             paint_pixel(cx - cc + c, cy - cr + r, model_image[r, c])
 
 def generate_spot_model_image(radius, sigma):
@@ -602,8 +602,8 @@ def generate_spot_model_image(radius, sigma):
 
     # Fixme : Use mirroring to be faster
    
-    for y in xrange(-ymax, ymax +1):
-        for x in xrange(-xmax, xmax +1):
+    for y in range(-ymax, ymax +1):
+        for x in range(-xmax, xmax +1):
 
             r = x**2 + y**2
 
@@ -625,8 +625,8 @@ def generate_segment_model(cx, cy, length, sigma, angle, paint_pixel):
 
     height, width = model_image.shape
 
-    for r in xrange(height):
-        for c in xrange(width):
+    for r in range(height):
+        for c in range(width):
             paint_pixel(cx - cc + c, cy - cr + r, model_image[r, c])
 
 def generate_segment_model_image(length, sigma, angle):
@@ -654,8 +654,8 @@ def generate_segment_model_image(length, sigma, angle):
 
     # Fixme : Use mirroring to be faster
    
-    for y in xrange(-ymax, ymax +1):
-        for x in xrange(-xmax, xmax +1):
+    for y in range(-ymax, ymax +1):
+        for x in range(-xmax, xmax +1):
 
             # Rotate(theta)
 	    

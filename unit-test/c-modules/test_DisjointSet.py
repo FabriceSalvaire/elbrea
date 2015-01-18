@@ -24,7 +24,7 @@ class TestDisjointSet(unittest.TestCase):
         compression_path = True
         disjoint_set = DisjointSet(disjoint_set_size, compression_path)
 
-        for i in xrange(disjoint_set_size):
+        for i in range(disjoint_set_size):
             self.assertEqual(disjoint_set.find(i), i)
 
         # 1 + 2 : root[1] = 2 rank[2] = 2

@@ -30,11 +30,11 @@ def print_image(image, in_buffer=False, max_r=None, max_c=None, number_of_digit=
     if (max_c is not None):
         width = min(max_c, width)
     rule = '='*(width*(number_of_digit +1) -1)
-    print rule
+    print(rule)
     string_format = '%' + str(number_of_digit) + 'u'
-    for r in xrange(height):
+    for r in range(height):
         line = []
-        for c in xrange(width):
+        for c in range(width):
             if in_buffer:
                 value = image.get_in_buffer(r, c)
             else:
@@ -46,8 +46,8 @@ def print_image(image, in_buffer=False, max_r=None, max_c=None, number_of_digit=
             else:
                 value_str = ' '
             line.append(value_str)
-        print ' '.join(line)
-    print rule
+        print(' '.join(line))
+    print(rule)
 
 ####################################################################################################
 
@@ -59,8 +59,8 @@ class TestImageProcessing2(unittest.TestCase):
     def test_basic(self):
 
         image = Image(100, 100, False)
-        print 'Data Pointer:', hex(image.data_pointer_as_integer())
-        print 'Image Size:', image.height(), image.width()
+        print('Data Pointer:', hex(image.data_pointer_as_integer()))
+        print('Image Size:', image.height(), image.width())
         self.assertFalse(image.is_data_aligned())
 
         image.zero()
@@ -85,16 +85,16 @@ class TestImageProcessing2(unittest.TestCase):
 
         np_array = np.arange(50, dtype=np.uint16)
         np_array.shape = 5, 10
-        print np_array
+        print(np_array)
         image = Image(np_array)
-        print 'Data Pointer:', hex(image.data_pointer_as_integer())
+        print('Data Pointer:', hex(image.data_pointer_as_integer()))
         self.assertEqual(image.data_pointer_as_integer(), np_array.ctypes.data)
         self.assertFalse(image.is_allocated())
         self.assertEqual(image.height(), 5)
         self.assertEqual(image.width(), 10)
         self.assertEqual(image.step(), 10*2)
         print_image(image)
-        for r in xrange(5):
+        for r in range(5):
             self.assertEqual(image.get(r, 0), r*10)
             self.assertEqual(image.get(r, 9), r*10 +9)
         image.set(1, 1, 123)
@@ -108,23 +108,23 @@ class TestImageProcessing2(unittest.TestCase):
         image_height, image_width = 32, 32 +3
         align = SSE_BYTE_ALIGNEMENT
 
-        print 'Allocate'
+        print('Allocate')
         image1 = Image(image_height, image_width, align)
-        print image1.is_allocated()
+        print(image1.is_allocated())
 
-        print 'Set Constant'
+        print('Set Constant')
         constant1 = 100
         image1.set_constant(constant1)
 
-        print 'Allocate'
+        print('Allocate')
         image2 = Image(image_height, image_width, align)
-        print image2.is_allocated()
+        print(image2.is_allocated())
 
-        print 'Set Constant'
+        print('Set Constant')
         constant2 = 200
         image2.set_constant(constant2)
 
-        print 'Add'
+        print('Add')
         # image2.saturated_addition(image1)
         image3 = Image(image_height, image_width, align)
         ImageProcessing.saturated_addition_sse(image1, image2, image3)

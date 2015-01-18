@@ -142,7 +142,7 @@ class PrettyPrintGas(object):
     def lex(self):
 
         for token_type, value in self._token_source():
-            print token_type, '=', value
+            print(token_type, '=', value)
 
     ##############################################
 

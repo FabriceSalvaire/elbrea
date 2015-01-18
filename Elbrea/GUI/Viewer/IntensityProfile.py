@@ -67,7 +67,7 @@ class IntensityProfileBase(object):
 
     def __iter__(self):
 
-        for colour in xrange(self.number_of_colours):
+        for colour in range(self.number_of_colours):
             yield self[colour]
 
     ##############################################
@@ -103,7 +103,7 @@ class IntensityProfileBase(object):
 
         attributes = dataset.attrs
         if comment is not None:
-            attributes['comment'] = unicode(comment)
+            attributes['comment'] = str(comment)
 
         return attributes
 

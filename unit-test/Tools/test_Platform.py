@@ -38,7 +38,7 @@ class TestPlatform(unittest.TestCase):
         
         application = QtGui.QApplication(sys.argv)
         platform = Platform(application)
-        print platform
+        print(platform)
         
 ####################################################################################################
 

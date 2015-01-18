@@ -242,10 +242,10 @@ sample per pixel %u
 bit per sample   %u
 is planar        %s
 """ 
-        print message % (self.width, self.height,
+        print(message % (self.width, self.height,
                          self.samples_per_pixel,
                          self.bits_per_pixel,
-                         self.is_planar)
+                         self.is_planar))
 
     #######################################
 

@@ -102,14 +102,14 @@ class TestIsland(unittest.TestCase):
 
             island.analyse(1)
 
-            print island.print_object()
+            print(island.print_object())
 
             if False:
                 image = Image(format='gray16', width=1000, height=1000)
                 island.paint(image.buffer, island_parameters['intensity_level'])
                 image_index += 1
                 image_file_name = 'test-image-%u.tif' % image_index
-                print 'Write', image_file_name
+                print('Write', image_file_name)
                 write_from_image(image, image_file_name)
 
             self.assertEqual(island.intensity_min, island.intensity_max)
@@ -129,8 +129,8 @@ class TestIsland(unittest.TestCase):
             self.assertAlmostEqual(island.major_axis_angle_unweighted, angle, delta=1.)
              
             def check_length(ref_value, test_value):
-                print 'Check Length: %.3f versus %.3f' % (ref_value, test_value)
-                ref_value, test_value = [.1*x for x in ref_value, test_value]
+                print('Check Length: %.3f versus %.3f' % (ref_value, test_value))
+                ref_value, test_value = [.1*x for x in (ref_value, test_value)]
                 self.assertAlmostEqual(ref_value, test_value, places=0)
                 
             check_length(island.major_axis_weighted, 2*island_parameters['a'])

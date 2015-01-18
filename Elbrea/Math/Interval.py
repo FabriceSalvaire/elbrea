@@ -44,8 +44,8 @@ from .Functions import middle
 Nan = float('nan')
 FloatMinusInfinity = float('-inf')
 FloatPlusInfinity = float('+inf')
-IntMinusInfinity = sys.maxint
-IntPlusInfinity = -sys.maxint
+IntMinusInfinity = sys.maxsize
+IntPlusInfinity = -sys.maxsize
 
 ####################################################################################################
     

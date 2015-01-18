@@ -64,7 +64,7 @@ class GlWidget(GlWidgetBase):
     def init_tools(self):
 
         from .ForegroundPainter import RoiPainter
-        from Cropper import Cropper
+        from .Cropper import Cropper
         self.roi_painter = RoiPainter(self)
         self.cropper = Cropper(self)
 
@@ -96,7 +96,7 @@ class GlWidget(GlWidgetBase):
 
         self.logger.debug('Initialise Shader')
 
-        import ShaderProgrames as ShaderProgrames
+        from . import ShaderProgrames as ShaderProgrames
         self.shader_manager = ShaderProgrames.shader_manager
         self.position_shader_interface = ShaderProgrames.position_shader_program_interface
 
@@ -287,7 +287,7 @@ class GlWidget(GlWidgetBase):
         
     def _show_intensity_profile(self, location):
         
-        from IntensityProfileForm import LineIntensityProfileForm
+        from .IntensityProfileForm import LineIntensityProfileForm
         x_profile, y_profile = self._intensity_line_picker(location, self._current_image())
         self._intensity_profile_form = LineIntensityProfileForm(x_profile, y_profile)
         self._intensity_profile_form.show()
@@ -299,7 +299,7 @@ class GlWidget(GlWidgetBase):
         if axis not in ('x', 'y', 'xy'):
             raise IndexError
 
-        from IntensityProfile import LineIntensityProfile
+        from .IntensityProfile import LineIntensityProfile
 
         x_profile = None # row
         y_profile = None # column
@@ -311,7 +311,7 @@ class GlWidget(GlWidgetBase):
             y_profile = LineIntensityProfile(location, 'y', 3, height)
         x, y = location
         margin = 5
-        for wave in xrange(3):
+        for wave in range(3):
             if x_profile is not None:
                 x_profile[wave] = np.mean(image[y-margin:y+margin,:,wave], 0)
             if y_profile is not None:

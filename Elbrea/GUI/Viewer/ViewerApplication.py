@@ -59,7 +59,7 @@ class ViewerApplication(GuiApplicationBase):
 
 
         super(ViewerApplication, self).__init__(args=args)
-        self._logger.debug(unicode(args))
+        self._logger.debug(str(args))
         
         from .ViewerMainWindow import ViewerMainWindow
         self._main_window = ViewerMainWindow()
@@ -100,7 +100,7 @@ class ViewerApplication(GuiApplicationBase):
 
         # self.front_image = self.process_images(self.front_image)
         # self.back_image = self.process_images(self.back_image)
-        print 'ready'
+        print('ready')
 
         glwidget = self._main_window.glwidget
         glwidget.init_tools() # Fixme: for shader
@@ -160,14 +160,14 @@ class ViewerApplication(GuiApplicationBase):
         MambaTools.cv2mamba(lightness_image, mask_mb)
         marker_mb = MambaTools.imageMb(width_mb, height_mb, 8)
         MambaTools.cv2mamba(marker_image, marker_mb)
-        print 'start build'
+        print('start build')
         mc.geodesy.build(mask_mb, marker_mb)
-        print 'end build'
+        print('end build')
         MambaTools.mamba2cv(marker_mb, tmp_image)
 
         filtered_image -= tmp_image
 
-        for i in xrange(3):
+        for i in range(3):
             input_image[:,:,i] = filtered_image[:height,:width]
             # input_image[:,:,i] = lightness_image[:height,:width]
             

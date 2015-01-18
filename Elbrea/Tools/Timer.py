@@ -37,7 +37,7 @@ class TimeTracker(object):
 
     def __iter__(self):
 
-        return self._activities.itervalues()
+        return iter(self._activities.values())
 
     ##############################################
 
@@ -77,7 +77,7 @@ class TimeTrackerActivity(object):
         self._name = name
 
         self._cpu_tsc = CpuTSC(self._time_tracker.cpu_clock_frequency)
-        self._number_of_cycles = 0L
+        self._number_of_cycles = 0
 
     ##############################################
 

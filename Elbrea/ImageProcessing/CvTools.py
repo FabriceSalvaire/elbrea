@@ -55,8 +55,8 @@ def circular_structuring_element(radius):
 
     size = 2*radius +1
     kernel = np.ones((size, size), dtype=np.uint8)
-    for i in xrange(1, radius +1):
-        for j in xrange(1, radius +1):
+    for i in range(1, radius +1):
+        for j in range(1, radius +1):
             if i**2 + j**2 > radius**2:
                 kernel[radius+i, radius+j] = 0
                 kernel[radius-i, radius+j] = 0
@@ -118,7 +118,7 @@ def morphology_gradient(image_src, image_dst, structuring_element):
 ####################################################################################################
 
 def alternate_sequential_filter(image_src, image_dst, radius_max, structuring_element, open_first=True):
-    for radius in xrange(1, radius_max +1):
+    for radius in range(1, radius_max +1):
         kernel, anchor = structuring_element(radius)
         if open_first:
             cv2.morphologyEx(image_src, cv2.MORPH_OPEN, kernel, image_dst, anchor)

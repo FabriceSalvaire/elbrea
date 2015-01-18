@@ -84,7 +84,7 @@ class Platform(object):
             self.desktop = None
             self.number_of_screens = 0
         self.screens = []
-        for i in xrange(self.number_of_screens):
+        for i in range(self.number_of_screens):
             self.screens.append(Screen(self, i))
         
         # OpenGL
