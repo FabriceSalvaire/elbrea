@@ -68,7 +68,7 @@ class GlWidget(GlWidgetBase):
     def init_tools(self):
 
         from .ForegroundPainter import RoiPainter
-        from .Cropper import Cropper
+        from ..Viewer.Cropper import Cropper
         self.roi_painter = RoiPainter(self)
         self.cropper = Cropper(self)
 

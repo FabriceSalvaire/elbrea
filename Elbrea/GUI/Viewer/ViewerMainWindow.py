@@ -30,8 +30,8 @@ from PyQt5.QtCore import Qt
 ####################################################################################################
 
 from Elbrea.GUI.Base.MainWindowBase import MainWindowBase
+from Elbrea.GUI.GraphicEngine.GlWidget import GlWidget
 from Elbrea.GUI.Widgets.IconLoader import IconLoader
-from .GlWidget import GlWidget
 
 ####################################################################################################
 

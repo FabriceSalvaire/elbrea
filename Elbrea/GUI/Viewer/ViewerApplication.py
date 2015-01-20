@@ -33,9 +33,9 @@ from Elbrea.GUI.Base.GuiApplicationBase import GuiApplicationBase
 
 import numpy as np
 
-from mamba import *
-import mambaComposed as mc
-import mambaExtra as me
+from mambaIm.mamba import *
+import mambaIm.mambaComposed as mc
+import mambaIm.mambaExtra as me
 
 # import cv
 import cv2

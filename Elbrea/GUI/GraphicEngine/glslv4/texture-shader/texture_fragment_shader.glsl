@@ -118,16 +118,17 @@ hsl_filter(vec3 texel)
 void main()
 {
   vec3 texel = texture(texture0, vertex.uv).rgb;
-  /* fragment_colour = vec4(texel, 1.); */
+  fragment_colour = vec4(texel, 1.);
 
-  vec4 hsv = rgb_to_hsl(texel);
+  /* vec4 hsv = rgb_to_hsl(texel); */
 
-  float h = hsv.x;
-  float s = hsv.y;
-  float l = hsv.z;
-  float chroma = hsv.a;
+  /* float h = hsv.x; */
+  /* float s = hsv.y; */
+  /* float l = hsv.z; */
+  /* float chroma = hsv.a; */
 
-  fragment_colour = vec4(h, s, l, 1.);
+  /* fragment_colour = vec4(h, s, l, 1.); */
+
 }
 
 /* *********************************************************************************************** *
