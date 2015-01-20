@@ -22,7 +22,7 @@
 
 import unittest
 
-from PyQt4 import QtGui
+from PyQt5 import QtWidgets
 
 ####################################################################################################
 
@@ -36,7 +36,7 @@ class TestPlatform(unittest.TestCase):
 
     def test_platform(self):
         
-        application = QtGui.QApplication(sys.argv)
+        application = QtWidgets.QApplication(sys.argv)
         platform = Platform(application)
         print(platform)
         

@@ -33,11 +33,11 @@
 
 import logging
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtWidgets, QtCore
 
 ####################################################################################################
 
-class MainWindowBase(QtGui.QMainWindow):
+class MainWindowBase(QtWidgets.QMainWindow):
 
     _logger = logging.getLogger(__name__)
     
@@ -49,7 +49,7 @@ class MainWindowBase(QtGui.QMainWindow):
 
         self.setWindowTitle(title)
 
-        self._application = QtGui.QApplication.instance()
+        self._application = QtWidgets.QApplication.instance()
         self.init_menu()
 
     ##############################################
@@ -115,7 +115,7 @@ class MainWindowBase(QtGui.QMainWindow):
         return self._application.translate(self.__class__.__name__,
                                            text,
                                            None,
-                                           QtGui.QApplication.UnicodeUTF8)
+                                           QtWidgets.QApplication.UnicodeUTF8)
 
 ####################################################################################################
 #

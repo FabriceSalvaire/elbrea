@@ -26,7 +26,7 @@ import logging
 
 ####################################################################################################
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtWidgets, QtCore
 
 ####################################################################################################
 
@@ -41,7 +41,7 @@ class StatusBar(object):
         self._main_window = main_window
         self._status_bar = self._main_window.statusBar()
 
-        self._application = QtGui.QApplication.instance()
+        self._application = QtWidgets.QApplication.instance()
 
         label_definitions = (('colour_intensities_label', 'Colour intensities'),
                              ('coordinate_label', 'Coordinate of the pointer'),
@@ -49,7 +49,7 @@ class StatusBar(object):
                              )
 
         for attribute_name, tool_tip in label_definitions:
-            widget = QtGui.QLabel(toolTip=tool_tip)
+            widget = QtWidgets.QLabel(toolTip=tool_tip)
             setattr(self, attribute_name, widget)
 
         self.colour_intensities_label.setTextFormat(QtCore.Qt.RichText)

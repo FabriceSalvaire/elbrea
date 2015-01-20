@@ -22,7 +22,7 @@
 
 import logging
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 import numpy as np
 
@@ -57,7 +57,7 @@ class GlWidget(GlWidgetBase):
 
         super(GlWidget, self).__init__(parent)
 
-        self._application = QtGui.QApplication.instance()
+        self._application = QtWidgets.QApplication.instance()
 
         self.show_front = True
 
@@ -119,7 +119,10 @@ class GlWidget(GlWidgetBase):
 
     def create_vertex_array_objects(self):
 
-        self.create_textures()
+        self.makeCurrent()
+        with GL.error_checker():
+            self.create_textures()
+        self.doneCurrent()
         self._ready = True
 
     ##############################################

@@ -36,7 +36,7 @@ import os
 import platform
 import sys
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 
 ####################################################################################################
 
@@ -77,7 +77,7 @@ class Platform(object):
         
         # Screen
         try:
-            application = QtGui.QApplication.instance()
+            application = QtWidgets.QApplication.instance()
             self.desktop = application.desktop()
             self.number_of_screens = self.desktop.screenCount() 
         except:

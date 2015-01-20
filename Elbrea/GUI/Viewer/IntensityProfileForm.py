@@ -25,7 +25,7 @@
 import os
 import uuid
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
@@ -43,7 +43,7 @@ from Elbrea.Tools.RangeTracker import IntervalAggregator
 
 ####################################################################################################
 
-class IntensityProfileBaseForm(QtGui.QDialog):
+class IntensityProfileBaseForm(QtWidgets.QDialog):
 
     ###############################################
 
@@ -51,7 +51,7 @@ class IntensityProfileBaseForm(QtGui.QDialog):
 
         super(IntensityProfileBaseForm, self).__init__()
 
-        # self._application = QtGui.QApplication.instance()
+        # self._application = QtWidgets.QApplication.instance()
 
         self._figure = Figure()
         self._axes = [self._figure.add_subplot(number_of_plots, 1, i)
@@ -63,7 +63,7 @@ class IntensityProfileBaseForm(QtGui.QDialog):
 
         self._matplotlib_toolbar = NavigationToolbar(self._canvas, self)
 
-        vertical_layout = QtGui.QVBoxLayout(self)
+        vertical_layout = QtWidgets.QVBoxLayout(self)
         for widget in self._canvas, self._matplotlib_toolbar:
             vertical_layout.addWidget(widget)
 
@@ -123,7 +123,7 @@ class LineIntensityProfileForm(IntensityProfileBaseForm):
 
 ####################################################################################################
 
-# class IntensityProfileSaveForm(QtGui.QDialog):
+# class IntensityProfileSaveForm(QtWidgets.QDialog):
 
 #     ###############################################
 
@@ -134,7 +134,7 @@ class LineIntensityProfileForm(IntensityProfileBaseForm):
 #         form = self.form = Ui_intensity_profile_save_form()
 #         form.setupUi(self)
 
-#         self._application = QtGui.QApplication.instance()
+#         self._application = QtWidgets.QApplication.instance()
 
 #         self._data = data
 #         label = str(uuid.uuid1())
@@ -152,7 +152,7 @@ class LineIntensityProfileForm(IntensityProfileBaseForm):
 
 #         extension_filter = 'HDF5 files (*.hdf5)'
         
-#         dialog = QtGui.QFileDialog.getSaveFileName
+#         dialog = QtWidgets.QFileDialog.getSaveFileName
 #         file_name = unicode(dialog(self,
 #                                    'Select HDF5 File',
 #                                    self.form.file_name_line_edit.text(),

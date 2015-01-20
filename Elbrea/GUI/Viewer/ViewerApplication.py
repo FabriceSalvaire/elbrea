@@ -23,7 +23,7 @@
 import logging
 import math
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import Qt, QtCore, QtWidgets
 
 ####################################################################################################
 

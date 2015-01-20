@@ -34,7 +34,7 @@
 import sys
 import traceback
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtWidgets, QtCore
 
 ####################################################################################################
 
@@ -49,13 +49,13 @@ from Elbrea.GUI.ui.critical_error_form_ui import Ui_critical_error_form
 
 ####################################################################################################
 
-class CriticalErrorForm(QtGui.QDialog, Ui_critical_error_form):
+class CriticalErrorForm(QtWidgets.QDialog, Ui_critical_error_form):
 
     ###############################################
 
     def __init__(self, exception_type, exception_value, exception_backtrace):
 
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
 
         self.setupUi(self)
 

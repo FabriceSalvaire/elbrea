@@ -24,8 +24,8 @@
 
 import logging
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import Qt
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import Qt
 
 ####################################################################################################
 
@@ -63,7 +63,7 @@ class ViewerMainWindow(MainWindowBase):
         icon_loader = IconLoader()
 
         self._switch_front_back_action = \
-            QtGui.QAction(# icon_loader[''],
+            QtWidgets.QAction(# icon_loader[''],
                           'Switch Front/Back',
                           self,
                           toolTip='Switch Front/Back',
@@ -79,7 +79,7 @@ class ViewerMainWindow(MainWindowBase):
         self._image_tool_bar = self.addToolBar('Main')
         for item in (self._switch_front_back_action,
                     ):
-            if isinstance(item,QtGui.QAction):
+            if isinstance(item,QtWidgets.QAction):
                 self._image_tool_bar.addAction(item)
             else:
                 self._image_tool_bar.addWidget(item)
@@ -97,13 +97,14 @@ class ViewerMainWindow(MainWindowBase):
 
     def _init_ui(self):
 
-        self._central_widget = QtGui.QWidget(self)
-        self._horizontal_layout = QtGui.QHBoxLayout(self._central_widget)
+        # self._central_widget = QtWidgets.QWidget(self)
+        # self._horizontal_layout = QtWidgets.QHBoxLayout(self._central_widget)
 
-        self.glwidget = GlWidget(self._central_widget)
+        self.glwidget = GlWidget(self) # ._central_widget
         self.glwidget.setFocusPolicy(QtCore.Qt.ClickFocus)
+        self._central_widget = self.glwidget
 
-        self._horizontal_layout.addWidget(self.glwidget)
+        # self._horizontal_layout.addWidget(self.glwidget)
         self.setCentralWidget(self._central_widget)
 
         self._translate_ui()

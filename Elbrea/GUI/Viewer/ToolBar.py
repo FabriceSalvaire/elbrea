@@ -22,7 +22,7 @@
 
 ####################################################################################################
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 
 ####################################################################################################
 
@@ -47,38 +47,38 @@ class ToolBar(object):
     
     def _create_actions(self):
 
-        application = QtGui.QApplication.instance()
+        application = QtWidgets.QApplication.instance()
         icon_loader = IconLoader()
 
         self.clear_tool_action = \
-            QtGui.QAction('Clear',
+            QtWidgets.QAction('Clear',
                           application,
                           toolTip='Clear Tool',
                           triggered=self.clear_tool,
                           )
 
         self.position_tool_action = \
-            QtGui.QAction(icon_loader.get_icon('position-tool', self.icon_size),
+            QtWidgets.QAction(icon_loader.get_icon('position-tool', self.icon_size),
                           'Position Tool',
                           application,
                           checkable=True,
                           )
 
         self.colour_picker_tool_action = \
-            QtGui.QAction(icon_loader.get_icon('colour-picker-tool', self.icon_size),
+            QtWidgets.QAction(icon_loader.get_icon('colour-picker-tool', self.icon_size),
                           'Colour Picker Tool',
                           application,
                           checkable=True,
                           )
 
         self.crop_tool_action = \
-            QtGui.QAction(icon_loader.get_icon('crop-tool', self.icon_size),
+            QtWidgets.QAction(icon_loader.get_icon('crop-tool', self.icon_size),
                           'Crop Tool',
                           application,
                           checkable=True,
                           )
 
-        self._action_group = QtGui.QActionGroup(application)
+        self._action_group = QtWidgets.QActionGroup(application)
         for action in (self.position_tool_action,
                        self.colour_picker_tool_action,
                        self.crop_tool_action,
@@ -89,7 +89,7 @@ class ToolBar(object):
 
     def _init_tool_bar(self):
                 
-        application = QtGui.QApplication.instance()
+        application = QtWidgets.QApplication.instance()
 
         self.position_tool_action.setChecked(True)
         
@@ -111,7 +111,7 @@ class ToolBar(object):
 
     def clear_tool(self):
 
-        application = QtGui.QApplication.instance()
+        application = QtWidgets.QApplication.instance()
         current_tool = self.current_tool()
 
         if current_tool is self.crop_tool_action:

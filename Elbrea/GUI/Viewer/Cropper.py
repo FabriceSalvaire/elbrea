@@ -24,7 +24,7 @@
 
 import logging
 
-from PyQt4 import QtGui
+from PyQt5 import QtWidgets
 
 ####################################################################################################
 
@@ -164,7 +164,7 @@ class Cropper(object):
 
         self._roi_painter.update_bounding_box(self._interval)
         if self._roi_painter.paint_box:
-            self._glwidget.updateGL()
+            self._glwidget.update() # updateGL
 
     ##############################################
 
@@ -174,7 +174,7 @@ class Cropper(object):
         self._roi_painter.status = False
         self._roi_painter.paint_box = False
         self._roi_painter.paint_grips = False
-        self._glwidget.updateGL()
+        self._glwidget.update() # updateGL
 
     ##############################################
 
@@ -184,7 +184,7 @@ class Cropper(object):
         self._roi_painter.status = True
         self._roi_painter.paint_box = True
         self._roi_painter.paint_grips = paint_grips
-        self._glwidget.updateGL()
+        self._glwidget.update() # updateGL
 
     ##############################################
 
@@ -229,7 +229,7 @@ class Cropper(object):
 
     def _show_locked_warning_message(self):
 
-        application = QtGui.QApplication.instance()
+        application = QtWidgets.QApplication.instance()
         application.show_message("You can't modify the ROI Box when the margin mode is enabled!")
 
     ##############################################
@@ -296,7 +296,7 @@ class Cropper(object):
         self._set_grips()
         self.enable()
 
-        self._glwidget.updateGL()
+        self._glwidget.update() # updateGL
 
     ##############################################
 
@@ -351,7 +351,7 @@ class Cropper(object):
         
         self._locked = margin != 0
         self._roi_painter.margin = margin
-        self._glwidget.updateGL()
+        self._glwidget.update() # updateGL
 
 ####################################################################################################
 #

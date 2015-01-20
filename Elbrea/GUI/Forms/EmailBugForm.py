@@ -22,7 +22,7 @@
 
 ####################################################################################################
 
-from PyQt4 import QtGui
+from PyQt5 import QtWidgets
 
 ####################################################################################################
 
@@ -37,7 +37,7 @@ from Elbrea.GUI.ui.email_bug_form_ui import Ui_email_bug_form
 
 ####################################################################################################
 
-class EmailBugForm(QtGui.QDialog):
+class EmailBugForm(QtWidgets.QDialog):
 
     ###############################################
 
@@ -63,7 +63,7 @@ class EmailBugForm(QtGui.QDialog):
             from_address = Config.Email.from_address
         
         # Fixme: test field ?
-        # QtGui.QMessageBox.critical(None, title, message)
+        # QtWidgets.QMessageBox.critical(None, title, message)
 
         template_message = """
 Bug description:
@@ -82,7 +82,7 @@ Elbrea Version:
 ---------------------------------------------------------------------------------
 """
 
-        application = QtGui.QApplication.instance()
+        application = QtWidgets.QApplication.instance()
 
         # Fixme: singleton ?
         platform = Platform(application)
