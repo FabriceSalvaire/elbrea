@@ -64,8 +64,8 @@ class ConstrainedPoint(object):
 
     def __init__(self, x=None, y=None):
 
-        self._x, self._y = [ConstrainedValue(value=x, constrained=(x is not None))
-                            for x in (x, y)]
+        self._x, self._y = [ConstrainedValue(value=z, constrained=(z is not None))
+                            for z in (x, y)]
         self._number_of_constrains =  bool(self._x) + bool(self._y)
 
     ##############################################
@@ -117,8 +117,8 @@ class ConstrainedBox(object):
 
     def __init__(self, x1=None, y1=None, x2=None, y2=None):
 
-	self._p1 = ConstrainedPoint(x1, y1)
-	self._p2 = ConstrainedPoint(x2, y2)
+        self._p1 = ConstrainedPoint(x1, y1)
+        self._p2 = ConstrainedPoint(x2, y2)
         self._number_of_constrains = self._p1.number_of_constrains() + self._p2.number_of_constrains()
 
     ##############################################

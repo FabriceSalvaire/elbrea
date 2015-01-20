@@ -8,3 +8,4 @@ Elbrea/C/Geometry.py
 Elbrea/C/ImageProcessing.py
 Elbrea/C/Labelling.py
 Elbrea/C/PlatformC.py
+__pycache__
