@@ -40,16 +40,20 @@ from PyOpenGLng.Tools.Interval import IntervalInt2D
 from .GraphicScene import GraphicScene
 
 ####################################################################################################
+ 
+_module_logger = logging.getLogger(__name__)
+
+####################################################################################################
 
 class GlWidget(GlWidgetBase):
 
-    logger = logging.getLogger(__name__)
+    _logger = _module_logger.getChild('GlWidget')
  
     ##############################################
     
     def __init__(self, parent):
 
-        self.logger.debug('Initialise GlWidget')
+        self._logger.debug('Initialise GlWidget')
 
         super(GlWidget, self).__init__(parent)
 
@@ -84,9 +88,8 @@ class GlWidget(GlWidgetBase):
 
     def initializeGL(self):
 
-        self.logger.debug('Initialise GL')
+        self._logger.debug('Initialise GL')
         super(GlWidget, self).initializeGL()
-        self.qglClearColor(QtCore.Qt.black)
         self._init_shader()
         self._ready = False
 
@@ -94,7 +97,7 @@ class GlWidget(GlWidgetBase):
 
     def _init_shader(self):
 
-        self.logger.debug('Initialise Shader')
+        self._logger.debug('Initialise Shader')
 
         from . import ShaderProgrames as ShaderProgrames
         self.shader_manager = ShaderProgrames.shader_manager
@@ -141,8 +144,9 @@ class GlWidget(GlWidgetBase):
     def paint(self):
 
         if self._ready:
-            self.paint_textures()
-            self.roi_painter.paint()
+            with GL.error_checker():
+                self.paint_textures()
+                self.roi_painter.paint()
 
     ##############################################
 
