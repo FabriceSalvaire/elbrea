@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 ####################################################################################################
 # 
 # Elbrea - Electronic Board Reverse Engineering Assistant
-# Copyright (C) 2014 Fabrice Salvaire
-#
+# Copyright (C) Salvaire Fabrice 2015
+# 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -22,26 +20,86 @@
 
 ####################################################################################################
 
-import hashlib
- 
 import numpy as np
 
-####################################################################################################
-
-from Elbrea.Math.Functions import rint
+import cv2
 
 ####################################################################################################
 
 class ImageFormat(object):
 
+    RGB = ('red', 'green', 'blue')
+    BGR = ('blue', 'green', 'red')
+    HLS = ('hue', 'luminosity', 'saturation')
+
+    Gray = ('intensity',)
+    Label = ('label',) # should be unsigned integer
+    Binary = ('mask',) # boolean interpretation
+
     ##############################################
 
-    def __init__(self, shape, data_type):
+    def __init__(self, height, width, number_of_channels=1, data_type=np.uint8,
+                 normalised=False, channels=None):
 
-        self._height, self._width = shape
+        error_string = ' must be >= 1'
+        if height < 1:
+            raise ValueError('height' + error_string)
+        if width < 1:
+            raise ValueError('width' + error_string)
+        if number_of_channels < 1:
+            raise ValueError('number of planes' + error_string)
+
+        self._height = height
+        self._width = width
+        self._number_of_channels = number_of_channels
         self._data_type = data_type
+        self._normalised = normalised # only for float data type
+        self._channels = channels
+        if channels is not None:
+            if len(channels) != number_of_channels:
+                raise NameError("channels don't match number_of_channels")
+            self._channel_map = {channel:i for i, channel in enumerate(channels)}
+        else:
+            self._channel_map = None
 
-        self._size = self._height * self._width * np.nbytes[self._data_type]
+    ##############################################
+
+    def clone(self, **kwargs):
+
+        d = dict(height=self._height, width=self._width, number_of_channels=self._number_of_channels,
+                 data_type=self._data_type, normalised=self._normalised, channels=self._channels)
+        d.update(kwargs)
+
+        return self.__class__(**d)
+
+    ##############################################
+
+    def transpose(self):
+
+        return self.clone(height=self._width, width=self._height)
+
+    ##############################################
+
+    def __repr__(self):
+
+        return "ImageFormat shape = ({}, {}, {})\n" \
+            "  dtype = {} normalised = {}\n" \
+            "  channels = {}".format(self._height, self._width, self._number_of_channels,
+                                     self._data_type, self._normalised,
+                                     self._channels)
+
+    ##############################################
+
+    def __getitem__(self, i):
+
+        if self._channels is not None:
+            # not duck typing
+            if isinstance(i, int):
+                return self._channels[i]
+            else:
+                return self._channel_map[i]
+        else:
+            return None
 
     ##############################################
 
@@ -49,675 +107,307 @@ class ImageFormat(object):
     def width(self):
         return self._width
 
+    ##############################################
+
     @property
     def height(self):
         return self._height
 
+    ##############################################
+
+    @property
+    def number_of_pixels(self):
+        return self._height * self._width
+
+    ##############################################
+
+    @property
+    def number_of_channels(self):
+        return self._number_of_channels
+
+    ##############################################
+
+    @property
+    def channels(self):
+        return self._channels
+
+    ##############################################
+
     @property
     def shape(self):
-        return (self._height, self._width)
+        if self.number_of_channels == 1:
+            return (self._height, self._width)
+        else:
+            return (self._height, self._width, self._number_of_channels)
+
+    ##############################################
 
     @property
     def dimension(self):
         return (self._width, self._height)
 
+    ##############################################
+
     @property
     def data_type(self):
         return self._data_type
 
-    @property
-    def gray_data_format(self):
-        return self.data_type_to_gray_format(self._data_type)
+    ##############################################
 
     @property
-    def size(self):
-        return self._size
+    def number_of_bytes(self):
+        return (self._height * self._width * self._number_of_channels *
+                self.data_type_number_of_bytes)
 
     ##############################################
 
-    @classmethod
-    def pixel_depth_to_data_type(self, pixel_depth):
+    @property
+    def data_type_number_of_bytes(self):
+        return np.nbytes[self._data_type]
 
-        if pixel_depth == 8:
-            return np.uint8
-        elif pixel_depth == 16:
-            return np.uint16
+    ##############################################
+
+    @property
+    def data_type_number_of_bits(self):
+        return 8 * self.data_type_number_of_bytes
+
+    ##############################################
+
+    @property
+    def is_integer(self):
+        return self.is_unsigned_integer or self.is_signed_integer
+
+    ##############################################
+
+    @property
+    def is_signed_integer(self):
+        return self._data_type in (np.int8, np.int16, np.int32, np.int64)
+
+    ##############################################
+
+    @property
+    def is_unsigned_integer(self):
+        return self._data_type in (np.uint8, np.uint16, np.uint32, np.uint64)
+
+    ##############################################
+
+    @property
+    def is_float(self):
+        # == (np.float, np.double)
+        return self._data_type in (np.float32, np.float64)
+
+    ##############################################
+
+    @property
+    def is_normalised(self):
+        return self._normalised
+
+    ##############################################
+
+    @property
+    def inf(self):
+
+        if self.is_unsigned_integer:
+            return 0
+        elif self.is_signed_integer:
+            return - 2**(self.data_type_number_of_bits -1)
+        elif self.is_float and self._normalised:
+            return .0
         else:
             raise NotImplementedError
 
     ##############################################
 
-    @classmethod
-    def data_type_to_gray_format(self, data_type):
+    @property
+    def sup(self):
 
-        if data_type == np.uint16:
-            return 'gray16'
-        elif data_type == np.uint8:
-            return 'gray8'
+        if self.is_unsigned_integer:
+            return 2**self.data_type_number_of_bits -1
+        elif self.is_signed_integer:
+            return 2**(self.data_type_number_of_bits -1) -1
+        elif self.is_float and self._normalised:
+            return 1.
         else:
             raise NotImplementedError
-
-    ##############################################
-
-    @classmethod
-    def dimension_to_shape(self, dimension):
-
-        """ Convert dimension to shape and vice versa """
-
-        if len(dimension) == 2:
-            return list(reversed(dimension))
-        else:
-            return ValueError
 
 ####################################################################################################
 
-class Image(object):
+class Image(np.ndarray):
 
-    #######################################
+    ##############################################
+
+    def __new__(cls, *args, **kwargs):
+
+        input_array = None
+        number_of_args = len(args)
+        if number_of_args == 1:
+            obj = args[0]
+            if isinstance(obj, ImageFormat):
+                image_format = obj.clone(**Image._kwargs_for_image_format(kwargs))
+            elif isinstance(obj, Image):
+                input_array = obj
+                image_format = input_array.image_format.clone(**Image._kwargs_for_image_format(kwargs))
+            elif isinstance(obj, np.ndarray):
+                input_array = obj
+                height, width = input_array.shape[:2]
+                if input_array.ndim == 3:
+                    number_of_channels = input_array.shape[2]
+                else:
+                    number_of_channels = 1
+                kwargs_for_image_format = dict(height=height, width=width, number_of_channels=number_of_channels,
+                                               data_type=input_array.dtype)
+                kwargs_for_image_format.update(Image._kwargs_for_image_format(kwargs))
+                image_format = ImageFormat(**kwargs_for_image_format)
+            else:
+                raise ValueError("Bad argument " + str(type(obj)))
+        else:
+            image_format = ImageFormat(*args, **kwargs)
+
+        # print(image_format)
+
+        if input_array is None:
+            print('1', image_format)
+            obj = np.ndarray.__new__(cls, image_format.shape, image_format.data_type,
+                                     buffer=None, offset=0, strides=None, order=None)
+        else:
+            if input_array.shape != image_format.shape:
+                raise NameError("Shape mismatch")
+            if kwargs.get('share', False):
+                print('2', image_format)
+                obj = input_array.view(cls)
+            else:
+                print('3', image_format)
+                obj = np.asarray(input_array, dtype=image_format.data_type).view(cls)
+
+        obj.image_format = image_format
+
+        return obj
+
+    ##############################################
 
     @staticmethod
-    def get_format(samples_per_pixel, bits_per_pixel):
+    def _kwargs_for_image_format(kwargs):
 
-        """ Return format string from *samples_per_pixel* and *bits_per_pixel*.
-        """
+        kwargs = dict(kwargs)
+        for key in ('share',):
+            if key in kwargs:
+                del kwargs[key]
+        return kwargs
+
+    ##############################################
+
+    def __array_finalize__(self, obj):
+
+        # print('__array_finalize__')
+        # called height times ???
+
+        if obj is None:
+            return
+
+        # _image_format
+        self.image_format = getattr(obj, 'image_format', None)
+
+    ##############################################
+
+    # def __repr__(self):
+
+    #     return 'Image\n' + repr(self.image_format)
+    
+    ##############################################
+
+    def set(self, value):
+
+        # cv2 ?
+        # cv.Set(self, value)
+        self[...] = value
+
+    ##############################################
+
+    def clear(self):
+        self.set(0)
+
+    ##############################################
+
+    def to_normalised_float(self, double=False):
         
-        if samples_per_pixel == 1 and bits_per_pixel == 8:
-            return 'gray8'
-        elif samples_per_pixel == 1 and bits_per_pixel == 16:
-            return 'gray16'
-        elif samples_per_pixel == 3 and bits_per_pixel == 8:
-            return 'rgb8'
-        elif samples_per_pixel == 3 and bits_per_pixel == 16:
-            return 'rgb16'
+        if double:
+            data_type = np.float64
         else:
-            return None
-
-    #######################################
-
-    @staticmethod
-    def format_to_dtype(format):
-
-        if format == 'gray8':
-            dtype = np.uint8
-        elif format == 'gray16':
-            dtype = np.uint16
-        elif format == 'rgb8':
-            dtype = np.uint8
-        elif format == 'rgb16':
-            dtype = np.uint16
-        else:
-            raise NameError('Image format %s is not supported' % (format))
-
-        return dtype
-        
-    #######################################
-    
-    def __init__(self, format, width, height, is_planar=True):
-
-        if not (width and height):
-            raise ValueError('Wrong image size %i x %i' % (width, height))
-        self.height = height
-        self.width = width
-       
-        dtype = self._init_from_format(format, is_planar)
-
-        self.size = self._compute_size()
-        self.intensity_max = 2**self.bits_per_pixel -1
-
-        self.buffer = np.zeros(self.size, dtype=dtype)
-        self.size_byte = self.buffer.nbytes
-        self.reshape()
-
-    #######################################
-    
-    def _init_from_format(self, format, is_planar):
-
-        self.format = format
-        self.is_planar = is_planar
-
-        # Fixme: enum w<<16+b
-        if format == 'gray8':
-            dtype = np.uint8
-            self.bits_per_pixel = 8
-            self.samples_per_pixel = 1
-            # interleaved makes no sense
-            self.is_planar = True
-
-        elif format == 'gray16':
-            dtype = np.uint16
-            self.bits_per_pixel = 16
-            self.samples_per_pixel = 1
-            # interleaved makes no sense
-            self.is_planar = True
-
-        elif format == 'rgb8':
-            dtype = np.uint8
-            self.bits_per_pixel = 8
-            self.samples_per_pixel = 3
-
-        elif format == 'rgb16':
-            dtype = np.uint16
-            self.bits_per_pixel = 16
-            self.samples_per_pixel = 3
-
-        else:
-            raise NameError('Image format %s is not supported' % (format))
-
-        return dtype
-
-    #######################################
-
-    def _compute_size(self):
-
-        """ Return the size in pixels. """
-
-        return self.width * self.height * self.samples_per_pixel
-
-    #######################################
-    
-    def copy_image_format(self, format=None, width=None, height=None, is_planar=None):
-
-        """ Make a clone of the image using its format and size. The *format* could be specified as
-        argument.
-        """
-
-        if format is None:
-            format = self.format
-        if width is None:
-            width = self.width
-        if height is None:
-            height = self.height
-        if is_planar is None:
-            is_planar = self.is_planar
-
-        return self.__class__(format, width, height, is_planar)
-    
-    #######################################
-    
-    def copy(self):
-
-        """ Make a copy of the image. """
-
-        image = self.copy_image_format()
-        image.buffer = self.buffer.copy()
+            data_type = np.float32
+        image = self.__class__(self, data_type=data_type, normalised=True)
+        image *= 1./self.image_format.sup
 
         return image
-    
-    #######################################
 
-    def dtype(self):
+    ##############################################
 
-        """ Return the data type. """
+    def convert_colour(self, channels):
 
-        return self.buffer.dtype
-
-    #######################################
-        
-    def print_object(self):
-
-        message = """
-width x height   %u x %u
-sample per pixel %u
-bit per sample   %u
-is planar        %s
-""" 
-        print(message % (self.width, self.height,
-                         self.samples_per_pixel,
-                         self.bits_per_pixel,
-                         self.is_planar))
-
-    #######################################
-
-    def reshape_to_linear(self):
-
-        """ Reshape the buffer to a linear shape. """
-
-        self.buffer.shape = self.size
-    
-    #######################################
-
-    def planar_shape(self, array):
-
-        """ Reshape the buffer to a planar 3D shape [*samples_per_pixel*, *height*, *width*]. If
-        *samples_per_pixel* is equal to one then this dimension is omitted.
-        """
-
-        if self.samples_per_pixel > 1:
-            array.shape = self.samples_per_pixel, self.height, self.width
-        else:
-            array.shape = self.height, self.width
-
-    #######################################
-
-    def planar_shape_2d(self, array):
-
-        """ Reshape the buffer to a planar 2D shape [*samples_per_pixel* * *height*, *width*].
-        """
-
-        array.shape = self.samples_per_pixel * self.height, self.width
-
-    #######################################
-
-    def interleaved_shape(self, array):
-
-        """ Reshape the buffer to an interleaved 3D shape [*height*, *width*, *samples_per_pixel*].
-        """
-
-        if self.samples_per_pixel > 1:
-            array.shape = self.height, self.width, self.samples_per_pixel
-        else:
-            array.shape = self.height, self.width
-
-    #######################################
-
-    def interleaved_shape_2d(self, array):
-
-        """ Reshape the buffer to an interleaved 2D shape [*height*, *samples_per_pixel* * *width*].
-        """
-
-        array.shape = self.height, self.samples_per_pixel * self.width 
-
-    #######################################
-
-    def reshape(self):
-
-        """ Reshape the buffer to its normal (3D) shape. """
-
-        if self.is_planar:
-            self.planar_shape(self.buffer)
-        else:
-            self.interleaved_shape(self.buffer)
-
-    #######################################
-
-    def reshape2d(self):
-
-        """ Reshape the buffer to its normal 2D shape. """
-
-        if self.is_planar:
-            self.planar_shape_2d(self.buffer)
-        else:
-            self.interleaved_shape_2d(self.buffer)
-
-    #######################################
-
-    def planar_to_interleaved(self):
-
-        """ Convert a planar image to an interleaved image. """
-
-        if self.is_planar:
-
-            self.reshape2d()
-
-            if self.format == 'rgb8':
-                ImageProcessing.planar_to_interleaved_uint8(self.buffer)
+        image_format = self.image_format
+        if channels is ImageFormat.HLS:
+            if image_format.channels is ImageFormat.RGB:
+                if image_format.is_unsigned_integer:
+                    float_image = self.to_normalised_float()
+                    hls_image = self.__class__(float_image, share=True, channels=ImageFormat.HLS)
+                elif image_format.is_float and image_format.normalised:
+                    float_image = self
+                    hls_image = self.__class__(image_format, channels=ImageFormat.HLS)
+                else:
+                    raise NotImplementedError
+                cv2.cvtColor(float_image, cv2.COLOR_RGB2HLS, hls_image)
+                return hls_image
             else:
                 raise NotImplementedError
-
-            self.is_planar = False
-            self.reshape()
-
-    #######################################
-
-    def interleaved_to_planar(self):
-
-        """ Convert an interleaved image to a planar image. """
-
-        if not self.is_planar:
-
-            self.is_planar = True
-            self.interleaved_shape_2d(self.buffer)
-
-            if self.format == 'rgb8':
-                ImageProcessing.interleaved_to_planar_uint8(self.buffer)
-            else:
-                raise NotImplementedError
-
-            self.reshape()
-
-    #######################################
-
-    def channel(self, channel):
-        """ Return an :class:`ImageChannelView` instance for the *channel*. """
-        return ImageChannelView(self, channel)
-    
-    def gray_channel(self):
-        """ Return an :class:`ImageChannelView` instance for the gray channel (0). """
-        return self.channel(0)
-    
-    def red_channel(self):
-        """ Return an :class:`ImageChannelView` instance for the red channel (0). """
-        return self.channel(0)
-    
-    def green_channel(self):
-        """ Return an :class:`ImageChannelView` instance for the green channel (1). """
-        return self.channel(1)
-    
-    def blue_channel(self):
-        """ Return an :class:`ImageChannelView` instance for the blue channel (2). """
-        return self.channel(2)
-
-    #######################################
-        
-    def extract_channel(self, channel):
-
-        if self.format not in ('rgb8', 'rgb16'):
-            raise NameError('extract_channel: format %s is not supported' % (self.format))
-        if not self.is_planar:
-            raise NameError('extract_channel: image must be planar')
-        
-        channel_image = self.__class__(format='gray8', width=self.width, height=self.height, is_planar=True)
-        channel_view = self.channel(channel)
-        channel_view.copy_to(channel_image)
-        
-        return channel_image
-
-    #######################################
-
-    # Fixme cf. supra, cf. LabelDetector
-
-    def copy_with_two_intervals(self, interval_dst, interval_src, image):
-
-        """ Set the *interval_dst* region of *image* with the content from the *interval_src* region
-        of :obj:`self`.
-        """
-
-        dst = self.buffer[interval_dst.y.inf:interval_dst.y.sup +1,
-                          interval_dst.x.inf:interval_dst.x.sup +1]
-
-        src = image.buffer[interval_src.y.inf:interval_src.y.sup +1,
-                           interval_src.x.inf:interval_src.x.sup +1]
-
-        dst[...] = src[...]
-
-    #######################################
-
-    def md5(self):
-
-        """ Return the MD5 checksum of the image. """
-        
-        return hashlib.md5(self.buffer.tostring()).hexdigest()
-
-    #######################################
-
-    def image_to_histogram(self, histogram, protected=True):
-        
-        # Fixme: histogram check
-
-        """ Fill an histogram with the image content. *histogram* must be compatible with a Numpy 1D
-        array of data type unsigned int 64-bit.
-
-        If *protected* is :obj:`True`, then the histogram has an overflow bin.  Thus for the
-        unprotected mode the number of bins must be greather then the maximum intensity.
-        """
-
-        if self.buffer.dtype == np.uint8:
-            function = ImageProcessing.image_to_histogram_uint8
-        elif self.buffer.dtype == np.uint16:
-            function = ImageProcessing.image_to_histogram_uint16
         else:
-            raise ValueError
-        self.reshape_to_linear()
-        function(self.buffer, histogram, protected)
-        self.reshape()
-
-    #######################################
-
-    def get_stat_in_roi(self, interval):
-
-        """ Return the mean and standard deviation in the *interval* region. Only the format
-        samples_per_pixel = 1 is supported.
-        """
-
-        if self.samples_per_pixel != 1:
             raise NotImplementedError
 
-        view = self.buffer[interval.y.inf:interval.y.sup +1,
-                           interval.x.inf:interval.x.sup +1]
+    ##############################################
 
-        return np.mean(view), np.std(view)
+    def swap_channels(self, channels):
+    
+        image_format = self.image_format
+        if ((channels is ImageFormat.BGR and image_format.channels is ImageFormat.RGB) or 
+            (channels is ImageFormat.RGB and image_format.channels is ImageFormat.BGR)):
+            output = self.__class__(image_format, channels=channels)
+            cv2.mixChannels([self], [output], (0,2, 1,1, 2,0))
+            return output
+            # ???
+        else:
+            raise NotImplementedError
 
-    #######################################
+    ##############################################
 
-    def flip_horizontally(self):
+    def split_channels(self):
 
-        """ Flip horizontalaly the image. """
+        channel_arrays = cv2.split(self)
+        image_format = self.image_format
+        return [self.__class__(channel_array, share=True, number_of_channels=1, channels=(channel,))
+                for channel, channel_array in zip(image_format.channels, channel_arrays)]
 
-        self.buffer = np.fliplr(self.buffer)
+        # cv2.merge(mv)
 
-    #######################################
+    ##############################################
 
     def flip_vertically(self):
 
-        """ Flip vertically the image. """
+        cv2.flip(self, 0, self)
 
-        self.buffer = np.flipud(self.buffer)
+    ##############################################
 
-    #######################################
+    def flip_horizontally(self):
 
-    def rotate90(self):
+        cv2.flip(self, 1, self)
 
-        """ Rotate the image of 90 degrees. """
+    ##############################################
 
-        # numpy.rot90(m, k=1)
+    def transpose(self):
 
-        self.width, self.height = self.height, self.width
-
-        src_buffer = self.buffer
-        dst_buffer = self.buffer = np.zeros((self.height, self.width), dtype=src_buffer.dtype)
-
-        if self.buffer.dtype == np.uint8:
-            function = ImageProcessing.rotate90_uint8
-        elif self.buffer.dtype == np.uint16:
-            function = ImageProcessing.rotate90_uint16
-        else:
-            raise ValueError
-        function(src_buffer, dst_buffer)
-
-    #######################################
-
-    def rebin(self, bin_size):
-
-        """ Return a rebined image. """
-
-        if self.format not in ('gray8', 'gray16'):
-            raise NameError('rebin: format %s is not supported' % (self.format))
-
-        # Fixme: bin_size must be multiple
-        width = self.width / bin_size
-        height = self.height / bin_size
-        dst_image = self.copy_image_format(width=width, height=height)
-
-        # Fixme: use slot [dtype][func_name]
-        dtype = self.buffer.dtype
-        if dtype == np.uint8:
-            function = ImageProcessing.rebin_uint8
-        elif dtype == np.uint16:
-            function = ImageProcessing.rebin_uint16
-        else:
-            raise NotImplementedError
-        function(self.buffer, dst_image.buffer)
-
-        return dst_image
-
-    #######################################
-    
-    def scale(self, factor=1):
-
-        """ Scale the image pixel by a *factor*. """
-
-        self.buffer *= factor
-
-    #######################################
-
-    def remap_intensity_range(self, lower_intensity, upper_intensity, dtype):
-
-        """ Remap the intensities in the [*lower_intensity*, *upper_intensity*] range and change the
-        data type to *dtype*.
-        """
-
-        if self.buffer.dtype == np.uint8:
-            function = ImageProcessing.remap_intensity_range_uint8
-            depth = 8
-        elif self.buffer.dtype == np.uint16:
-            function = ImageProcessing.remap_intensity_range_uint16
-            if dtype == np.uint16:
-                depth = 16
-            elif dtype == np.uint8:
-                depth = 8
-            else:
-                raise NameError('remap_intensity_range: wrong dtype')
-        else:
-            raise ValueError
-
-        dst_upper_intensity = 2**depth -1
-        self.reshape_to_linear()
-        function(self.buffer, lower_intensity, upper_intensity, dst_upper_intensity)
-        self.reshape()
-
-    #######################################
-
-    # Fixme: not here
-
-    def generate_binary(self, threshold, value_factor=1):
-
-        r""" Binarise the image.
-
-        .. math::
-
-          dst = \begin{cases}
-            \text{value factor} * \text{intensity max} & \text{if } src \geq \text{ threshold} \\
-            0 &
-          \end{cases}
-
-        Return an new instance and the percentage of pixel on.
-        """
-
-        # np.array(np.where(data > threshold, value, 0))
-
-        binary_image = self.copy_image_format()
-
-        if value_factor < 1:
-            value = rint(value_factor*self.intensity_max)
-        else:
-            value = self.intensity_max
-
-        self.reshape_to_linear()
-        binary_image.reshape_to_linear()
-
-        if self.buffer.dtype == np.uint8:
-            function = ImageProcessing.make_binary_uint8
-        elif self.buffer.dtype == np.uint16:
-            function = ImageProcessing.make_binary_uint16
-        else:
-            raise ValueError
-        number_of_pixels_true = function(self.buffer, binary_image.buffer, threshold, value)
-
-        percent_of_pixels_true = 100. * number_of_pixels_true / float(self.size)
-
-        self.reshape()
-        binary_image.reshape()
-        
-        return binary_image, percent_of_pixels_true
-       
-####################################################################################################
-
-# Fixme: improve
-
-class ImageChannelView(object):
-
-    #######################################
-
-    def __init__(self, image, channel):
-
-        """ Create a view on the *channel* of *image*. The image must be planar.
-
-        If the source is *uint16* and the destination is *uint8* data type, then the integers are trunked.
-        """
-
-        if not image.is_planar:
-            raise NameError('Image has interleaved format')
-
-        if channel < 0 and channel > image.samples_per_pixel:
-            raise IndexError
-
-        self.image = image
-        self.channel = channel
-
-        if image.samples_per_pixel == 1:
-            self.view = image.buffer[...]
-        else:
-            self.view = image.buffer[channel, ...]
-
-    #######################################
-
-    def copy_from(self, image):
-
-        # Used in WaveMixer.merge_wave_images
-
-        """ Set the channel view with the *image* content. """
-
-        self.view[...] = image.buffer[...]
-
-    #######################################
-
-    def copy_to(self, image):
-
-        # unused
-
-        """ Set the *image* with the channel view content. """
-
-        image.buffer[...] = self.view[...]
-
-    #######################################
-
-    def copy_with_interval(self, interval, image):
-
-        # unused
-
-        """ Set the channel view *interval* region with the *image* content. """
-
-        self.view[interval.y.inf:interval.y.sup +1,
-                  interval.x.inf:interval.x.sup +1] = image.buffer[...]
-
-    #######################################
-
-    def copy_with_two_intervals(self, interval_dst, interval_src, image):
-
-        # used by MosaicPixels.crop
-
-        """ Set the *interval_dst* region of the channel view with the content from the *interval_src* region
-        of *image*.
-        """
-        
-        dst = self.view[interval_dst.y.inf:interval_dst.y.sup +1,
-                        interval_dst.x.inf:interval_dst.x.sup +1]
-        
-        src = image.buffer[interval_src.y.inf:interval_src.y.sup +1,
-                           interval_src.x.inf:interval_src.x.sup +1]
-        
-        dst[...] = src[...]
-
-    #######################################
-        
-##  Fixme: Don't work with View
-#
-#   def copy_and_remap_with_two_intervals(self, interval_dst, interval_src, image,
-#                                          lower_intensity, upper_intensity, range):
-# 
-#       # Fixme: duplicated code
-# 
-#       dst = self.view[interval_dst.y.inf:interval_dst.y.sup +1,
-#                       interval_dst.x.inf:interval_dst.x.sup +1]
-# 
-#       src = image.buffer[interval_src.y.inf:interval_src.y.sup +1,
-#                          interval_src.x.inf:interval_src.x.sup +1]
-# 
-#
-#       ImageProcessing.remap_intensity_range_uint16_to_8(src, dst, lower_intensity, upper_intensity, range)
+        output = self.__class__(self.image_format.transpose())
+        cv2.transpose(self, output)
+        return output
 
 ####################################################################################################
-#
+# 
 # End
-#
+# 
 ####################################################################################################
