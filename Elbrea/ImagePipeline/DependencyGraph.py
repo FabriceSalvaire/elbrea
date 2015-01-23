@@ -22,14 +22,10 @@
 
 class DependencyGraphNode(object):
 
-    #! node_id -> name 
-    #! remove data
-
     ##############################################
 
-    def __init__(self, node_id, parents=None, childs=None, data=None):
+    def __init__(self, parents=None, childs=None):
 
-        self.node_id = node_id
         if parents is None:
             self.parents = []
         else:
@@ -38,7 +34,6 @@ class DependencyGraphNode(object):
             self.childs = []
         else:
             self.childs = childs
-        self.data = data
 
     ##############################################
 
@@ -65,15 +60,27 @@ class DependencyGraph(object):
     def __init__(self, root):
 
         self.root = root
-        self.nodes = {root.node_id: root}
+        self._nodes = {root.name: root}
+
+    ##############################################
+
+    def __iter__(self):
+
+        return iter(self._nodes.values())
+
+    ##############################################
+
+    def __getitem__(self, key):
+
+        return self._nodes[key]
 
     ##############################################
 
     def add_node(self, node):
 
-        node_id = node.node_id
-        if node_id not in self.nodes:
-            self.nodes[node_id] = node
+        node_id = node.name # hash must return an int
+        if node_id not in self._nodes:
+            self._nodes[node_id] = node
         else:
             raise NameError("Node {} is already registered".format(node_id))
 
