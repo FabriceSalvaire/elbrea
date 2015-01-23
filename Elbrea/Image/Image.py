@@ -1,8 +1,8 @@
 ####################################################################################################
 # 
 # Elbrea - Electronic Board Reverse Engineering Assistant
-# Copyright (C) Salvaire Fabrice 2015
-# 
+# Copyright (C) 2014 Fabrice Salvaire
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -266,17 +266,17 @@ class Image(np.ndarray):
         # print(image_format)
 
         if input_array is None:
-            print('1', image_format)
+            # print('1', image_format)
             obj = np.ndarray.__new__(cls, image_format.shape, image_format.data_type,
                                      buffer=None, offset=0, strides=None, order=None)
         else:
             if input_array.shape != image_format.shape:
                 raise NameError("Shape mismatch")
             if kwargs.get('share', False):
-                print('2', image_format)
+                # print('2', image_format)
                 obj = input_array.view(cls)
             else:
-                print('3', image_format)
+                # print('3', image_format)
                 obj = np.asarray(input_array, dtype=image_format.data_type).view(cls)
 
         obj.image_format = image_format
@@ -355,6 +355,7 @@ class Image(np.ndarray):
                 else:
                     raise NotImplementedError
                 cv2.cvtColor(float_image, cv2.COLOR_RGB2HLS, hls_image)
+                hls_image[:,:,0] *= 1./360 # normalised float, else have to define sup !
                 return hls_image
             else:
                 raise NotImplementedError
@@ -405,6 +406,27 @@ class Image(np.ndarray):
         output = self.__class__(self.image_format.transpose())
         cv2.transpose(self, output)
         return output
+
+    ##############################################
+
+    def histogram(self, channel=0, inf=None, sup=None, number_of_bins=None):
+
+        # Fixme: Histogram.py vs cv
+
+        image_format = self.image_format
+        if inf is None:
+            inf = image_format.inf
+        if sup is None:
+            sup = image_format.sup
+        if number_of_bins is None:
+            number_of_bins = sup - inf
+        if isinstance(channel, str):
+            channel = self.image_format[channel]
+
+        histogram = cv2.calcHist([self], [channel],
+                                 None,
+                                 [number_of_bins], [inf, sup])
+        return histogram
 
 ####################################################################################################
 # 
