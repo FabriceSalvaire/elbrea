@@ -294,7 +294,7 @@ class GlWidget(GlWidgetBase):
         
     def _show_intensity_profile(self, location):
         
-        from .IntensityProfileForm import LineIntensityProfileForm
+        from Elbrea.GUI.Viewer.IntensityProfileForm import LineIntensityProfileForm
         x_profile, y_profile = self._intensity_line_picker(location, self._current_image())
         self._intensity_profile_form = LineIntensityProfileForm(x_profile, y_profile)
         self._intensity_profile_form.show()
@@ -306,7 +306,7 @@ class GlWidget(GlWidgetBase):
         if axis not in ('x', 'y', 'xy'):
             raise IndexError
 
-        from .IntensityProfile import LineIntensityProfile
+        from Elbrea.GUI.Viewer.IntensityProfile import LineIntensityProfile
 
         x_profile = None # row
         y_profile = None # column

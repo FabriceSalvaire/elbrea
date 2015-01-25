@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ####################################################################################################
 # 
 # Elbrea - Electronic Board Reverse Engineering Assistant
