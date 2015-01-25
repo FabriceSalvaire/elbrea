@@ -37,7 +37,6 @@ from mambaIm.mamba import *
 import mambaIm.mambaComposed as mc
 import mambaIm.mambaExtra as me
 
-# import cv
 import cv2
 
 ####################################################################################################
@@ -126,12 +125,10 @@ class ViewerApplication(GuiApplicationBase):
         lightness_image_float[:height,:width] = image_hsl_float[:,:,1]
         saturation_image_float[:height,:width] = image_hsl_float[:,:,2]
 
-        track_inf = 30.
+        track_inf = 80.
         track_sup = 170.
-        high_ligth = .45
         mask = ((hue_image_float >= track_inf) &
-                (hue_image_float <= track_sup) &
-                (lightness_image_float < high_ligth))
+                (hue_image_float <= track_sup))
         mask = mask == False # cv
 
         mask = np.array(mask, dtype=np.uint8)
@@ -150,22 +147,22 @@ class ViewerApplication(GuiApplicationBase):
         cv2.bitwise_and(lightness_image, mask, lightness_image)
 
         filtered_image = np.array(lightness_image)
-        tmp_image = np.array(lightness_image)
+        # tmp_image = np.array(lightness_image)
 
-        marker_image = np.array(lightness_image)
-        blob_height = 50
-        cv2.subtract(lightness_image, blob_height, marker_image)
+        # marker_image = np.array(lightness_image)
+        # blob_height = 50
+        # cv2.subtract(lightness_image, blob_height, marker_image)
 
-        mask_mb = MambaTools.imageMb(width_mb, height_mb, 8)
-        MambaTools.cv2mamba(lightness_image, mask_mb)
-        marker_mb = MambaTools.imageMb(width_mb, height_mb, 8)
-        MambaTools.cv2mamba(marker_image, marker_mb)
-        print('start build')
-        mc.geodesy.build(mask_mb, marker_mb)
-        print('end build')
-        MambaTools.mamba2cv(marker_mb, tmp_image)
+        # mask_mb = MambaTools.imageMb(width_mb, height_mb, 8)
+        # MambaTools.cv2mamba(lightness_image, mask_mb)
+        # marker_mb = MambaTools.imageMb(width_mb, height_mb, 8)
+        # MambaTools.cv2mamba(marker_image, marker_mb)
+        # print('start build')
+        # mc.geodesy.build(mask_mb, marker_mb)
+        # print('end build')
+        # MambaTools.mamba2cv(marker_mb, tmp_image)
 
-        filtered_image -= tmp_image
+        # filtered_image -= tmp_image
 
         for i in range(3):
             input_image[:,:,i] = filtered_image[:height,:width]

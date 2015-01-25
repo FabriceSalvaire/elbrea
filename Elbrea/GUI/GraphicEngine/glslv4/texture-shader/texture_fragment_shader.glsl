@@ -97,12 +97,15 @@ hsl_filter(vec3 texel)
   /* fragment_colour = vec4(s, s, s, 1.); */
   /* fragment_colour = vec4(l, l, l, 1.); */
 
-  float track_inf = 30. / 360.;
+  float track_inf = 80. / 360.;
   float track_sup = 170. / 360.;
   float high_ligth = .45;
   float low_light = .25;
 
-  if (h >= track_inf && h <= track_sup && l < high_ligth) // green */
+  if (h >= track_inf && h <= track_sup) // green && l < high_ligth
+    /* if (l > 120/255.) */
+    /*   fragment_colour = vec4(1, 0, 0, 1); */
+    /* else */
     fragment_colour = vec4(0, texel.g, 0, 1);
   /* else if (l > high_ligth) // white */
   /*   fragment_colour = vec4(1, 0, 0, 1); */
@@ -118,6 +121,8 @@ hsl_filter(vec3 texel)
 void main()
 {
   vec3 texel = texture(texture0, vertex.uv).rgb;
+
+  /* hsl_filter(texel); */
   fragment_colour = vec4(texel, 1.);
 
   /* vec4 hsv = rgb_to_hsl(texel); */
@@ -128,7 +133,6 @@ void main()
   /* float chroma = hsv.a; */
 
   /* fragment_colour = vec4(h, s, l, 1.); */
-
 }
 
 /* *********************************************************************************************** *
