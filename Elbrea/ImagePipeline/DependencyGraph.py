@@ -24,16 +24,21 @@ class DependencyGraphNode(object):
 
     ##############################################
 
-    def __init__(self, parents=None, childs=None):
+    def __init__(self, parents=None):
 
         if parents is None:
             self.parents = []
         else:
             self.parents = parents
-        if childs is None:
-            self.childs = []
-        else:
-            self.childs = childs
+        self.childs = []
+
+    ##############################################
+
+    def connect_parents(self, parents):
+
+        self.parents = list(parents)
+        for node in self.parents:
+            node.childs.append(self)
 
     ##############################################
 
