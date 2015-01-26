@@ -94,7 +94,7 @@ class LicenseChecker(object):
 
         root_path = os.path.dirname(os.path.realpath(__file__))
         replace_slice = os.path.join(root_path, 'replace-slice')
-        license_model_py = os.path.join(root_path, 'license-model-gpl.py')
+        license_model_py = os.path.join(root_path, 'license-model.py')
 
         for path in self.iter_file():
             try:
