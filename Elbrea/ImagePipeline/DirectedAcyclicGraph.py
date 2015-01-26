@@ -20,25 +20,41 @@
 
 ####################################################################################################
 
-class DependencyGraphNode(object):
+# input versus parent
+# output versus child
+
+####################################################################################################
+
+class DirectedAcyclicGraphNode(object):
 
     ##############################################
 
-    def __init__(self, parents=None):
+    def __init__(self):
 
-        if parents is None:
-            self.parents = []
-        else:
-            self.parents = parents
-        self.childs = []
+        self.inputs = dict()
+        self.outputs = set()
 
     ##############################################
 
-    def connect_parents(self, parents):
+    def node_id(self):
+        raise NotImplementedError
 
-        self.parents = list(parents)
-        for node in self.parents:
-            node.childs.append(self)
+    ##############################################
+
+    def disconnect_input(self, name):
+
+        if name in self.inputs:
+            node = self.inputs[name]
+            del self.inputs[name]
+            node.outputs.remove(self)
+
+    ##############################################
+
+    def connect_input(self, name, node):
+
+        self.disconnect_input(name)
+        self.inputs[name] = node
+        node.outputs.add(self)
 
     ##############################################
 
@@ -51,14 +67,14 @@ class DependencyGraphNode(object):
         while queue:
             node = queue.pop(0)
             yield node
-            for child in node.childs:
-                if child not in visited:
-                    queue.append(child)
-                    visited.add(child)
+            for output in node.outputs:
+                if output not in visited:
+                    queue.append(output)
+                    visited.add(output)
 
 ####################################################################################################
 
-class DependencyGraph(object):
+class DirectedAcyclicGraph(object):
 
     ##############################################
     
@@ -75,15 +91,15 @@ class DependencyGraph(object):
 
     ##############################################
 
-    def __getitem__(self, key):
+    def __getitem__(self, node_id):
 
-        return self._nodes[key]
+        return self._nodes[node_id]
 
     ##############################################
 
     def add_node(self, node):
 
-        node_id = node.name # hash must return an int
+        node_id = node.node_id
         if node_id not in self._nodes:
             self._nodes[node_id] = node
         else:

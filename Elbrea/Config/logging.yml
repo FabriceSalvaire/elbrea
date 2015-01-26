@@ -13,7 +13,8 @@ formatters:
 #   RESET_SEQ = "\033[0m"
 #   COLOR_SEQ = "\033[1;%dm"
 #   BOLD_SEQ = "\033[1m"
-    format: '<ESC>[1;32m%(asctime)s<ESC>[0m - <ESC>[1;34m%(name)s - %(module)s.%(funcName)s<ESC>[0m - <ESC>[1;31m%(levelname)s<ESC>[0m - %(message)s'
+#   format: '<ESC>[1;32m%(asctime)s<ESC>[0m - <ESC>[1;34m%(name)s - %(module)s.%(funcName)s<ESC>[0m - <ESC>[1;31m%(levelname)s<ESC>[0m - %(message)s'
+    format: '<ESC>[1;32m%(asctime)s<ESC>[0m - %(module)s.%(funcName)s<ESC>[0m - <ESC>[1;31m%(levelname)s<ESC>[0m - %(message)s'
 
 ####################################################################################################
 
