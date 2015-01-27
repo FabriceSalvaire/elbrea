@@ -9,6 +9,8 @@
 
 import logging
 
+from atomiclong import AtomicLong
+
 ####################################################################################################
 
 # from Elbrea.Image.Image import Image
@@ -22,7 +24,7 @@ _module_logger = logging.getLogger(__name__)
 
 class TimeStamp(object):
 
-    _time_stamp = 0
+    _time_stamp = AtomicLong(0)
 
     ##############################################
 
@@ -46,11 +48,11 @@ class TimeStamp(object):
 
         # Should be atomic
         TimeStamp._time_stamp += 1
-        self._modified_time = TimeStamp._time_stamp
+        self._modified_time = TimeStamp._time_stamp.value
 
 ####################################################################################################
 
-class Object(object):
+class ObjectWithTimeStamp(object):
 
      ##############################################
 
@@ -72,7 +74,11 @@ class Object(object):
 
 ####################################################################################################
 
-class ImageFilterOutput(Object):
+# LargestPossibleRegion—the image in its entirety.
+# BufferedRegion—the portion of the image retained in memory.
+# RequestedRegion—the portion of the region requested by a filter or other class when operating on the image.
+
+class ImageFilterOutput(ObjectWithTimeStamp):
 
     _logger = _module_logger.getChild('ImageFilterOutput')
 
@@ -80,10 +86,17 @@ class ImageFilterOutput(Object):
 
     def __init__(self, source, name):
 
-        Object.__init__(self)
+        ObjectWithTimeStamp.__init__(self)
 
+        # When was this data last generated?
+        # This time stamp is an integer number and it is intended to synchronize the activities of
+        # the pipeline. It doesn't relates to the clock time of acquiring or processing the data.
         self._update_time = TimeStamp()
+
+        # The maximum modification time of all upstream filters and data objects.
+        # This does not include the modification time of this data object.
         self._pipeline_time = 0
+
         self.connect_source(source, name)
 
     ##############################################
@@ -134,6 +147,14 @@ class ImageFilterOutput(Object):
 
     def update(self):
 
+        # Provides opportunity for the data object to insure internal consistency before
+        # access. Also causes owning source/filter (if any) to update itself. The Update() method is
+        # composed of UpdateOutputInformation(), PropagateRequestedRegion(), and
+        # UpdateOutputData(). This method may call methods that throw an InvalidRequestedRegionError
+        # exception. This exception will leave the pipeline in an inconsistent state. You will need
+        # to call ResetPipeline() on the last ProcessObjectWithTimeStamp in your pipeline in order to restore the
+        # pipeline to a state where you can call Update() again.
+
         self._logger.info(self.name)
         self.update_output_information()
         self.propagate_requested_region()
@@ -143,6 +164,14 @@ class ImageFilterOutput(Object):
 
     def update_output_information(self):
 
+        # Update the information for this DataObjectWithTimeStamp so that it can be used as an output of a
+        # ProcessObjectWithTimeStamp. This method is used in the pipeline mechanism to propagate information and
+        # initialize the meta data associated with a DataObjectWithTimeStamp. Any implementation of this method
+        # in a derived class is assumed to call its source's
+        # ProcessObjectWithTimeStamp::UpdateOutputInformation() which determines modified times,
+        # LargestPossibleRegions, and any extra meta data like spacing, origin, etc. Default
+        # implementation simply call's it's source's UpdateOutputInformation().
+
         self._logger.info(self.name)
         self._source.update_output_information()
 
@@ -150,10 +179,16 @@ class ImageFilterOutput(Object):
 
     def propagate_requested_region(self):
 
+        # Methods to update the pipeline. Called internally by the pipeline mechanism. 
+
         self._logger.info(self.name)
+
+        # If we need to update due to pipeline modification time, or the fact that our data was
+        # released, then propagate the update region to the source if there is one.
         if int(self._update_time) < self._pipeline_time:
             self._source.propagate_requested_region(self)
-            
+
+        # Check that the requested region lies within the largest possible region
         # self.verify_requested_region()
 
     ##############################################
@@ -161,12 +196,22 @@ class ImageFilterOutput(Object):
     def update_output_data(self):
 
         self._logger.info(self.name)
+
+        # If we need to update due to pipeline modification time, or the fact that our data was
+        # released, then propagate the UpdateOutputData to the source if there is one.
         if int(self._update_time) < self._pipeline_time:
             self._source.update_output_data()
 
     ##############################################
 
     def copy_information(self, input_):
+
+        # Copy information from the specified data set. This method is part of the pipeline execution
+        # model. By default, a ProcessObjectWithTimeStamp will copy meta-data from the first input to all of its
+        # outputs. See ProcessObjectWithTimeStamp::GenerateOutputInformation(). Each subclass of DataObjectWithTimeStamp is
+        # responsible for being able to copy whatever meta-data it needs from from another DataObjectWithTimeStamp. The
+        # default implementation of this method is empty. If a subclass overrides this method, it should
+        # always call its superclass' version.
 
         self._logger.info("from {} to {}".format(input_.name, self.name))
 
@@ -180,7 +225,7 @@ class ImageFilterOutput(Object):
 
 ####################################################################################################
 
-class ImageFilter(Object):
+class ImageFilter(ObjectWithTimeStamp):
 
     _last_filter_id = 0
 
@@ -203,16 +248,21 @@ class ImageFilter(Object):
 
     def __init__(self):
 
-        Object.__init__(self)
+        ObjectWithTimeStamp.__init__(self)
 
         self._filter_id = self._new_filter_id()
+
+        # Time when generate_output_information was last called.
         self._output_information_time = TimeStamp()
-        self._modified_time = TimeStamp()
-        self.modified() 
+
+        # This flag indicates when the pipeline is executing.
+        # It prevents infinite recursion when pipelines have loops.
         self._updating = False
 
         self._inputs = dict()
         self._outputs = {name:ImageFilterOutput(self, name) for name in self.__output_names__}
+
+        self.modified() 
 
     ##############################################
 
@@ -293,9 +343,10 @@ class ImageFilter(Object):
 
         # Watch out for loops in the pipeline
         if self._updating:
+            self._logger.info("{} is updating!".format(self.name))
             # Since we are in a loop, we will want to update. But if we don't modify this filter,
-            # then we will not execute because our OutputInformationMTime will be more recent than
-            # the MTime of our output.
+            # then we will not execute because our output information modification time will be more
+            # recent than the modification time of our output.
             self.modified()
             return
             
@@ -307,28 +358,28 @@ class ImageFilter(Object):
             if input_name not in self._inputs:
                 raise NameError("Input {} is required".format(input_name))
 
-        # We now wish to set the PipelineMTime of each output DataObject to the largest of this
-        # ProcessObject's MTime, all input DataObject's PipelineMTime, and all input's MTime.  We
-        # begin with the MTime of this ProcessObject.
+        # We now wish to set the pipeline modification time of each output to the largest of this
+        # filter's modification time, all input's pipeline modification time, and all input's
+        # modification time.  We begin with the modification time of this filter.
         modified_time = self.modified_time
 
         # Loop through the inputs
         for input_ in self._inputs.values():
-            # Propagate the UpdateOutputInformation call
+            # Propagate the update output information call
             self._updating = True
             input_.update_output_information()
             self._updating = False
 
-            # What is the PipelineMTime of this input? Compare this against our current computation
-            # to find the largest one.
-            # Pipeline MTime of the input does not include the MTime of the data object
-            # itself. Factor these mtimes into the next PipelineMTime
+            # What is the pipeline modification time of this input? Compare this against our current
+            # computation to find the largest one.  Pipeline modification time of the input does not
+            # include the modification time of the data object itself. Factor these modification
+            # times into the next pipeline modification time
             modified_time = max(modified_time, input_.modified_time, input_.pipeline_time)
 
-        # Call GenerateOutputInformation for subclass specific information.  Since
-        # UpdateOutputInformation propagates all the way up the pipeline, we need to be careful here
-        # to call GenerateOutputInformation only if necessary. Otherwise, we may cause this source
-        # to be modified which will cause it to execute again on the next update.
+        # Call generate_output_information for subclass specific information.  Since
+        # update_output_information propagates all the way up the pipeline, we need to be careful
+        # here to call generate_output_information only if necessary. Otherwise, we may cause this
+        # source to be modified which will cause it to execute again on the next update.
         if modified_time > int(self._output_information_time):
             for output in self._outputs.values():
                 output.pipeline_time = modified_time
@@ -348,6 +399,14 @@ class ImageFilter(Object):
 
     def generate_output_information(self):
 
+        # Generate the information describing the output data. The default implementation of this method
+        # will copy information from the input to the output. A filter may override this method if its
+        # output will have different information than its input. For instance, a filter that shrinks an
+        # image will need to provide an implementation for this method that changes the spacing of the
+        # pixels. Such filters should call their superclass' implementation of this method prior to changing
+        # the information values they need (i.e. GenerateOutputInformation() should call
+        # Superclass::GenerateOutputInformation() prior to changing the information.
+        
         self._logger.info(self.name)
         if self._inputs:
             primary_input = self.get_primary_input()
@@ -358,10 +417,13 @@ class ImageFilter(Object):
 
     def propagate_requested_region(self, output):
 
+        # Send the requested region information back up the pipeline (to the filters that precede this one).
+
         self._logger.info(self.name)
 
         # check flag to avoid executing forever if there is a loop
         if self._updating:
+            self._logger.info("{} is updating!".format(self.name))
             return
 
         # Give the subclass a chance to indicate that it will provide more data then required for
@@ -396,6 +458,7 @@ class ImageFilter(Object):
 
         # prevent chasing our tail
         if self._updating:
+            self._logger.info("{} is updating!".format(self.name))
             return
 
         # Prepare all the outputs. This may deallocate previous bulk data.
@@ -409,7 +472,7 @@ class ImageFilter(Object):
             self.get_primary_input().update_output_data()
         else:
             for input_ in self._inputs.values():
-                # propagate_requested_region
+                input_.propagate_requested_region()
                 input_.update_output_data()
 
         # start
