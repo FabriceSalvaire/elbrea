@@ -9,68 +9,15 @@
 
 import logging
 
-from atomiclong import AtomicLong
-
 ####################################################################################################
 
 # from Elbrea.Image.Image import Image
 # from Elbrea.Tools.EnumFactory import EnumFactory
+from Elbrea.Tools.TimeStamp import TimeStamp, ObjectWithTimeStamp
 
 ####################################################################################################
 
 _module_logger = logging.getLogger(__name__)
-
-####################################################################################################
-
-class TimeStamp(object):
-
-    _time_stamp = AtomicLong(0)
-
-    ##############################################
-
-    def __init__(self):
-
-        self._modified_time = 0
-
-    ##############################################
-
-    def __lt__(self, other):
-        return self._modified_time < other._modified_time
-
-    ##############################################
-
-    def __int__(self):
-        return self._modified_time
-
-    ##############################################
-
-    def modified(self):
-
-        # Should be atomic
-        TimeStamp._time_stamp += 1
-        self._modified_time = TimeStamp._time_stamp.value
-
-####################################################################################################
-
-class ObjectWithTimeStamp(object):
-
-     ##############################################
-
-    def __init__(self):
-
-        self._modified_time = TimeStamp()
-
-    ##############################################
-
-    @property
-    def modified_time(self):
-        return int(self._modified_time)
-
-    ##############################################
-
-    def modified(self):
-
-        self._modified_time.modified()
 
 ####################################################################################################
 
@@ -164,13 +111,13 @@ class ImageFilterOutput(ObjectWithTimeStamp):
 
     def update_output_information(self):
 
-        # Update the information for this DataObjectWithTimeStamp so that it can be used as an output of a
-        # ProcessObjectWithTimeStamp. This method is used in the pipeline mechanism to propagate information and
-        # initialize the meta data associated with a DataObjectWithTimeStamp. Any implementation of this method
-        # in a derived class is assumed to call its source's
-        # ProcessObjectWithTimeStamp::UpdateOutputInformation() which determines modified times,
-        # LargestPossibleRegions, and any extra meta data like spacing, origin, etc. Default
-        # implementation simply call's it's source's UpdateOutputInformation().
+        # Update the information for this DataObjectWithTimeStamp so that it can be used as an
+        # output of a ProcessObjectWithTimeStamp. This method is used in the pipeline mechanism to
+        # propagate information and initialize the meta data associated with a
+        # DataObjectWithTimeStamp. Any implementation of this method in a derived class is assumed
+        # to call its source's ProcessObjectWithTimeStamp::UpdateOutputInformation() which
+        # determines modified times, LargestPossibleRegions, and any extra meta data like spacing,
+        # origin, etc. Default implementation simply call's it's source's UpdateOutputInformation().
 
         self._logger.info(self.name)
         self._source.update_output_information()
@@ -206,12 +153,13 @@ class ImageFilterOutput(ObjectWithTimeStamp):
 
     def copy_information(self, input_):
 
-        # Copy information from the specified data set. This method is part of the pipeline execution
-        # model. By default, a ProcessObjectWithTimeStamp will copy meta-data from the first input to all of its
-        # outputs. See ProcessObjectWithTimeStamp::GenerateOutputInformation(). Each subclass of DataObjectWithTimeStamp is
-        # responsible for being able to copy whatever meta-data it needs from from another DataObjectWithTimeStamp. The
-        # default implementation of this method is empty. If a subclass overrides this method, it should
-        # always call its superclass' version.
+        # Copy information from the specified data set. This method is part of the pipeline
+        # execution model. By default, a ProcessObjectWithTimeStamp will copy meta-data from the
+        # first input to all of its outputs. See
+        # ProcessObjectWithTimeStamp::GenerateOutputInformation(). Each subclass of
+        # DataObjectWithTimeStamp is responsible for being able to copy whatever meta-data it needs
+        # from from another DataObjectWithTimeStamp. The default implementation of this method is
+        # empty. If a subclass overrides this method, it should always call its superclass' version.
 
         self._logger.info("from {} to {}".format(input_.name, self.name))
 
@@ -227,12 +175,11 @@ class ImageFilterOutput(ObjectWithTimeStamp):
 
 class ImageFilter(ObjectWithTimeStamp):
 
-    _last_filter_id = 0
-
     __filter_name__ = None
     __input_names__ = None
     __output_names__ = None
 
+    _last_filter_id = 0
     _logger = _module_logger.getChild('ImageFilter')
 
     ##############################################
@@ -399,13 +346,14 @@ class ImageFilter(ObjectWithTimeStamp):
 
     def generate_output_information(self):
 
-        # Generate the information describing the output data. The default implementation of this method
-        # will copy information from the input to the output. A filter may override this method if its
-        # output will have different information than its input. For instance, a filter that shrinks an
-        # image will need to provide an implementation for this method that changes the spacing of the
-        # pixels. Such filters should call their superclass' implementation of this method prior to changing
-        # the information values they need (i.e. GenerateOutputInformation() should call
-        # Superclass::GenerateOutputInformation() prior to changing the information.
+        # Generate the information describing the output data. The default implementation of this
+        # method will copy information from the input to the output. A filter may override this
+        # method if its output will have different information than its input. For instance, a
+        # filter that shrinks an image will need to provide an implementation for this method that
+        # changes the spacing of the pixels. Such filters should call their superclass'
+        # implementation of this method prior to changing the information values they need
+        # (i.e. GenerateOutputInformation() should call Superclass::GenerateOutputInformation()
+        # prior to changing the information.
         
         self._logger.info(self.name)
         if self._inputs:
