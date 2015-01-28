@@ -9,10 +9,11 @@
 
 import logging
 
+import numpy as np
+
 ####################################################################################################
 
-# from Elbrea.Image.Image import Image
-# from Elbrea.Tools.EnumFactory import EnumFactory
+from Elbrea.Image.Image import Image
 from Elbrea.Tools.TimeStamp import TimeStamp, ObjectWithTimeStamp
 
 ####################################################################################################
@@ -25,6 +26,9 @@ _module_logger = logging.getLogger(__name__)
 # BufferedRegion—the portion of the image retained in memory.
 # RequestedRegion—the portion of the region requested by a filter or other class when operating on the image.
 
+####################################################################################################
+
+# DataObject
 class ImageFilterOutput(ObjectWithTimeStamp):
 
     _logger = _module_logger.getChild('ImageFilterOutput')
@@ -40,11 +44,14 @@ class ImageFilterOutput(ObjectWithTimeStamp):
         # the pipeline. It doesn't relates to the clock time of acquiring or processing the data.
         self._update_time = TimeStamp()
 
-        # The maximum modification time of all upstream filters and data objects.
-        # This does not include the modification time of this data object.
+        # The maximum modification time of all upstream filters and outputs.
+        # This does not include the modification time of this output.
         self._pipeline_time = 0
 
         self.connect_source(source, name)
+
+        self.image = None
+        # self._image_format = None
 
     ##############################################
 
@@ -76,6 +83,22 @@ class ImageFilterOutput(ObjectWithTimeStamp):
 
     ##############################################
 
+    # @property
+    # def image(self):
+    #     return self._image
+
+    ##############################################
+
+    @property
+    def image_format(self):
+        if self.image is not None:
+            return self.image.image_format
+        else:
+            return None
+        # return self._image_format
+
+    ##############################################
+
     def connect_source(self, source, name):
 
         self._source = source # image_filter
@@ -99,12 +122,12 @@ class ImageFilterOutput(ObjectWithTimeStamp):
         # composed of UpdateOutputInformation(), PropagateRequestedRegion(), and
         # UpdateOutputData(). This method may call methods that throw an InvalidRequestedRegionError
         # exception. This exception will leave the pipeline in an inconsistent state. You will need
-        # to call ResetPipeline() on the last ProcessObjectWithTimeStamp in your pipeline in order to restore the
-        # pipeline to a state where you can call Update() again.
+        # to call ResetPipeline() on the last ProcessObjectWithTimeStamp in your pipeline in order
+        # to restore the pipeline to a state where you can call Update() again.
 
         self._logger.info(self.name)
         self.update_output_information()
-        self.propagate_requested_region()
+        #!# self.propagate_requested_region()
         self.update_output_data()
 
     ##############################################
@@ -161,7 +184,8 @@ class ImageFilterOutput(ObjectWithTimeStamp):
         # from from another DataObjectWithTimeStamp. The default implementation of this method is
         # empty. If a subclass overrides this method, it should always call its superclass' version.
 
-        self._logger.info("from {} to {}".format(input_.name, self.name))
+        self._logger.info("from {} to {}\n{}".format(input_.name, self.name,
+                                                     str(input_.image_format)))
 
     ##############################################
 

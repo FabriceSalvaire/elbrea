@@ -142,6 +142,12 @@ class ImageFormat(object):
     ##############################################
 
     @property
+    def normalised(self):
+        return self._normalised
+
+    ##############################################
+
+    @property
     def number_of_bytes(self):
         return (self._height * self._width * self._number_of_channels *
                 self.data_type_number_of_bytes)
@@ -315,32 +321,40 @@ class Image(np.ndarray):
 
     ##############################################
 
-    def to_normalised_float(self, double=False):
-        
-        if double:
-            data_type = np.float64
-        else:
-            data_type = np.float32
-        image = self.__class__(self, data_type=data_type, normalised=True)
-        image *= 1./self.image_format.sup
+    def to_normalised_float(self, float_image=None, double=False):
 
-        return image
+        if float_image is None:
+            if double:
+                data_type = np.float64
+            else:
+                data_type = np.float32
+            float_image = self.__class__(self, data_type=data_type, normalised=True)
+        else:
+            float_image[...] = self
+        float_image *= 1./self.image_format.sup
+
+        return float_image
 
     ##############################################
 
-    def convert_colour(self, channels):
+    def convert_colour(self, channels, hls_image=None):
+
+        # Fixme: check hls_image
 
         image_format = self.image_format
         if channels is ImageFormat.HLS:
             if image_format.channels is ImageFormat.RGB:
                 if image_format.is_unsigned_integer:
                     float_image = self.to_normalised_float()
-                    hls_image = self.__class__(float_image, share=True, channels=ImageFormat.HLS)
+                    if hls_image is None:
+                        hls_image = self.__class__(float_image, share=True, channels=ImageFormat.HLS)
                 elif image_format.is_float and image_format.normalised:
                     float_image = self
-                    hls_image = self.__class__(image_format, channels=ImageFormat.HLS)
+                    if hls_image is None:
+                        hls_image = self.__class__(image_format, channels=ImageFormat.HLS)
                 else:
                     raise NotImplementedError
+                # Fixme: catch error
                 cv2.cvtColor(float_image, cv2.COLOR_RGB2HLS, hls_image)
                 hls_image[:,:,0] *= 1./360 # normalised float, else have to define sup !
                 return hls_image

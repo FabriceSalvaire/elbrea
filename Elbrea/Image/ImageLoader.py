@@ -25,6 +25,8 @@ from .Image import ImageFormat, Image
 def load_image(path):
 
     cv_array = cv2.imread(path)
+    if cv_array is None:
+        raise NameError() # Fixme.
     # CV uses BGR format
     image = Image(cv_array, share=True, channels=ImageFormat.BGR)
     image = image.swap_channels(ImageFormat.RGB)
