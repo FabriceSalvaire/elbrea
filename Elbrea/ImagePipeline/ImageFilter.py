@@ -174,7 +174,9 @@ class ImageFilterOutput(ObjectWithTimeStamp):
 
     ##############################################
 
-    def copy_information(self, input_):
+    def copy_information(self, image_format):
+
+        # was input_
 
         # Copy information from the specified data set. This method is part of the pipeline
         # execution model. By default, a ProcessObjectWithTimeStamp will copy meta-data from the
@@ -184,8 +186,12 @@ class ImageFilterOutput(ObjectWithTimeStamp):
         # from from another DataObjectWithTimeStamp. The default implementation of this method is
         # empty. If a subclass overrides this method, it should always call its superclass' version.
 
-        self._logger.info("from {} to {}\n{}".format(input_.name, self.name,
-                                                     str(input_.image_format)))
+        # self._logger.info("from {} to {}\n{}".format(input_.name, self.name,
+        #                                              str(input_.image_format)))
+
+        self._logger.info("Make output for {} with shape \n{}".format(self.name,
+                                                                      str(image_format)))
+        self.image = Image(image_format)
 
     ##############################################
 
@@ -380,10 +386,22 @@ class ImageFilter(ObjectWithTimeStamp):
         # prior to changing the information.
         
         self._logger.info(self.name)
+
+        # if self._inputs:
+        #     primary_input = self.get_primary_input()
+        #     for output in self._outputs.values():
+        #         output.copy_information(primary_input)
+
         if self._inputs:
-            primary_input = self.get_primary_input()
             for output in self._outputs.values():
-                output.copy_information(primary_input)
+                image_format = self.generate_image_format(output)
+                output.copy_information(image_format)
+
+    ##############################################
+
+    def generate_image_format(self, output):
+
+        raise NotImplementedError
 
     ##############################################
 

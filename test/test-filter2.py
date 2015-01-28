@@ -42,15 +42,10 @@ class FloatFilter(ImageFilter):
 
     ##############################################
 
-    def generate_output_information(self):
+    def generate_image_format(self, output):
 
-       if self._inputs:
-           input_ = self.get_primary_input()
-           output = self.get_primary_output()
-           image_format = input_.image_format.clone(data_type=np.float32, normalised=True)
-           self._logger.info("Make output for {} with shape \n{}".format(output.name,
-                                                                         str(image_format)))
-           output.image = Image(image_format)
+        image_format = self.get_primary_input().image_format
+        return image_format.clone(data_type=np.float32, normalised=True)
 
     ##############################################
 
@@ -72,16 +67,11 @@ class HlsFilter(ImageFilter):
 
     ##############################################
 
-    def generate_output_information(self):
+    def generate_image_format(self, output):
 
-       if self._inputs:
-           input_ = self.get_primary_input()
-           output = self.get_primary_output()
-           image_format = input_.image_format.clone(data_type=np.float32, normalised=True,
-                                                    channels=ImageFormat.HLS)
-           self._logger.info("Make output for {} with shape \n{}".format(output.name,
-                                                                         str(image_format)))
-           output.image = Image(image_format)
+        image_format = self.get_primary_input().image_format
+        return image_format.clone(data_type=np.float32, normalised=True,
+                                  channels=ImageFormat.HLS)
 
     ##############################################
 
