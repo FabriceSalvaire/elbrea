@@ -32,7 +32,7 @@ import Elbrea.Tools.BackTrace as BackTrace
 
 ####################################################################################################
 
-from Elbrea.GUI.ui.critical_error_form_ui import Ui_critical_error_form
+from .ui.critical_error_form_ui import Ui_critical_error_form
 
 ####################################################################################################
 

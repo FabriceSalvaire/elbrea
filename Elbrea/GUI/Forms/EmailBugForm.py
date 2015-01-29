@@ -20,7 +20,7 @@ import Elbrea.Version as Version
 
 ####################################################################################################
 
-from Elbrea.GUI.ui.email_bug_form_ui import Ui_email_bug_form
+from .ui.email_bug_form_ui import Ui_email_bug_form
 
 ####################################################################################################
 

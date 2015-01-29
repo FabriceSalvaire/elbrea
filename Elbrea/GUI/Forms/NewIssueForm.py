@@ -19,7 +19,7 @@ import Elbrea.Config.Config as Config
 
 ####################################################################################################
 
-from Elbrea.GUI.ui.new_issue_form_ui import Ui_new_issue_form
+from .ui.new_issue_form_ui import Ui_new_issue_form
 
 ####################################################################################################
 

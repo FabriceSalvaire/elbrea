@@ -17,10 +17,6 @@ from PyQt5 import QtWidgets, QtCore
 
 ####################################################################################################
 
-from Elbrea.Tools.Colour import rgb_to_hsl
-
-####################################################################################################
-
 class StatusBar(object):
 
     _logger = logging.getLogger(__name__)
@@ -77,14 +73,16 @@ class StatusBar(object):
 
     ##############################################
 
-    def update_colour_intensities_status(self, colour_intensities):
+    def update_colour_intensities_status(self, rgb_colour):
 
-        red, green, blue = [int(x) for x in colour_intensities]
-        hue, lightness, saturation = rgb_to_hsl(red, green, blue)
+        hls_colour = rgb_colour.to_hls()
         rgb_template = '<font color="red">#<font color="black">{}<font color="green">#<font color="black">{}<font color="blue">#<font color="black">{}'
         hls_template = 'H {} L {:.2f} S {:.2f}'
-        self.colour_intensities_label.setText(rgb_template.format(red, green, blue) + ' ' +
-                                              hls_template.format(int(hue*360), lightness, saturation))
+        self.colour_intensities_label.setText(rgb_template.format(rgb_colour.red, rgb_colour.green, rgb_colour.blue)
+                                              + ' ' +
+                                              hls_template.format(int(hls_colour.hue*360),
+                                                                  hls_colour.lightness,
+                                                                  hls_colour.saturation))
 
 ####################################################################################################
 #

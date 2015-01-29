@@ -24,7 +24,8 @@ from PyOpenGLng.HighLevelApi.GlWidgetBase import GlWidgetBase
 from PyOpenGLng.HighLevelApi.TextureVertexArray import GlTextureVertexArray
 from PyOpenGLng.Tools.Interval import IntervalInt2D
 
-from .GraphicScene import GraphicScene
+from Elbrea.GraphicEngine.GraphicScene import GraphicScene
+from Elbrea.Image.Colour import RgbIntColour
 
 ####################################################################################################
  
@@ -54,7 +55,7 @@ class GlWidget(GlWidgetBase):
 
     def init_tools(self):
 
-        from .ForegroundPainter import RoiPainter
+        from Elbrea.GraphicEngine.ForegroundPainter import RoiPainter
         from ..Viewer.Cropper import Cropper
         self.roi_painter = RoiPainter(self)
         self.cropper = Cropper(self)
@@ -86,7 +87,7 @@ class GlWidget(GlWidgetBase):
 
         self._logger.debug('Initialise Shader')
 
-        from . import ShaderProgrames as ShaderProgrames
+        from Elbrea.GraphicEngine import ShaderProgrames as ShaderProgrames
         self.shader_manager = ShaderProgrames.shader_manager
         self.position_shader_interface = ShaderProgrames.position_shader_program_interface
 
@@ -264,8 +265,8 @@ class GlWidget(GlWidgetBase):
         position = self.window_to_gl_coordinate(event, round_to_integer=True)
         x, y = position
         image = self._current_image()
-        colour_intensities = list(image[y,x])
-        self._application.main_window.status_bar.update_colour_intensities_status(colour_intensities)
+        rgb_colour = RgbIntColour(image[y,x])
+        self._application.main_window.status_bar.update_colour_intensities_status(rgb_colour)
         self.show_coordinate(position)
         # self._set_previous_position(position)
 
@@ -281,7 +282,7 @@ class GlWidget(GlWidgetBase):
         
     def _show_intensity_profile(self, location):
         
-        from Elbrea.GUI.Viewer.IntensityProfileForm import LineIntensityProfileForm
+        from .IntensityProfileForm import LineIntensityProfileForm
         x_profile, y_profile = self._intensity_line_picker(location, self._current_image())
         self._intensity_profile_form = LineIntensityProfileForm(x_profile, y_profile)
         self._intensity_profile_form.show()
@@ -293,7 +294,7 @@ class GlWidget(GlWidgetBase):
         if axis not in ('x', 'y', 'xy'):
             raise IndexError
 
-        from Elbrea.GUI.Viewer.IntensityProfile import LineIntensityProfile
+        from .IntensityProfile import LineIntensityProfile
 
         x_profile = None # row
         y_profile = None # column

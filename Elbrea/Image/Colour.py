@@ -22,7 +22,7 @@ class Colour(np.ndarray):
         elif len(args) == 3:
             data = args
 
-        obj = np.asarray(data).view(cls)
+        obj = np.asarray(data, dtype=cls.__dtype__).view(cls)
 
         obj.colour_kwargs = kwargs
 
@@ -44,6 +44,8 @@ class Colour(np.ndarray):
 
 class NormalisedColour(Colour):
 
+    __dtype__ = np.float64
+
     ##############################################
 
     def __array_finalize__(self, obj):
@@ -61,6 +63,8 @@ class NormalisedColour(Colour):
 ####################################################################################################
 
 class IntColour(Colour):
+
+    __dtype__ = np.uint
 
     ##############################################
 
@@ -163,7 +167,7 @@ class HlsColourMixin:
     ##############################################
 
     @property
-    def luminosity(self):
+    def lightness(self):
         return self[1]
 
     ##############################################
@@ -177,12 +181,12 @@ class HlsColourMixin:
     def to_rgb(self):
 
         # assume normalised
-        hue, luminosity, saturation = self.tolist()
+        hue, lightness, saturation = self.tolist()
 
         hue *= 6
-        chroma = (1 - abs(2 * luminosity - 1)) * saturation
+        chroma = (1 - abs(2 * lightness - 1)) * saturation
         x = chroma * (1 - abs(hue % 2 - 1))
-        m = luminosity - .5 * chroma
+        m = lightness - .5 * chroma
 
         # print(hue, chroma, x, m)
 
@@ -210,7 +214,7 @@ class HlsIntColour(IntColour, HlsColourMixin):
     def normalise(self):
 
         return HlsNormalisedColour(self.hue / 360,
-                                   self.luminosity / self._dtype_scale,
+                                   self.lightness / self._dtype_scale,
                                    self.saturation / self._dtype_scale)
 
 ####################################################################################################

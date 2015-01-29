@@ -15,7 +15,7 @@ from PyQt5 import QtWidgets
 
 ####################################################################################################
 
-from Elbrea.GUI.GraphicEngine.GraphicScene import GraphicSceneItem
+from Elbrea.GraphicEngine.GraphicScene import GraphicSceneItem
 from Elbrea.Math.Interval import IntervalInt2D
 from Elbrea.Tools.ConstrainedBox import ConstrainedBox
 from Elbrea.Tools.EnumFactory import EnumFactory

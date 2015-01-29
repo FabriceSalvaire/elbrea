@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtWidgets
 
 ####################################################################################################
 
-from Elbrea.GUI.Widgets.IconLoader import IconLoader
+from Elbrea.GUI.Base.IconLoader import IconLoader
 
 ####################################################################################################
 
