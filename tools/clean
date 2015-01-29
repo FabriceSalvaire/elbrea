@@ -33,6 +33,7 @@ else
   rm -rf ${root_dir}/build
   rm -rf ${root_dir}/dist
   find ${root_dir} -name "*pyc" -exec rm {} \;
+  find ${root_dir} -name "__pycache__" -exec rmdir {} \;
   find ${root_dir} -name "*~" -exec rm {} \;
   find ${root_dir} -name "*_flymake.py" -exec rm {} \;
 fi

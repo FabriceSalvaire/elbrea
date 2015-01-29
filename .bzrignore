@@ -1,5 +1,5 @@
 __pycache__
-Elbrea/GUI/ui/*_ui.py
+*_ui.py
 Elbrea/C/DisjointSet.py
 Elbrea/C/Geometry.py
 Elbrea/C/ImageProcessing.py

@@ -28,6 +28,11 @@ class TimeStamp(object):
 
     ##############################################
 
+    def __gt__(self, other):
+        return self._modified_time > other._modified_time
+
+    ##############################################
+
     def __int__(self):
         return self._modified_time
 
