@@ -117,13 +117,13 @@ class GlWidget(GlWidgetBase):
 
     def create_textures(self):
 
-        data = self._application.front_image
+        data = self._application.front_pipeline.input_filter.get_primary_output().image
         height, width = data.shape[:2]
         self.front_texture_vertex_array = GlTextureVertexArray(position=Point(0, 0), dimension=Offset(width, height),
                                                                image=data)
         self.front_texture_vertex_array.bind_to_shader(self.shader_manager.texture_shader_program.interface.attributes)
 
-        data = self._application.back_image
+        data = self._application.back_pipeline.input_filter.get_primary_output().image
         self.back_texture_vertex_array = GlTextureVertexArray(position=Point(0, 0), dimension=Offset(width, height),
                                                               image=data)
         self.back_texture_vertex_array.bind_to_shader(self.shader_manager.texture_shader_program.interface.attributes)
