@@ -43,8 +43,12 @@ class BackgroundPainter(Painter):
     ##############################################
 
     @property
-    def current_painter(self):
+    def current_painter_name(self):
         return self._current_painter
+
+    @property
+    def current_painter(self):
+        return self._texture_painters[self._current_painter]
 
     ##############################################
 

@@ -200,6 +200,13 @@ class GlWidget(GlWidgetBase):
 
     ##############################################
 
+    def _current_image(self):
+
+        background_painter = self._painter_manager.background_painter
+        return background_painter.current_painter.source.image
+
+    ##############################################
+
     def colour_picker(self, event):
 
         position = self.window_to_gl_coordinate(event, round_to_integer=True)

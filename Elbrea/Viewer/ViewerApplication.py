@@ -23,7 +23,6 @@ class ViewerApplication(GuiApplicationBase):
     
     def __init__(self, args):
 
-
         super(ViewerApplication, self).__init__(args=args)
         self._logger.debug(str(args))
         
@@ -90,7 +89,7 @@ class ViewerApplication(GuiApplicationBase):
         self._logger.info('')
 
         background_painter = self.painter_manager.background_painter
-        if background_painter.current_painter == 'front':
+        if background_painter.current_painter_name == 'front':
             source = 'back'
         else:
             source = 'front'
