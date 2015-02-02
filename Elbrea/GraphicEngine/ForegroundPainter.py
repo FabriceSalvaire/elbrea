@@ -16,6 +16,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyOpenGLng.HighLevelApi.Geometry import Point, Segment
 from PyOpenGLng.HighLevelApi.PrimitiveVertexArray import GlSegmentVertexArray
 
+from .Painter import ForegroundPainter
 from .ShaderProgrames import shader_manager
 
 ####################################################################################################
@@ -24,15 +25,19 @@ _module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
 
-class RoiPainter(object):
+class RoiPainter(ForegroundPainter):
+
+    __painter_name__ = 'roi'
 
     _logger = _module_logger.getChild('RoiPainter')
 
     ##############################################
     
-    def __init__(self, glwidget):
+    def __init__(self, painter_manager):
 
-        self._glwidget = glwidget
+        super(RoiPainter, self).__init__(painter_manager)
+
+        self._glwidget = self._painter_manager.glwidget
         self._shader_program = shader_manager.roi_shader_program
         self.reset()
 

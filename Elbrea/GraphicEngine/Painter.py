@@ -21,12 +21,15 @@ class PainterMetaClass(type):
 
     classes = {}
 
+    _logger = _module_logger.getChild('PainterMetaClass')
+
     ##############################################
 
     def __init__(cls, class_name, super_classes, class_attribute_dict):
 
         type.__init__(cls, class_name, super_classes, class_attribute_dict)
         if class_name != 'ForegroundPainter':
+            # PainterMetaClass._logger.debug("Register foreground painter %s", cls.__painter_name__)
             PainterMetaClass.classes[cls.__painter_name__] = cls
 
 ####################################################################################################

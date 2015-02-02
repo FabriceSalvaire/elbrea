@@ -122,7 +122,7 @@ class Cropper(object):
     def __init__(self, glwidget):
 
         self._glwidget = glwidget
-        self._roi_painter = glwidget.roi_painter
+        self._roi_painter = glwidget._painter_manager.foreground_painter('roi')
 
         self._locked = False
         self._updating = False

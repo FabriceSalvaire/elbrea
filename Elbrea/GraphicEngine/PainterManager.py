@@ -11,37 +11,30 @@ import logging
 
 ####################################################################################################
 
-from .Painter import PainterMetaClass, ForegroundPainter
-from .PainterTexture import BackgroundPainter
+from .Painter import PainterMetaClass
+from .TexturePainter import TexturePainter
+
+# Load Painters
+from . import ForegroundPainter 
 
 ####################################################################################################
 
 class PainterManager(object):
 
-    """
-
-    Public Attributes:
-
-      :attr:`opengl_viewer`
-
-      :attr:`slide`
-
-    """
-
     _logger = logging.getLogger(__name__)
 
     ##############################################
 
-    def __init__(self, gl_viewer):
+    def __init__(self, glwidget):
         
         super(PainterManager, self).__init__()
 
-        self.gl_viewer = gl_viewer
+        self.glwidget = glwidget
 
         # Fixme: register self
-        self.gl_viewer._painter_manager = self
+        self.glwidget._painter_manager = self
 
-        self._background_painter = BackgroundPainter(self)
+        self._background_painter = TexturePainter(self)
         self._create_registered_painters()
 
     ##############################################
@@ -72,18 +65,19 @@ class PainterManager(object):
 
     def painter_iterator(self):
 
-        return iter([self._background_painter] + self._foreground_painters.values())
+        return iter([self._background_painter] + list(self._foreground_painters.values()))
 
     ##############################################
 
     def enabled_painter_iterator(self):
 
-        return iter([painter for painter in self.painter_iterator() if painter.status])
+        return iter([painter for painter in self.painter_iterator() if painter._status])
 
     ##############################################
 
     def paint(self):
 
+        self._logger.info("")
         for painter in self.enabled_painter_iterator():
             painter.paint()
 

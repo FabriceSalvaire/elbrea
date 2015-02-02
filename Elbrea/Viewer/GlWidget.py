@@ -19,9 +19,7 @@ import numpy as np
 
 from PyOpenGLng.HighLevelApi import GL
 from PyOpenGLng.HighLevelApi.Buffer import GlUniformBuffer
-from PyOpenGLng.HighLevelApi.Geometry import Point, Offset
 from PyOpenGLng.HighLevelApi.GlWidgetBase import GlWidgetBase
-from PyOpenGLng.HighLevelApi.TextureVertexArray import GlTextureVertexArray
 from PyOpenGLng.Tools.Interval import IntervalInt2D
 
 from Elbrea.GraphicEngine.GraphicScene import GraphicScene
@@ -47,17 +45,15 @@ class GlWidget(GlWidgetBase):
 
         self._application = QtWidgets.QApplication.instance()
 
-        self.show_front = True
-
         self._previous_position = None
+
+        self._painter_manager = None
 
     ##############################################
 
     def init_tools(self):
 
-        from Elbrea.GraphicEngine.ForegroundPainter import RoiPainter
-        from ..Viewer.Cropper import Cropper
-        self.roi_painter = RoiPainter(self)
+        from .Cropper import Cropper
         self.cropper = Cropper(self)
 
     ##############################################
@@ -105,68 +101,12 @@ class GlWidget(GlWidgetBase):
 
     ##############################################
 
-    def create_vertex_array_objects(self):
-
-        self.makeCurrent()
-        with GL.error_checker():
-            self.create_textures()
-        self.doneCurrent()
-        self._ready = True
-
-    ##############################################
-
-    def create_textures(self):
-
-        data = self._application.front_pipeline.input_filter.get_primary_output().image
-        height, width = data.shape[:2]
-        self.front_texture_vertex_array = GlTextureVertexArray(position=Point(0, 0), dimension=Offset(width, height),
-                                                               image=data)
-        self.front_texture_vertex_array.bind_to_shader(self.shader_manager.texture_shader_program.interface.attributes)
-
-        data = self._application.back_pipeline.input_filter.get_primary_output().image
-        self.back_texture_vertex_array = GlTextureVertexArray(position=Point(0, 0), dimension=Offset(width, height),
-                                                              image=data)
-        self.back_texture_vertex_array.bind_to_shader(self.shader_manager.texture_shader_program.interface.attributes)
-
-        self._image_interval = IntervalInt2D((0, width), (0, height))
-
-    ##############################################
-
     def paint(self):
 
         if self._ready:
             with GL.error_checker():
-                self.paint_textures()
-                self.roi_painter.paint()
-
-    ##############################################
-
-    def paint_textures(self):
-
-        shader_program = self.shader_manager.texture_shader_program
-        shader_program.bind()
-        if self.show_front:
-            self.front_texture_vertex_array.draw()
-        else:
-            self.back_texture_vertex_array.draw()
-        shader_program.unbind()
-
-    ##############################################
-
-    def switch_front_back(self):
-
-        self._logger.info('')
-        self.show_front = not self.show_front
-        self.update()
-
-    ##############################################
-
-    def _current_image(self):
-        if self.show_front:
-            return self._application.front_image
-        else:
-            return self._application.back_image
-
+                self._painter_manager.paint()
+                
     ##############################################
 
     def display_all(self):
@@ -318,6 +258,12 @@ class GlWidget(GlWidgetBase):
             return y_profile
         elif axis == 'xy':
             return x_profile, y_profile
+
+    ##############################################
+
+    def switch_front_back(self):
+
+        self._logger.info('')
 
 ####################################################################################################
 #
