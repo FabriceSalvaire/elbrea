@@ -63,21 +63,21 @@ class ViewerApplication(GuiApplicationBase):
         from Elbrea.GraphicEngine.PainterManager import PainterManager
         self.painter_manager = PainterManager(glwidget)
 
-        from Elbrea.GraphicEngine.TexturePainter import TexturePainter
         from Elbrea.GraphicEngine import ShaderProgrames as ShaderProgrames
         shader_manager = ShaderProgrames.shader_manager
 
-        background_painter = TexturePainter(self.painter_manager)
-        self.painter_manager._background_painters['front'] = background_painter
-        background_painter.shader_program = shader_manager.texture_shader_program
-        background_painter.source = front_input
-        background_painter.enable()
+        background_painter = self.painter_manager.background_painter 
 
-        background_painter = TexturePainter(self.painter_manager)
-        self.painter_manager._background_painters['back'] = background_painter
-        background_painter.shader_program = shader_manager.texture_shader_program
-        background_painter.source = back_input
-        background_painter.disable()
+        painter = background_painter.add_painter('front')
+        painter.shader_program = shader_manager.texture_shader_program
+        painter.source = front_input
+
+        painter = background_painter.add_painter('back')
+        painter.shader_program = shader_manager.texture_shader_program
+        painter.source = back_input
+
+        background_painter.select_painter('front')
+        background_painter.enable()
 
         glwidget.init_tools() # Fixme: for shader
         glwidget._ready = True
@@ -89,16 +89,13 @@ class ViewerApplication(GuiApplicationBase):
 
         self._logger.info('')
 
-        self.painter_manager.background_painter('front').switch()
-        self.painter_manager.background_painter('back').switch()
+        background_painter = self.painter_manager.background_painter
+        if background_painter.current_painter == 'front':
+            source = 'back'
+        else:
+            source = 'front'
+        background_painter.select_painter(source)
         self._main_window.glwidget.update()        
-
-        # if self.painter_manager['front']:
-        #     self.painter_manager.background_painter('front').disable()
-        #     self.painter_manager.background_painter('back').enable()
-        # else:
-        #     self.painter_manager.background_painter('front').enable()
-        #     self.painter_manager.background_painter('back').disable()
 
 ####################################################################################################
 #

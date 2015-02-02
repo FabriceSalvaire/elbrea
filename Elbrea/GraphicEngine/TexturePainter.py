@@ -27,6 +27,56 @@ _module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
 
+class BackgroundPainter(Painter):
+
+    _logger = _module_logger.getChild('BackgroundPainter')
+
+    ##############################################
+    
+    def __init__(self, painter_manager):
+
+        super(BackgroundPainter, self).__init__(painter_manager)
+
+        self._texture_painters = {}
+        self._current_painter = None
+
+    ##############################################
+
+    @property
+    def current_painter(self):
+        return self._current_painter
+
+    ##############################################
+
+    def add_painter(self, name):
+
+        painter = TexturePainter(self._painter_manager)
+        painter.disable()
+        self._texture_painters[name] = painter
+        return painter
+        
+    ##############################################
+
+    def select_painter(self, name):
+
+        if name in self._texture_painters:
+            self._current_painter = name
+            painter = self._texture_painters[name]
+            painter.enable()
+            # return painter
+        else:
+            raise KeyError(name)
+
+    ##############################################
+
+    def paint(self):
+
+        if self._current_painter is not None:
+            self._logger.info("current painter {}".format(self._current_painter))
+            self._texture_painters[self._current_painter].paint()
+
+####################################################################################################
+
 class TexturePainter(Painter, ObjectWithTimeStamp):
 
     _logger = _module_logger.getChild('TexturePainter')
@@ -103,7 +153,7 @@ class TexturePainter(Painter, ObjectWithTimeStamp):
             and self._texture_vertex_array is not None
             and self._shader_program is not None):
 
-            self._logger.info("")
+            self._logger.info("uploaded {}".format(self._uploaded))
 
             # if self.source > self: # timestamp
             if not self._uploaded:
