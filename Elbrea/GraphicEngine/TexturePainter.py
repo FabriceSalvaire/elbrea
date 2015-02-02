@@ -78,7 +78,8 @@ class TexturePainter(Painter, ObjectWithTimeStamp):
         with GL.error_checker():
             self._texture_vertex_array = GlTextureVertexArray(position=Point(0, 0), dimension=dimension)
             # image=self._source.image
-            self._texture_vertex_array.bind_to_shader(self._shader_program.interface.attributes)
+            shader_program_interface = self._shader_program.interface.attributes
+            self._texture_vertex_array.bind_to_shader(shader_program_interface)
         self._uploaded = False
 
     ##############################################

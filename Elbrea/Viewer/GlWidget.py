@@ -259,12 +259,6 @@ class GlWidget(GlWidgetBase):
         elif axis == 'xy':
             return x_profile, y_profile
 
-    ##############################################
-
-    def switch_front_back(self):
-
-        self._logger.info('')
-
 ####################################################################################################
 #
 # End

@@ -12,7 +12,6 @@ import logging
 ####################################################################################################
 
 from .Painter import PainterMetaClass
-from .TexturePainter import TexturePainter
 
 # Load Painters
 from . import ForegroundPainter 
@@ -34,7 +33,7 @@ class PainterManager(object):
         # Fixme: register self
         self.glwidget._painter_manager = self
 
-        self._background_painter = TexturePainter(self)
+        self._background_painters = {}
         self._create_registered_painters()
 
     ##############################################
@@ -51,9 +50,15 @@ class PainterManager(object):
 
     ##############################################
 
-    @property
-    def background_painter(self):
-        return self._background_painter
+    # @property
+    # def background_painter(self):
+    #     return self._background_painter
+
+    ##############################################
+
+    def background_painter(self, name):
+
+        return self._background_painters[name]
 
     ##############################################
 
@@ -65,7 +70,8 @@ class PainterManager(object):
 
     def painter_iterator(self):
 
-        return iter([self._background_painter] + list(self._foreground_painters.values()))
+        # return iter([self._background_painter] + list(self._foreground_painters.values()))
+        return iter(list(self._background_painters.values()) + list(self._foreground_painters.values()))
 
     ##############################################
 

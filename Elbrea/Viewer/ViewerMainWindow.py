@@ -54,7 +54,7 @@ class ViewerMainWindow(MainWindowBase):
                           'Switch Front/Back',
                           self,
                           toolTip='Switch Front/Back',
-                          triggered=self.glwidget.switch_front_back,
+                          triggered=self._application.switch_front_back,
                           shortcut='Ctrl+F',
                           shortcutContext=Qt.ApplicationShortcut,
                           )
