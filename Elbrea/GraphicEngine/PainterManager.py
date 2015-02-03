@@ -25,7 +25,7 @@ class PainterManager(object):
 
     ##############################################
 
-    def __init__(self, glwidget):
+    def __init__(self, glwidget, background_painter_class=BackgroundPainter):
         
         super(PainterManager, self).__init__()
 
@@ -34,7 +34,7 @@ class PainterManager(object):
         # Fixme: register self
         self.glwidget._painter_manager = self
 
-        self._background_painter = BackgroundPainter(self)
+        self._background_painter = background_painter_class(self)
         self._create_registered_painters()
 
     ##############################################

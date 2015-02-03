@@ -102,6 +102,13 @@ class ViewerMainWindow(MainWindowBase):
             else:
                 self._image_tool_bar.addWidget(item)
 
+        filter_combo_box = QtWidgets.QComboBox(self)
+        filter_combo_box.addItem('raw')
+        filter_combo_box.addItem('hls')
+        filter_combo_box.addItem('user')
+        filter_combo_box.currentIndexChanged[str].connect(self._application.on_filter_changed)
+        self._image_tool_bar.addWidget(filter_combo_box)
+
         from .ToolBar import ToolBar
         self.tool_bar = ToolBar(self)
 

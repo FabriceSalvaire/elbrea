@@ -51,36 +51,48 @@ class ViewerApplication(GuiApplicationBase):
 
         glwidget = self._main_window.glwidget
 
-        # front_input = self.front_pipeline.input_filter.get_primary_output()
-        # back_input = self.back_pipeline.input_filter.get_primary_output()
-        # front_input = self.front_pipeline.hls_filter.get_primary_output()
-        # back_input = self.back_pipeline.hls_filter.get_primary_output()
-        front_input = self.front_pipeline.user_filter.get_primary_output()
-        back_input = self.back_pipeline.user_filter.get_primary_output()
-
         from PyOpenGLng.Tools.Interval import IntervalInt2D
+        front_input = self.front_pipeline.input_filter.get_primary_output()
         image_format = front_input.image_format
         print(image_format)
         glwidget._image_interval = IntervalInt2D((0, image_format.width), (0, image_format.height))
 
         from Elbrea.GraphicEngine.PainterManager import PainterManager
-        self.painter_manager = PainterManager(glwidget)
+        from .FrontBackPainter import FrontBackPainter
+        self.painter_manager = PainterManager(glwidget, FrontBackPainter)
 
         from Elbrea.GraphicEngine import ShaderProgrames as ShaderProgrames
         shader_manager = ShaderProgrames.shader_manager
 
-        background_painter = self.painter_manager.background_painter 
-
-        painter = background_painter.add_painter('front')
+        background_painter = self.painter_manager.background_painter.front_painter
+        painter = background_painter.add_painter('raw')
         painter.shader_program = shader_manager.texture_shader_program
+        front_input = self.front_pipeline.input_filter.get_primary_output()
         painter.source = front_input
-
-        painter = background_painter.add_painter('back')
+        painter = background_painter.add_painter('hls')
         painter.shader_program = shader_manager.texture_shader_program
-        painter.source = back_input
+        front_input = self.front_pipeline.hls_filter.get_primary_output()
+        painter.source = front_input
+        painter = background_painter.add_painter('user')
+        painter.shader_program = shader_manager.texture_shader_program
+        front_input = self.front_pipeline.user_filter.get_primary_output()
+        painter.source = front_input
+        background_painter.select_painter('raw')
 
-        background_painter.select_painter('front')
-        background_painter.enable()
+        background_painter = self.painter_manager.background_painter.back_painter
+        painter = background_painter.add_painter('raw')
+        painter.shader_program = shader_manager.texture_shader_program
+        back_input = self.back_pipeline.input_filter.get_primary_output()
+        painter.source = back_input
+        painter = background_painter.add_painter('hls')
+        painter.shader_program = shader_manager.texture_shader_program
+        back_input = self.back_pipeline.hls_filter.get_primary_output()
+        painter.source = back_input
+        painter = background_painter.add_painter('user')
+        painter.shader_program = shader_manager.texture_shader_program
+        back_input = self.back_pipeline.user_filter.get_primary_output()
+        painter.source = back_input
+        background_painter.select_painter('raw')
 
         glwidget.init_tools() # Fixme: for shader
         glwidget._ready = True
@@ -92,12 +104,7 @@ class ViewerApplication(GuiApplicationBase):
 
         self._logger.info("")
 
-        background_painter = self.painter_manager.background_painter
-        if background_painter.current_painter_name == 'front':
-            source = 'back'
-        else:
-            source = 'front'
-        background_painter.select_painter(source)
+        self.painter_manager.background_painter.switch()
         self._main_window.glwidget.update()        
 
     ##############################################
@@ -111,7 +118,19 @@ class ViewerApplication(GuiApplicationBase):
         front_input = self.front_pipeline.user_filter.get_primary_output().modified()
         back_input = self.back_pipeline.user_filter.get_primary_output().modified()
         self._main_window.glwidget.update()
-        
+
+    ##############################################
+
+    def on_filter_changed(self, filter_name):
+
+        self._logger.info(filter_name)
+
+        background_painter = self.painter_manager.background_painter.front_painter
+        background_painter.select_painter(filter_name)
+        background_painter = self.painter_manager.background_painter.back_painter
+        background_painter.select_painter(filter_name)
+        self._main_window.glwidget.update()
+
 ####################################################################################################
 #
 # End

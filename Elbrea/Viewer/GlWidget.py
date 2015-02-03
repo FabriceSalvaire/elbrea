@@ -202,7 +202,7 @@ class GlWidget(GlWidgetBase):
 
     def _current_image(self):
 
-        background_painter = self._painter_manager.background_painter
+        background_painter = self._painter_manager.background_painter.current_painter
         return background_painter.current_painter.source.image
 
     ##############################################
