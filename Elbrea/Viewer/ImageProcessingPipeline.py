@@ -8,8 +8,9 @@
 ####################################################################################################
 
 import logging
-
 from importlib import reload
+
+import numpy as np
 
 ####################################################################################################
 
@@ -40,7 +41,7 @@ class UserFilter(ImageFilter):
     def generate_image_format(self, output):
 
         image_format = self.get_primary_input().image_format
-        return image_format.clone()
+        return image_format.clone(data_type=np.uint8)
 
     ##############################################
 
