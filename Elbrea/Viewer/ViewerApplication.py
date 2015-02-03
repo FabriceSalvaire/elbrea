@@ -51,8 +51,12 @@ class ViewerApplication(GuiApplicationBase):
 
         glwidget = self._main_window.glwidget
 
-        front_input = self.front_pipeline.input_filter.get_primary_output()
-        back_input = self.back_pipeline.input_filter.get_primary_output()
+        # front_input = self.front_pipeline.input_filter.get_primary_output()
+        # back_input = self.back_pipeline.input_filter.get_primary_output()
+        # front_input = self.front_pipeline.hls_filter.get_primary_output()
+        # back_input = self.back_pipeline.hls_filter.get_primary_output()
+        front_input = self.front_pipeline.user_filter.get_primary_output()
+        back_input = self.back_pipeline.user_filter.get_primary_output()
 
         from PyOpenGLng.Tools.Interval import IntervalInt2D
         image_format = front_input.image_format
@@ -86,7 +90,7 @@ class ViewerApplication(GuiApplicationBase):
 
     def switch_front_back(self):
 
-        self._logger.info('')
+        self._logger.info("")
 
         background_painter = self.painter_manager.background_painter
         if background_painter.current_painter_name == 'front':
@@ -96,6 +100,18 @@ class ViewerApplication(GuiApplicationBase):
         background_painter.select_painter(source)
         self._main_window.glwidget.update()        
 
+    ##############################################
+
+    def reload_user(self):
+
+        self._logger.info("")
+
+        front_input = self.front_pipeline.user_filter.generate_data()
+        back_input = self.back_pipeline.user_filter.generate_data()
+        front_input = self.front_pipeline.user_filter.get_primary_output().modified()
+        back_input = self.back_pipeline.user_filter.get_primary_output().modified()
+        self._main_window.glwidget.update()
+        
 ####################################################################################################
 #
 # End

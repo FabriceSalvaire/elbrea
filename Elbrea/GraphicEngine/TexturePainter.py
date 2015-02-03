@@ -54,7 +54,7 @@ class BackgroundPainter(Painter):
 
     def add_painter(self, name):
 
-        painter = TexturePainter(self._painter_manager)
+        painter = TexturePainter(self._painter_manager, name)
         painter.disable()
         self._texture_painters[name] = painter
         return painter
@@ -87,10 +87,12 @@ class TexturePainter(Painter, ObjectWithTimeStamp):
 
     ##############################################
     
-    def __init__(self, painter_manager):
+    def __init__(self, painter_manager, name):
 
         ObjectWithTimeStamp.__init__(self)
         Painter.__init__(self, painter_manager)
+
+        self._name = name
 
         self._glwidget = self._painter_manager.glwidget
         self._source = None
@@ -99,6 +101,13 @@ class TexturePainter(Painter, ObjectWithTimeStamp):
         self._texture_vertex_array = None
         self._uploaded = False
         # self.modified()
+
+    ##############################################
+
+    @property
+    def name(self):
+        # return self.__painter_name__
+        return self._name
 
     ##############################################
 
@@ -160,7 +169,8 @@ class TexturePainter(Painter, ObjectWithTimeStamp):
             self._logger.info("uploaded {}".format(self._uploaded))
 
             # if self.source > self: # timestamp
-            if not self._uploaded:
+            print(self._uploaded, self.source._modified_time, self._modified_time)
+            if not self._uploaded or self.source._modified_time > self._modified_time:
                 self.upload_data()
 
             shader_program = self._shader_program

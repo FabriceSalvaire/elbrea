@@ -23,6 +23,11 @@ class TimeStamp(object):
 
     ##############################################
 
+    def __repr__(self):
+        return 'TS ' + str(self._modified_time)
+
+    ##############################################
+
     def __lt__(self, other):
         return self._modified_time < other._modified_time
 

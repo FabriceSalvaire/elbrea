@@ -48,14 +48,44 @@ class ViewerMainWindow(MainWindowBase):
         icon_loader = IconLoader()
 
         self._switch_front_back_action = \
-            QtWidgets.QAction(# icon_loader[''],
-                          'Switch Front/Back',
-                          self,
-                          toolTip='Switch Front/Back',
-                          triggered=self._application.switch_front_back,
-                          shortcut='Ctrl+F',
-                          shortcutContext=Qt.ApplicationShortcut,
-                          )
+                QtWidgets.QAction(# icon_loader[''],
+                    'Switch Front/Back',
+                    self,
+                    toolTip='Switch Front/Back',
+                    triggered=self._application.switch_front_back,
+                    shortcut='Ctrl+F',
+                    shortcutContext=Qt.ApplicationShortcut,
+                )
+
+        self._refresh_action = \
+                QtWidgets.QAction(# icon_loader[''],
+                    'Refresh',
+                    self,
+                    toolTip='Refresh',
+                    triggered=self.glwidget.update,
+                    shortcut='Ctrl+R',
+                    shortcutContext=Qt.ApplicationShortcut,
+                )
+
+        self._display_all_action = \
+                QtWidgets.QAction(# icon_loader[''],
+                    'Display All',
+                    self,
+                    toolTip='Display All',
+                    triggered=self.glwidget.display_all,
+                    shortcut='Ctrl+A',
+                    shortcutContext=Qt.ApplicationShortcut,
+                )
+
+        self._reload_user_action = \
+                QtWidgets.QAction(# icon_loader[''],
+                    'Reload User',
+                    self,
+                    toolTip='Reload User',
+                    triggered=self._application.reload_user,
+                    shortcut='Ctrl+U',
+                    shortcutContext=Qt.ApplicationShortcut,
+                )
 
     ##############################################
     
@@ -63,6 +93,9 @@ class ViewerMainWindow(MainWindowBase):
 
         self._image_tool_bar = self.addToolBar('Main')
         for item in (self._switch_front_back_action,
+                     self._refresh_action,
+                     self._display_all_action,
+                     self._reload_user_action,
                     ):
             if isinstance(item,QtWidgets.QAction):
                 self._image_tool_bar.addAction(item)
