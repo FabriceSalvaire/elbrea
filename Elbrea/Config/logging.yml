@@ -61,6 +61,7 @@ loggers:
     handlers: [console]
 
   PyOpenGLng:
+    # level: DEBUG
     level: INFO
     handlers: [console]
 

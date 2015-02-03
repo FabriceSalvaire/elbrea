@@ -114,21 +114,14 @@ def user_filter(image_hls_float, output_image):
     # Then, we obtain the final (and better) result. Each grain is labelled
     convert(image8_mb, watershed_image8_mb)
     # min(labels, black watershed lines, input mask)
-    logic(output_image_mb, watershed_image8_mb, output_image_mb, "inf")
+    logic(output_image_mb, watershed_image8_mb, output_image_mb, 'inf')
 
-    output_image_mb.setPalette(patchwork)
-    output_image_mb.save('tmp.png')
-    image_tmp = cv2.imread('tmp.png')
+    MambaTools.mamba2cv(output_image_mb, image_tmp)
 
-    # MambaTools.mamba2cv(output_image_mb, image_tmp)
-
-    # output_image[:height,:width,0] = mask[:height,:width] * 255
-    # output_image[:height,:width,1] = mask[:height,:width] * 255
-    # output_image[:height,:width,2] = mask[:height,:width] * 255
-    # output_image[:height,:width,0] = image_tmp[:height,:width] * 255
-    # output_image[:height,:width,1] = image_tmp[:height,:width] * 255
-    # output_image[:height,:width,2] = image_tmp[:height,:width] * 255
     output_image[:height,:width] = image_tmp[:height,:width]
+
+    # output_image[:100,:100] = 100
+    # output_image[100:100,200:200] = 200
 
 ####################################################################################################
 

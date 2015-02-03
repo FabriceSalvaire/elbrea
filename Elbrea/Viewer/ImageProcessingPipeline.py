@@ -12,13 +12,15 @@ from importlib import reload
 
 import numpy as np
 
+import cv2
+
 ####################################################################################################
 
-from Elbrea.ImageProcessing.Filtering.IO.ImageLoader import ImageLoaderFilter
-from Elbrea.ImageProcessing.Filtering.DataTypeConverter import NormalisedFloatFilter
-from Elbrea.ImageProcessing.Filtering.Colour import HlsFilter
-
+from Elbrea.Image.Image import ImageFormat
 from Elbrea.ImageProcessing.Core.ImageFilter import ImageFilter
+from Elbrea.ImageProcessing.Filtering.Colour import HlsFilter
+from Elbrea.ImageProcessing.Filtering.DataTypeConverter import NormalisedFloatFilter
+from Elbrea.ImageProcessing.Filtering.IO.ImageLoader import ImageLoaderFilter
 
 from . import UserFilterFunctions
 
@@ -41,7 +43,10 @@ class UserFilter(ImageFilter):
     def generate_image_format(self, output):
 
         image_format = self.get_primary_input().image_format
-        return image_format.clone(data_type=np.uint8)
+        return image_format.clone(height=image_format.height, width=image_format.width,
+                                  number_of_channels=1,
+                                  data_type=np.uint8,
+                                  channels=ImageFormat.Label)
 
     ##############################################
 
@@ -54,6 +59,9 @@ class UserFilter(ImageFilter):
 
         reload(UserFilterFunctions)
         UserFilterFunctions.user_filter(input_.image, output.image)
+
+        # uuid
+        # cv2.imwrite(self.name + '.tiff', output.image)
 
 ####################################################################################################
 

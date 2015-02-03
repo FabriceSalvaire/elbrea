@@ -17,9 +17,10 @@ from PyOpenGLng.HighLevelApi.TextureVertexArray import GlTextureVertexArray
 
 ####################################################################################################
 
-from .Painter import Painter
 # from .ShaderProgrames import shader_manager
+from .Painter import Painter
 from Elbrea.Tools.TimeStamp import TimeStamp, ObjectWithTimeStamp
+from Elbrea.Image.Image import ImageFormat
 
 ####################################################################################################
 
@@ -139,7 +140,9 @@ class TexturePainter(Painter, ObjectWithTimeStamp):
         self._glwidget.makeCurrent() #?
         dimension = Offset(image_format.width, image_format.height)
         with GL.error_checker():
-            self._texture_vertex_array = GlTextureVertexArray(position=Point(0, 0), dimension=dimension)
+            integer_internal_format = image_format.channels == ImageFormat.Label
+            self._texture_vertex_array = GlTextureVertexArray(position=Point(0, 0), dimension=dimension,
+                                                              integer_internal_format=integer_internal_format)
             # image=self._source.image
             shader_program_interface = self._shader_program.interface.attributes
             self._texture_vertex_array.bind_to_shader(shader_program_interface)

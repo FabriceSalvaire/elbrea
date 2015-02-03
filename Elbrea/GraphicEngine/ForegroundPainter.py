@@ -17,7 +17,7 @@ from PyOpenGLng.HighLevelApi.Geometry import Point, Segment
 from PyOpenGLng.HighLevelApi.PrimitiveVertexArray import GlSegmentVertexArray
 
 from .Painter import ForegroundPainter
-from .ShaderProgrames import shader_manager
+# from .ShaderProgrames import shader_manager
 
 ####################################################################################################
 
@@ -38,7 +38,7 @@ class RoiPainter(ForegroundPainter):
         super(RoiPainter, self).__init__(painter_manager)
 
         self._glwidget = self._painter_manager.glwidget
-        self._shader_program = shader_manager.roi_shader_program
+        self._shader_program = self._glwidget.shader_manager.roi_shader_program
         self.reset()
 
     ##############################################
