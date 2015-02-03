@@ -16,7 +16,7 @@ import numpy as np
 
 import cv2
 
-from mambaIm.mamba import *
+from mambaIm import mamba as mb
 import mambaIm.mambaComposed as mc
 import mambaIm.mambaExtra as me
 
@@ -25,8 +25,6 @@ import mambaIm.mambaExtra as me
 from Elbrea.Math.Functions import rint
 import Elbrea.ImageProcessing.Core.CvTools as CvTools
 # import Elbrea.ImageProcessing.MambaTools as MambaTools
-
-from . import MambaTools
 
 ####################################################################################################
 
@@ -41,17 +39,8 @@ def user_filter(image_hls_float, output_image):
     _module_logger.info("")
 
     height, width = image_hls_float.shape[:2]
-    height_mb = int(math.ceil(height/2.)*2)
-    width_mb = int(math.ceil(width/64.)*64)
 
-    image_tmp = np.zeros((height_mb, width_mb), dtype=np.uint8)
-
-    hue_image_float = np.zeros((height_mb, width_mb), dtype=np.float32)
-    saturation_image_float = np.zeros((height_mb, width_mb), dtype=np.float32)
-    lightness_image_float = np.zeros((height_mb, width_mb), dtype=np.float32)
-    hue_image_float[:height,:width] = image_hls_float[:,:,0]
-    lightness_image_float[:height,:width] = image_hls_float[:,:,1]
-    saturation_image_float[:height,:width] = image_hls_float[:,:,2]
+    hue_image_float, lightness_image_float, saturation_image_float = cv2.split(image_hls_float)
 
     track_inf = 80. / 360
     track_sup = 170. / 360
@@ -69,28 +58,31 @@ def user_filter(image_hls_float, output_image):
                                         # lambda radius: CvTools.circular_structuring_element(radius),
                                         open_first=False)
 
-    image8_mb = MambaTools.imageMb(width_mb, height_mb, 8)
-    output_image_mb = MambaTools.imageMb(width_mb, height_mb, 8)
-    binary_image_mb = MambaTools.imageMb(width_mb, height_mb, 1)
-    marker_mb = MambaTools.imageMb(width_mb, height_mb, 1)
-    distance_image32_mb = MambaTools.imageMb(width_mb, height_mb, 32)
-    distance_image8_mb = MambaTools.imageMb(width_mb, height_mb, 8)
-    watershed_image32_mb = MambaTools.imageMb(width_mb, height_mb, 32)
-    watershed_image8_mb = MambaTools.imageMb(width_mb, height_mb, 8)
+    image8_np = mb.NumpyWrapper(height, width, 8)
+    output_image_np = mb.NumpyWrapper(height, width, 8)
+    image8_mb = mb.imageMb(image8_np)
+    output_image_mb = mb.imageMb(output_image_np)
 
-    MambaTools.cv2mamba(mask, image8_mb)
+    binary_image_mb = mb.imageMb(width, height, 1)
+    marker_mb = mb.imageMb(width, height, 1)
+    distance_image32_mb = mb.imageMb(width, height, 32)
+    distance_image8_mb = mb.imageMb(width, height, 8)
+    watershed_image32_mb = mb.imageMb(width, height, 32)
+    watershed_image8_mb = mb.imageMb(width, height, 8)
+
+    image8_np.view[...] = mask
 
     # Segmentation grains with the distance function. Firstly, we compute the distance function
     # (note the edge programming)
-    copyBitPlane(image8_mb, 0, binary_image_mb)
-    computeDistance(binary_image_mb, distance_image32_mb, edge=FILLED)
+    mb.copyBitPlane(image8_mb, 0, binary_image_mb)
+    mb.computeDistance(binary_image_mb, distance_image32_mb, edge=mb.FILLED)
     
     # We verify (with computeRange) that the distance image is lower than 256
-    range = computeRange(distance_image32_mb)
-    copyBytePlane(distance_image32_mb, 0, distance_image8_mb)
+    range = mb.computeRange(distance_image32_mb)
+    mb.copyBytePlane(distance_image32_mb, 0, distance_image8_mb)
 
     # The distance function is inverted and its valued watershed is computed
-    negate(distance_image8_mb, distance_image8_mb)
+    mb.negate(distance_image8_mb, distance_image8_mb)
 
     # Computing a marker image
     mc.minima(distance_image8_mb, marker_mb)
@@ -99,29 +91,24 @@ def user_filter(image_hls_float, output_image):
     # Then, we compute the watershed of the inverted distance function controlled by this marker
     # set (note the number of connected components given by the labelling operator; they should
     # correspond to the number of grains)
-    number_of_labels = label(marker_mb, watershed_image32_mb)
-    watershedSegment(distance_image8_mb, watershed_image32_mb) # (grayscale, marker -> output)
+    number_of_labels = mb.label(marker_mb, watershed_image32_mb)
+    mb.watershedSegment(distance_image8_mb, watershed_image32_mb) # (grayscale, marker -> output)
     # The three first byte planes contain the actual segmentation (each region has a specific
     # label according to the original marker). The last plane represents the actual watershed
     # line (pixels set to 255).
 
     # We build the labelled catchment basins
-    copyBytePlane(watershed_image32_mb, 3, watershed_image8_mb) # copy watershed lines
-    negate(watershed_image8_mb, watershed_image8_mb) # black watershed lines
-    copyBytePlane(watershed_image32_mb, 0, output_image_mb) # copy labels
-    logic(output_image_mb, watershed_image8_mb, output_image_mb, 'inf') # min(labels, black watershed lines)
+    mb.copyBytePlane(watershed_image32_mb, 3, watershed_image8_mb) # copy watershed lines
+    mb.negate(watershed_image8_mb, watershed_image8_mb) # black watershed lines
+    mb.copyBytePlane(watershed_image32_mb, 0, output_image_mb) # copy labels
+    mb.logic(output_image_mb, watershed_image8_mb, output_image_mb, 'inf') # min(labels, black watershed lines)
     
     # Then, we obtain the final (and better) result. Each grain is labelled
-    convert(image8_mb, watershed_image8_mb)
+    mb.convert(image8_mb, watershed_image8_mb)
     # min(labels, black watershed lines, input mask)
-    logic(output_image_mb, watershed_image8_mb, output_image_mb, 'inf')
+    mb.logic(output_image_mb, watershed_image8_mb, output_image_mb, 'inf')
 
-    MambaTools.mamba2cv(output_image_mb, image_tmp)
-
-    output_image[:height,:width] = image_tmp[:height,:width]
-
-    # output_image[:100,:100] = 100
-    # output_image[100:100,200:200] = 200
+    output_image[...] = output_image_np.view
 
 ####################################################################################################
 
