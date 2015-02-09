@@ -13,6 +13,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 import numpy as np
 
+import cv2 # Fixme
+
 ####################################################################################################
 
 #!# from PyOpenGLng.HighLevelApi.GlOrtho2D import ZoomManagerAbc
@@ -46,6 +48,7 @@ class GlWidget(GlWidgetBase):
         self._application = QtWidgets.QApplication.instance()
 
         self._previous_position = None
+        self._previous_position_screen = None
 
         self._painter_manager = None
 
@@ -116,9 +119,20 @@ class GlWidget(GlWidgetBase):
 
     ##############################################
 
-    def _set_previous_position(self, position):
+    def event_position(self, event):
+
+        """ Convert mouse coordinate
+        """
+
+        self._logger.info("{} {}".format(event.x(), event.y()))
+        return np.array((event.x(), event.y()), dtype=np.int) # int for subtraction
+        
+    ##############################################
+
+    def _set_previous_position(self, position, position_screen):
 
         self._previous_position = position
+        self._previous_position_screen = position_screen
 
     ##############################################
 
@@ -138,13 +152,17 @@ class GlWidget(GlWidgetBase):
             if current_tool is tool_bar.position_tool_action:
                 position = self.window_to_gl_coordinate(event, round_to_integer=False)
                 self.show_coordinate(position)
-                self._set_previous_position(position)
+                self._set_previous_position(position, self.event_position(event))
             elif current_tool is tool_bar.colour_picker_tool_action:
                 if event.modifiers() == (QtCore.Qt.ControlModifier):
                     self.intensity_profile_picker(event)
                 else:
                     self.colour_picker(event)
-
+            elif current_tool is tool_bar.pen_tool_action:
+                # Fixme:
+                position = self.window_to_gl_coordinate(event, round_to_integer=False)
+                self._set_previous_position(position, self.event_position(event))
+                
     ##############################################
         
     def mouseReleaseEvent(self, event):
@@ -179,17 +197,33 @@ class GlWidget(GlWidgetBase):
         tool_bar = self._application.main_window.tool_bar
         current_tool = tool_bar.current_tool()
         if current_tool is tool_bar.position_tool_action:
-            position = self.window_to_gl_coordinate(event, round_to_integer=False)
+            position_screen = self.event_position(event)
+            dxy_screen = self._previous_position_screen - position_screen
             # Fixme: if out of viewer position = -1exxx
+            position = self.window_to_gl_coordinate(event, round_to_integer=False)
             dxy = self._previous_position - position
-            self.translate_xy(dxy)
-            self._set_previous_position(position)
+            # dxy *= [1, -1]
+            self._logger.info("{} {} / {} {}".format(dxy_screen[0], dxy_screen[1], int(dxy[0]), int(dxy[0])))
+            dxy_screen *= self.glortho2d.parity_display_scale
+            self.translate_xy(dxy_screen)
+            self._set_previous_position(position, position_screen)
             self.show_coordinate(position)
         elif current_tool is tool_bar.colour_picker_tool_action:
             self.colour_picker(event)
         elif current_tool is tool_bar.crop_tool_action:
             self.cropper.update(event) # Fixme: call mouseMoveEvent
-                
+        elif current_tool is tool_bar.pen_tool_action:
+            position = self.window_to_gl_coordinate(event, round_to_integer=False)
+            painter = self._painter_manager.foreground_painter('sketcher')
+            cv2.line(painter.image,
+                     tuple([int(x) for x in self._previous_position]), # rint
+                     tuple([int(x) for x in position]),
+                     (255, 255, 255),
+                     3, 16) # thickness, lineType, shift
+            painter.modified()
+            self._set_previous_position(position, self.event_position(event))
+            self.update()
+           
     ##############################################
 
     def show_coordinate(self, position):
@@ -265,6 +299,31 @@ class GlWidget(GlWidgetBase):
             return y_profile
         elif axis == 'xy':
             return x_profile, y_profile
+
+    ##############################################
+
+    def tabletEvent(self, event):
+
+        pointer_type = event.pointerType()
+        # QtGui.QTabletEvent.UnknownPointer
+        # QtGui.QTabletEvent.Pen
+        # QtGui.QTabletEvent.Eraser
+
+        position = event.pos()
+        pressure = event.pressure()
+        x_tilt = event.xTilt()
+        y_tilt = event.yTilt()
+
+        event_type = event.type()
+        # QtCore.QEvent.TabletPress
+        # QtCore.QEvent.TabletRelease
+        # QtCore.QEvent.TabletMove
+
+        self._logger.info("type {} pointer {} pos {} pressure {} tilt {} {}".format(
+            event_type,
+            pointer_type,
+            position,
+            pressure, x_tilt, y_tilt))
 
 ####################################################################################################
 #

@@ -102,12 +102,12 @@ if shader_manager.has_visual():
          'shader_program_args':(random_texture,),
          },
 
-        # {'program_name':'text_shader_program',
-        #  'shader_list':('text_vertex_shader',
-        #                 'text_geometry_shader',
-        #                 'text_fragment_shader'),
-        #  'program_interface':text_shader_program_interface,
-        #  },
+        {'program_name':'text_shader_program',
+         'shader_list':('text_vertex_shader',
+                        'text_geometry_shader',
+                        'text_fragment_shader'),
+         'program_interface':text_shader_program_interface,
+         },
     
         # {'program_name':'rectangle_shader_program',
         #  'shader_list':('fixed_colour_vertex_shader_in',

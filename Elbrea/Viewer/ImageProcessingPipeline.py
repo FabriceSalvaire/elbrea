@@ -43,10 +43,14 @@ class UserFilter(ImageFilter):
     def generate_image_format(self, output):
 
         image_format = self.get_primary_input().image_format
+        # return image_format.clone(height=image_format.height, width=image_format.width,
+        #                           number_of_channels=1,
+        #                           data_type=np.uint8,
+        #                           channels=ImageFormat.Label)
         return image_format.clone(height=image_format.height, width=image_format.width,
-                                  number_of_channels=1,
+                                  number_of_channels=3,
                                   data_type=np.uint8,
-                                  channels=ImageFormat.Label)
+                                  channels=ImageFormat.RGB)
 
     ##############################################
 

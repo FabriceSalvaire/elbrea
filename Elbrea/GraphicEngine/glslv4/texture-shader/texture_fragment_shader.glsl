@@ -125,6 +125,13 @@ void main()
   /* hsl_filter(texel); */
   fragment_colour = vec4(texel, 1.);
 
+  /* if (texel.b < 20/255.) */
+  /*   fragment_colour = vec4(1); */
+  /* else if (texel.b > 60/255.) */
+  /*   fragment_colour = vec4(1, 0, 0, 1); */
+  /* else */
+  /*   fragment_colour = vec4(texel, 1.); */
+
   /* vec4 hsv = rgb_to_hsl(texel); */
 
   /* float h = hsv.x; */

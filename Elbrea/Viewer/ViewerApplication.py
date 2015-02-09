@@ -74,7 +74,8 @@ class ViewerApplication(GuiApplicationBase):
         front_input = self.front_pipeline.hls_filter.get_primary_output()
         painter.source = front_input
         painter = background_painter.add_painter('user')
-        painter.shader_program = shader_manager.texture_label_shader_program
+        painter.shader_program = shader_manager.texture_shader_program
+        # painter.shader_program = shader_manager.texture_label_shader_program
         front_input = self.front_pipeline.user_filter.get_primary_output()
         painter.source = front_input
         background_painter.select_painter('raw')
@@ -89,7 +90,8 @@ class ViewerApplication(GuiApplicationBase):
         back_input = self.back_pipeline.hls_filter.get_primary_output()
         painter.source = back_input
         painter = background_painter.add_painter('user')
-        painter.shader_program = shader_manager.texture_label_shader_program
+        # painter.shader_program = shader_manager.texture_label_shader_program
+        painter.shader_program = shader_manager.texture_shader_program
         back_input = self.back_pipeline.user_filter.get_primary_output()
         painter.source = back_input
         background_painter.select_painter('raw')
@@ -99,6 +101,10 @@ class ViewerApplication(GuiApplicationBase):
         # shader_manager.texture_label_shader_program._random_texture = GlRandomTexture(size=1000, texture_unit=1)
         # glwidget.doneCurrent()
 
+        painter = self.painter_manager.foreground_painter('sketcher')
+        painter.create_texture(image_format)
+        painter.enable()
+        
         glwidget.init_tools() # Fixme: for shader
         glwidget._ready = True
         glwidget.display_all()

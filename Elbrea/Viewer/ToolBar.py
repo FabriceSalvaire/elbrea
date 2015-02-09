@@ -65,10 +65,18 @@ class ToolBar(object):
                           checkable=True,
                           )
 
+        self.pen_tool_action = \
+            QtWidgets.QAction(icon_loader.get_icon('pencil', self.icon_size),
+                          'Pen Tool',
+                          application,
+                          checkable=True,
+                          )
+        
         self._action_group = QtWidgets.QActionGroup(application)
         for action in (self.position_tool_action,
                        self.colour_picker_tool_action,
                        self.crop_tool_action,
+                       self.pen_tool_action,
                        ):
             self._action_group.addAction(action)
 
@@ -84,6 +92,7 @@ class ToolBar(object):
         standard_actions = (self.position_tool_action,
                             self.colour_picker_tool_action,
                             self.crop_tool_action,
+                            self.pen_tool_action,
                             )
         for action in standard_actions:
             self._tool_bar.addAction(action)
