@@ -217,7 +217,7 @@ class Cropper(object):
     def _show_locked_warning_message(self):
 
         application = QtWidgets.QApplication.instance()
-        application.show_message("You can't modify the ROI Box when the margin mode is enabled!")
+        application.show_message("You can't modify the ROI Box!")
 
     ##############################################
 
@@ -323,22 +323,6 @@ class Cropper(object):
 
         self._updating = True
         self.update(event)
-
-    ##############################################
-
-    @property
-    def margin(self):
-
-        return self._roi_painter.margin
-
-    ##############################################
-
-    @margin.setter
-    def margin(self, margin):
-        
-        self._locked = margin != 0
-        self._roi_painter.margin = margin
-        self._glwidget.update() # updateGL
 
 ####################################################################################################
 #

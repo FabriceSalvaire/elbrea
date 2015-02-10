@@ -24,7 +24,6 @@ import mambaIm.mambaExtra as me
 
 from Elbrea.Math.Functions import rint
 import Elbrea.ImageProcessing.Core.CvTools as CvTools
-# import Elbrea.ImageProcessing.MambaTools as MambaTools
 
 ####################################################################################################
 
@@ -34,7 +33,7 @@ _module_logger.info("Load " + __name__)
 
 ####################################################################################################
 
-def user_filter(image_hls_float, output_image):
+def user_filter_via(image_hls_float, output_image):
 
     _module_logger.info("")
 
@@ -112,7 +111,7 @@ def user_filter(image_hls_float, output_image):
 
 ####################################################################################################
 
-def user_filter_track(image_hls_float, output_image):
+def user_filter(image_hls_float, output_image):
 
     _module_logger.info("")
 
@@ -120,12 +119,7 @@ def user_filter_track(image_hls_float, output_image):
     height_mb = int(math.ceil(height/2.)*2)
     width_mb = int(math.ceil(width/64.)*64)
 
-    hue_image_float = np.zeros((height_mb, width_mb), dtype=np.float32)
-    saturation_image_float = np.zeros((height_mb, width_mb), dtype=np.float32)
-    lightness_image_float = np.zeros((height_mb, width_mb), dtype=np.float32)
-    hue_image_float[:height,:width] = image_hls_float[:,:,0]
-    lightness_image_float[:height,:width] = image_hls_float[:,:,1]
-    saturation_image_float[:height,:width] = image_hls_float[:,:,2]
+    hue_image_float, lightness_image_float, saturation_image_float = cv2.split(image_hls_float)
 
     track_inf = 80. / 360
     track_sup = 170. / 360
@@ -144,31 +138,43 @@ def user_filter_track(image_hls_float, output_image):
                                         open_first=False)
     cv2.bitwise_not(mask, mask)
 
-    lightness_image_float *= 255
-    lightness_image = np.array(lightness_image_float, dtype=np.uint8)
-    cv2.bitwise_and(lightness_image, mask, lightness_image)
+    # track_image_float = hue_image_float
+    track_image_float = lightness_image_float
+    # track_image_float = saturation_image_float
+    track_image_float *= 255
+    track_image = np.array(track_image_float, dtype=np.uint8)
+    cv2.bitwise_and(track_image, mask, track_image)
 
-    filtered_image = np.array(lightness_image)
-    # tmp_image = np.array(lightness_image)
+    filtered_image = np.array(track_image)
 
-    # marker_image = np.array(lightness_image)
-    # blob_height = 50
-    # cv2.subtract(lightness_image, blob_height, marker_image)
+    # cv2.blur(track_image, (1, 10), filtered_image)
 
-    # mask_mb = MambaTools.imageMb(width_mb, height_mb, 8)
-    # MambaTools.cv2mamba(lightness_image, mask_mb)
-    # marker_mb = MambaTools.imageMb(width_mb, height_mb, 8)
-    # MambaTools.cv2mamba(marker_image, marker_mb)
+    # marker_image = np.array(track_image)
+    # blob_height = 5
+    # cv2.subtract(track_image, blob_height, marker_image)
+
+    # mask_np = mb.NumpyWrapper(height, width, 8)
+    # mask_np.view[...] = track_image
+    # marker_np = mb.NumpyWrapper(height, width, 8)
+    # marker_np.view[...] = marker_image
+    # mask_mb = mb.imageMb(mask_np)
+    # marker_mb = mb.imageMb(marker_np)
     # print('start build')
     # mc.geodesy.build(mask_mb, marker_mb)
     # print('end build')
-    # MambaTools.mamba2cv(marker_mb, tmp_image)
 
-    # filtered_image -= tmp_image
+    # filtered_image -= marker_np.view
+
+    # cv2.subtract(track_image, 255, filtered_image)
+    # cv2.blur(track_image, (3, 3), track_image)
+    # CvTools.morphology_gradient(track_image, filtered_image, CvTools.unit_ball)
+    # CvTools.morphology_close(filtered_image, filtered_image, CvTools.horizontal_structuring_element(3))
+    # CvTools.morphology_close(filtered_image, filtered_image, CvTools.vertical_structuring_element(3))
+    # cv2.subtract(filtered_image, 15, filtered_image)
 
     for i in range(3):
-        output_image[:,:,i] = filtered_image[:height,:width]
-        # input_image[:,:,i] = lightness_image[:height,:width]
+        output_image[:,:,i] = filtered_image #* 10
+        # input_image[:,:,i] = track_image
 
 ####################################################################################################
 # 

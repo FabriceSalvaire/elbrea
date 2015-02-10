@@ -156,17 +156,25 @@ class TextPainter(ForegroundPainter):
         self._font_size = self._font[25]
         self._font_size.load_all_glyphs()
 
-        self._glwidget.makeCurrent()
         self._font_atlas_texture = ImageTexture(self._font.atlas.data)
+        
+        self._text_vertex_array = None
+        
+    ##############################################
 
+    def set_text(self, interval):
+
+        self._glwidget.makeCurrent()
         self._text_vertex_array = TextVertexArray(self._font_atlas_texture)
-        self._text_vertex_array.add(text='Azerty',
-                                    font_size=self._font_size,
-                                    colour=(1., 1., 1., 1.),
-                                    x=200, y=200,
-                                    anchor_x='left', anchor_y='baseline',
-                                    # anchor_x='center', anchor_y='bottom',
-        )
+        for i in range(8):
+            self._text_vertex_array.add(text=str(i+1),
+                                        font_size=self._font_size,
+                                        colour=(1., 1., 1., 1.),
+                                        x=interval.x.inf + i/8 * interval.x.length() ,
+                                        y=interval.y.inf,
+                                        anchor_x='left', anchor_y='baseline',
+                                        # anchor_x='center', anchor_y='bottom',
+                                    )
         self._text_vertex_array.upload()
         self._text_vertex_array.bind_to_shader(self._text_shader_program.interface.attributes)
         self._glwidget.doneCurrent()
@@ -176,12 +184,12 @@ class TextPainter(ForegroundPainter):
     def paint(self):
 
         self._logger.debug("")
-
-        shader_program = self._text_shader_program
-        # shader_program.bind()
-        # shader_program.uniforms. ...
-        self._text_vertex_array.draw(shader_program)
-        # shader_program.unbind()
+        if self._text_vertex_array is not None:
+            shader_program = self._text_shader_program
+            # shader_program.bind()
+            # shader_program.uniforms. ...
+            self._text_vertex_array.draw(shader_program)
+            # shader_program.unbind()
 
 ####################################################################################################
 

@@ -228,9 +228,9 @@ class GraphicSceneItem(object):
 
     ##############################################
     
-    def __cmp__(self, other):
+    def __lt__(self, other):
 
-        return cmp(self._z_value, other._z_value)
+        return self._z_value < other._z_value
 
     ##############################################
     

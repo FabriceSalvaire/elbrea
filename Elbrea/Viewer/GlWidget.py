@@ -180,7 +180,10 @@ class GlWidget(GlWidgetBase):
             #     self._set_previous_position(position)
             if current_tool is tool_bar.crop_tool_action:
                 self.cropper.end(event) # Fixme: call mouseReleaseEvent
-
+                self._logger.info(str(self.cropper.interval))
+                text_painter = self._painter_manager.foreground_painter('text')
+                text_painter.set_text(self.cropper.interval)
+                
     ##############################################
 
     def wheelEvent(self, event):
@@ -191,6 +194,8 @@ class GlWidget(GlWidgetBase):
 
     def mouseMoveEvent(self, event):
 
+        self._logger.info("")
+        
         if not (event.buttons() & QtCore.Qt.LeftButton):
             return
 
@@ -324,7 +329,22 @@ class GlWidget(GlWidgetBase):
             pointer_type,
             position,
             pressure, x_tilt, y_tilt))
+        
+        position = self.window_to_gl_coordinate(event, round_to_integer=False)
+        if self._previous_position is not None:
+            painter = self._painter_manager.foreground_painter('sketcher')
+            cv2.line(painter.image,
+                     tuple([int(x) for x in self._previous_position]), # rint
+                     tuple([int(x) for x in position]),
+                     (255, 255, 255),
+                     int(pressure*10), 16) # thickness, lineType, shift
+            painter.modified()
+            self.update()
+        self._set_previous_position(position, self.event_position(event))
 
+        event.accept()
+        # event.ignore()
+        
 ####################################################################################################
 #
 # End

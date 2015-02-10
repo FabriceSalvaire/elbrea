@@ -9,7 +9,8 @@
 
 ####################################################################################################
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5.QtCore import Qt
 
 ####################################################################################################
 
@@ -25,6 +26,7 @@ class ToolBar(object):
     
     def __init__(self, main_window):
 
+        self._main_window = main_window
         self._tool_bar = main_window.addToolBar('Main')
 
         self._create_actions()
@@ -71,12 +73,20 @@ class ToolBar(object):
                           application,
                           checkable=True,
                           )
+
+        self.eraser_tool_action = \
+            QtWidgets.QAction(icon_loader.get_icon('eraser', self.icon_size),
+                          'Eraser Tool',
+                          application,
+                          checkable=True,
+                          )
         
         self._action_group = QtWidgets.QActionGroup(application)
         for action in (self.position_tool_action,
                        self.colour_picker_tool_action,
                        self.crop_tool_action,
                        self.pen_tool_action,
+                       self.eraser_tool_action,
                        ):
             self._action_group.addAction(action)
 
@@ -87,16 +97,41 @@ class ToolBar(object):
         application = QtWidgets.QApplication.instance()
 
         self.position_tool_action.setChecked(True)
-        
-        self._tool_bar.addAction(self.clear_tool_action)
-        standard_actions = (self.position_tool_action,
-                            self.colour_picker_tool_action,
-                            self.crop_tool_action,
-                            self.pen_tool_action,
-                            )
-        for action in standard_actions:
-            self._tool_bar.addAction(action)
 
+        self._pencil_size_combobox = QtWidgets.QComboBox(self._main_window)
+        for pencil_size in (1, 3, 6, 12):
+            self._pencil_size_combobox.addItem(str(pencil_size), pencil_size)
+
+        self._pencil_colour_combobox = QtWidgets.QComboBox(self._main_window)
+        for colour in (Qt.white, Qt.black,
+                       Qt.red, Qt.blue, Qt.green,
+                       Qt.cyan, Qt.magenta, Qt.yellow,
+                   ):
+            pixmap = QtGui.QPixmap(10, 10)
+            pixmap.fill(colour)
+            icon = QtGui.QIcon(pixmap)
+            self._pencil_colour_combobox.addItem(icon, '')
+            
+        self._eraser_size_combobox = QtWidgets.QComboBox(self._main_window)
+        for eraser_size in (3, 6, 12):
+            self._eraser_size_combobox.addItem(str(eraser_size), eraser_size)
+            
+        self._tool_bar.addAction(self.clear_tool_action)
+        items = (self.position_tool_action,
+                 self.colour_picker_tool_action,
+                 self.crop_tool_action,
+                 self.pen_tool_action,
+                 self._pencil_size_combobox,
+                 self._pencil_colour_combobox,
+                 self.eraser_tool_action,
+                 self._eraser_size_combobox,
+        )
+        for item in items:
+            if isinstance(item, QtWidgets.QAction):
+                self._tool_bar.addAction(item)
+            else:
+                self._tool_bar.addWidget(item)
+            
     ##############################################
 
     def current_tool(self):
