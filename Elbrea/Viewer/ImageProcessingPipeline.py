@@ -82,9 +82,9 @@ class ImageProcessingPipeline(object):
 
         self.float_filter.connect_input('input', self.input_filter.get_primary_output())
         self.hls_filter.connect_input('input', self.float_filter.get_primary_output())
-        # self.hls_filter.update()
-        self.user_filter.connect_input('input', self.hls_filter.get_primary_output())
-        self.user_filter.update()
+        self.hls_filter.update()
+        # self.user_filter.connect_input('input', self.hls_filter.get_primary_output())
+        # self.user_filter.update()
 
 ####################################################################################################
 # 

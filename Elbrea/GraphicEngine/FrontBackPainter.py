@@ -25,12 +25,12 @@ class FrontBackPainter(Painter):
 
     ##############################################
     
-    def __init__(self, painter_manager):
+    def __init__(self, painter_manager, painter_class):
 
         super(FrontBackPainter, self).__init__(painter_manager)
 
-        self.front_painter = BackgroundPainter(painter_manager)
-        self.back_painter = BackgroundPainter(painter_manager)
+        self.front_painter = painter_class(painter_manager)
+        self.back_painter = painter_class(painter_manager)
         self._is_front = True
 
     ##############################################

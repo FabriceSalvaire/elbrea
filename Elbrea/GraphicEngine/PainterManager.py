@@ -11,6 +11,7 @@ import logging
 
 ####################################################################################################
 
+from .FrontBackPainter import FrontBackPainter
 from .Painter import PainterMetaClass
 from .TexturePainter import BackgroundPainter
 
@@ -34,7 +35,7 @@ class PainterManager(object):
         # Fixme: register self
         self.glwidget._painter_manager = self
 
-        self._background_painter = background_painter_class(self)
+        self._background_painter = FrontBackPainter(self, background_painter_class)
         self._create_registered_painters()
 
     ##############################################

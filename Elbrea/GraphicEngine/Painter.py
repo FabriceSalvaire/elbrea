@@ -28,7 +28,7 @@ class PainterMetaClass(type):
     def __init__(cls, class_name, super_classes, class_attribute_dict):
 
         type.__init__(cls, class_name, super_classes, class_attribute_dict)
-        if class_name != 'ForegroundPainter':
+        if class_name != 'RegisteredPainter':
             # PainterMetaClass._logger.debug("Register foreground painter %s", cls.__painter_name__)
             PainterMetaClass.classes[cls.__painter_name__] = cls
 
@@ -91,7 +91,7 @@ class Painter(object):
 
 ####################################################################################################
 
-class ForegroundPainter(Painter, metaclass = PainterMetaClass):
+class RegisteredPainter(Painter, metaclass = PainterMetaClass):
     pass
 
 ####################################################################################################

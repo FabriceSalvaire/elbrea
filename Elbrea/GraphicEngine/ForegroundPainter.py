@@ -12,6 +12,8 @@ import os
 
 # from PyQt5 import QtCore
 
+import cv2
+
 ####################################################################################################
 
 from PyOpenGLng.HighLevelApi import GL
@@ -22,7 +24,8 @@ from PyOpenGLng.HighLevelApi.TextVertexArray import TextVertexArray
 from PyOpenGLng.HighLevelApi.TextureFont import TextureFont
 from PyOpenGLng.HighLevelApi.TextureVertexArray import GlTextureVertexArray
 
-from .Painter import ForegroundPainter
+# from .FrontBackPainter import FrontBackPainter
+from .Painter import RegisteredPainter, Painter # , PainterMetaClass
 from Elbrea.Image.Image import Image
 from Elbrea.Tools.TimeStamp import TimeStamp, ObjectWithTimeStamp
 
@@ -34,7 +37,7 @@ _module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
 
-class RoiPainter(ForegroundPainter):
+class RoiPainter(RegisteredPainter):
 
     __painter_name__ = 'roi'
 
@@ -134,7 +137,7 @@ class RoiPainter(ForegroundPainter):
 
 ####################################################################################################
 
-class TextPainter(ForegroundPainter):
+class TextPainter(RegisteredPainter):
 
     __painter_name__ = 'text'
 
@@ -193,10 +196,10 @@ class TextPainter(ForegroundPainter):
 
 ####################################################################################################
 
-class SketcherPainter(ForegroundPainter, ObjectWithTimeStamp):
+class SketcherPainter(Painter, ObjectWithTimeStamp):
 
-    __painter_name__ = 'sketcher'
-
+    __painter_name__ = 'sketcher inner-painter'
+    
     _logger = _module_logger.getChild('SketcherPainter')
 
     ##############################################
@@ -204,7 +207,7 @@ class SketcherPainter(ForegroundPainter, ObjectWithTimeStamp):
     def __init__(self, painter_manager):
 
         ObjectWithTimeStamp.__init__(self)
-        ForegroundPainter.__init__(self, painter_manager)
+        Painter.__init__(self, painter_manager)
 
         self._glwidget = self._painter_manager.glwidget
         self._image = None
@@ -229,7 +232,15 @@ class SketcherPainter(ForegroundPainter, ObjectWithTimeStamp):
     @property
     def image(self):
         return self._image
+
+    ##############################################
+
+    def draw_line(self, point1, point2, colour, thickness):
         
+        cv2.line(self._image, point1, point2, colour, thickness, 16)
+        # thickness, lineType, shift
+        self.modified()
+
     ##############################################
 
     def create_texture(self, image_format):
@@ -286,6 +297,12 @@ class SketcherPainter(ForegroundPainter, ObjectWithTimeStamp):
 
             GL.glDisable(GL.GL_BLEND)
 
+####################################################################################################
+
+# class FrontBackSketcherPainter(FrontBackPainter, metaclass = PainterMetaClass):
+
+#     __painter_name__ = 'sketcher'
+    
 ####################################################################################################
 #
 # End

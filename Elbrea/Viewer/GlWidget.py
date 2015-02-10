@@ -219,12 +219,11 @@ class GlWidget(GlWidgetBase):
             self.cropper.update(event) # Fixme: call mouseMoveEvent
         elif current_tool is tool_bar.pen_tool_action:
             position = self.window_to_gl_coordinate(event, round_to_integer=False)
-            painter = self._painter_manager.foreground_painter('sketcher')
-            cv2.line(painter.image,
-                     tuple([int(x) for x in self._previous_position]), # rint
-                     tuple([int(x) for x in position]),
-                     (255, 255, 255),
-                     3, 16) # thickness, lineType, shift
+            painter = self._painter_manager.foreground_painter('sketcher').current_painter
+            painter.draw_line(tuple([int(x) for x in self._previous_position]), # rint
+                              tuple([int(x) for x in position]),
+                              (255, 255, 255),
+                              3)
             painter.modified()
             self._set_previous_position(position, self.event_position(event))
             self.update()
@@ -322,27 +321,28 @@ class GlWidget(GlWidgetBase):
         event_type = event.type()
         # QtCore.QEvent.TabletPress
         # QtCore.QEvent.TabletRelease
-        # QtCore.QEvent.TabletMove
 
         self._logger.info("type {} pointer {} pos {} pressure {} tilt {} {}".format(
             event_type,
             pointer_type,
             position,
             pressure, x_tilt, y_tilt))
-        
-        position = self.window_to_gl_coordinate(event, round_to_integer=False)
-        if self._previous_position is not None:
-            painter = self._painter_manager.foreground_painter('sketcher')
-            cv2.line(painter.image,
-                     tuple([int(x) for x in self._previous_position]), # rint
-                     tuple([int(x) for x in position]),
-                     (255, 255, 255),
-                     int(pressure*10), 16) # thickness, lineType, shift
-            painter.modified()
-            self.update()
-        self._set_previous_position(position, self.event_position(event))
 
-        event.accept()
+        tool_bar = self._application.main_window.tool_bar
+        current_tool = tool_bar.current_tool()
+        if current_tool is tool_bar.pen_tool_action:
+            if event_type == QtCore.QEvent.TabletMove:
+                position = self.window_to_gl_coordinate(event, round_to_integer=False)
+                if self._previous_position is not None:
+                    painter = self._painter_manager.foreground_painter('sketcher').current_painter
+                    painter.draw_line(tuple([int(x) for x in self._previous_position]), # rint
+                                      tuple([int(x) for x in position]),
+                                      (255, 255, 255),
+                                      int(pressure*10))
+                    self.update()
+                self._set_previous_position(position, self.event_position(event))
+
+            event.accept()
         # event.ignore()
         
 ####################################################################################################

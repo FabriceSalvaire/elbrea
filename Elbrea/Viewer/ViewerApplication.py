@@ -58,9 +58,12 @@ class ViewerApplication(GuiApplicationBase):
         glwidget._image_interval = IntervalInt2D((0, image_format.width), (0, image_format.height))
 
         from Elbrea.GraphicEngine.PainterManager import PainterManager
-        from .FrontBackPainter import FrontBackPainter
-        self.painter_manager = PainterManager(glwidget, FrontBackPainter)
+        self.painter_manager = PainterManager(glwidget)
 
+        from Elbrea.GraphicEngine.FrontBackPainter import FrontBackPainter
+        from Elbrea.GraphicEngine.ForegroundPainter import SketcherPainter
+        self.painter_manager._foreground_painters['sketcher'] = FrontBackPainter(self.painter_manager, SketcherPainter)
+        
         from Elbrea.GraphicEngine import ShaderProgrames as ShaderProgrames
         shader_manager = ShaderProgrames.shader_manager
 
@@ -76,7 +79,8 @@ class ViewerApplication(GuiApplicationBase):
         painter = background_painter.add_painter('user')
         painter.shader_program = shader_manager.texture_shader_program
         # painter.shader_program = shader_manager.texture_label_shader_program
-        front_input = self.front_pipeline.user_filter.get_primary_output()
+        front_input = self.front_pipeline.hls_filter.get_primary_output()
+        # front_input = self.front_pipeline.user_filter.get_primary_output()
         painter.source = front_input
         background_painter.select_painter('raw')
 
@@ -89,11 +93,11 @@ class ViewerApplication(GuiApplicationBase):
         painter.shader_program = shader_manager.texture_shader_program
         back_input = self.back_pipeline.hls_filter.get_primary_output()
         painter.source = back_input
-        painter = background_painter.add_painter('user')
-        # painter.shader_program = shader_manager.texture_label_shader_program
-        painter.shader_program = shader_manager.texture_shader_program
-        back_input = self.back_pipeline.user_filter.get_primary_output()
-        painter.source = back_input
+        # painter = background_painter.add_painter('user')
+        # # painter.shader_program = shader_manager.texture_label_shader_program
+        # painter.shader_program = shader_manager.texture_shader_program
+        # back_input = self.back_pipeline.user_filter.get_primary_output()
+        # painter.source = back_input
         background_painter.select_painter('raw')
 
         # glwidget.makeCurrent()
@@ -102,7 +106,8 @@ class ViewerApplication(GuiApplicationBase):
         # glwidget.doneCurrent()
 
         painter = self.painter_manager.foreground_painter('sketcher')
-        painter.create_texture(image_format)
+        for painter_ in painter.front_painter, painter.back_painter:
+            painter_.create_texture(image_format)
         painter.enable()
         
         glwidget.init_tools() # Fixme: for shader
@@ -116,6 +121,7 @@ class ViewerApplication(GuiApplicationBase):
         self._logger.info("")
 
         self.painter_manager.background_painter.switch()
+        self.painter_manager.foreground_painter('sketcher').switch()
         self._main_window.glwidget.update()        
 
     ##############################################
