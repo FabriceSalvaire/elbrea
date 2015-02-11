@@ -15,25 +15,6 @@ _module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
 
-class PainterMetaClass(type):
-
-    """ Metaclass to register all the subclasses. """
-
-    classes = {}
-
-    _logger = _module_logger.getChild('PainterMetaClass')
-
-    ##############################################
-
-    def __init__(cls, class_name, super_classes, class_attribute_dict):
-
-        type.__init__(cls, class_name, super_classes, class_attribute_dict)
-        if class_name != 'RegisteredPainter':
-            # PainterMetaClass._logger.debug("Register foreground painter %s", cls.__painter_name__)
-            PainterMetaClass.classes[cls.__painter_name__] = cls
-
-####################################################################################################
-
 class Painter(object):
 
     """
@@ -89,6 +70,25 @@ class Painter(object):
     def paint(self):
         raise NotImplementedError
 
+####################################################################################################
+
+class PainterMetaClass(type):
+
+    """ Metaclass to register all the subclasses. """
+
+    classes = {}
+
+    _logger = _module_logger.getChild('PainterMetaClass')
+
+    ##############################################
+
+    def __init__(cls, class_name, super_classes, class_attribute_dict):
+
+        type.__init__(cls, class_name, super_classes, class_attribute_dict)
+        if class_name != 'RegisteredPainter':
+            # PainterMetaClass._logger.debug("Register foreground painter %s", cls.__painter_name__)
+            PainterMetaClass.classes[cls.__painter_name__] = cls
+    
 ####################################################################################################
 
 class RegisteredPainter(Painter, metaclass = PainterMetaClass):

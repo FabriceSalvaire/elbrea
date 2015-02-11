@@ -11,12 +11,7 @@ import logging
 
 ####################################################################################################
 
-from .FrontBackPainter import FrontBackPainter
 from .Painter import PainterMetaClass
-from .TexturePainter import BackgroundPainter
-
-# Load Painters
-from . import ForegroundPainter 
 
 ####################################################################################################
 
@@ -26,7 +21,7 @@ class PainterManager(object):
 
     ##############################################
 
-    def __init__(self, glwidget, background_painter_class=BackgroundPainter):
+    def __init__(self, glwidget):
         
         super(PainterManager, self).__init__()
 
@@ -35,8 +30,29 @@ class PainterManager(object):
         # Fixme: register self
         self.glwidget._painter_manager = self
 
-        self._background_painter = FrontBackPainter(self, background_painter_class)
+        self._background_painter = None
+        self.create_background_painter()
+        
         self._create_registered_painters()
+
+    ##############################################
+
+    def create_background_painter(self):
+
+        raise NotImplementedError
+
+    ##############################################
+
+    def register_foreground_painter(self, painter, painter_name=None):
+
+        # Fixme: useful ?
+        if painter_name is None:
+            painter_name = painter.name
+        
+        if painter_name != 'background' and painter_name not in self._foreground_painters:
+            self._foreground_painters[painter_name] = painter
+        else:
+            raise NameError("Painter %s already registered" % (painter_name))
 
     ##############################################
 
@@ -45,10 +61,8 @@ class PainterManager(object):
         self._foreground_painters = {} # enabled/disabled ?
         for painter_name, cls in PainterMetaClass.classes.items():
             self._logger.debug("Add Foreground painter %s", painter_name)
-            if painter_name not in self._foreground_painters:
-                self._foreground_painters[painter_name] = cls(self)
-            else:
-                raise NameError("Painter %s already registered" % (painter_name))
+            painter = cls(self)
+            self.register_foreground_painter(painter)
 
     ##############################################
 
@@ -64,6 +78,15 @@ class PainterManager(object):
 
     ##############################################
 
+    def __getitem__(self, name):
+
+        if name == 'background':
+            return self._background_painter
+        else:
+            return self._foreground_painters[name]
+    
+    ##############################################
+
     def painter_iterator(self):
 
         return iter([self._background_painter] + list(self._foreground_painters.values()))
@@ -72,7 +95,7 @@ class PainterManager(object):
 
     def enabled_painter_iterator(self):
 
-        return iter([painter for painter in self.painter_iterator() if painter._status])
+        return iter([painter for painter in self.painter_iterator() if bool(painter)])
 
     ##############################################
 

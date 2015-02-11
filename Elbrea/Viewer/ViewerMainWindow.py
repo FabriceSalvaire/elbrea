@@ -47,12 +47,12 @@ class ViewerMainWindow(MainWindowBase):
 
         icon_loader = IconLoader()
 
-        self._switch_front_back_action = \
+        self._switch_face_action = \
                 QtWidgets.QAction(# icon_loader[''],
                     'Switch Front/Back',
                     self,
                     toolTip='Switch Front/Back',
-                    triggered=self._application.switch_front_back,
+                    triggered=self._application.switch_face,
                     shortcut='Ctrl+F',
                     shortcutContext=Qt.ApplicationShortcut,
                 )
@@ -92,7 +92,7 @@ class ViewerMainWindow(MainWindowBase):
     def _create_toolbar(self):
 
         self._image_tool_bar = self.addToolBar('Main')
-        for item in (self._switch_front_back_action,
+        for item in (self._switch_face_action,
                      self._refresh_action,
                      self._display_all_action,
                      self._reload_user_action,

@@ -57,12 +57,23 @@ class ViewerApplication(GuiApplicationBase):
         print(image_format)
         glwidget._image_interval = IntervalInt2D((0, image_format.width), (0, image_format.height))
 
-        from Elbrea.GraphicEngine.PainterManager import PainterManager
-        self.painter_manager = PainterManager(glwidget)
+        from .Sketcher import FrontBackSketcher
+        self.sketcher = FrontBackSketcher(image_format)
+        
+        # Load Painters
+        from Elbrea.GraphicEngine import ForegroundPainter 
+        from Elbrea.GraphicEngine.FrontBackPainter import FrontBackPainterManager
+        self.painter_manager = FrontBackPainterManager(glwidget)
 
         from Elbrea.GraphicEngine.FrontBackPainter import FrontBackPainter
         from Elbrea.GraphicEngine.ForegroundPainter import SketcherPainter
-        self.painter_manager._foreground_painters['sketcher'] = FrontBackPainter(self.painter_manager, SketcherPainter)
+        painter = FrontBackPainter(self.painter_manager, 'sketcher', SketcherPainter)
+        self.painter_manager.register_foreground_painter(painter)
+        for painter, sketcher in ((painter.front_painter, self.sketcher.front_sketcher),
+                                  (painter.back_painter, self.sketcher.back_sketcher),
+                              ):
+            painter.create_texture(sketcher)
+        painter.enable()
         
         from Elbrea.GraphicEngine import ShaderProgrames as ShaderProgrames
         shader_manager = ShaderProgrames.shader_manager
@@ -104,11 +115,6 @@ class ViewerApplication(GuiApplicationBase):
         # from PyOpenGLng.HighLevelApi.RandomTexture import GlRandomTexture
         # shader_manager.texture_label_shader_program._random_texture = GlRandomTexture(size=1000, texture_unit=1)
         # glwidget.doneCurrent()
-
-        painter = self.painter_manager.foreground_painter('sketcher')
-        for painter_ in painter.front_painter, painter.back_painter:
-            painter_.create_texture(image_format)
-        painter.enable()
         
         glwidget.init_tools() # Fixme: for shader
         glwidget._ready = True
@@ -116,13 +122,12 @@ class ViewerApplication(GuiApplicationBase):
 
     ##############################################
 
-    def switch_front_back(self):
+    def switch_face(self):
 
         self._logger.info("")
 
-        self.painter_manager.background_painter.switch()
-        self.painter_manager.foreground_painter('sketcher').switch()
-        self._main_window.glwidget.update()        
+        self.painter_manager.switch_face()
+        self.sketcher.switch_face()
 
     ##############################################
 

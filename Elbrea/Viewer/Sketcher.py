@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 ####################################################################################################
 # 
 # XXXXX - XXXXX
@@ -9,11 +11,12 @@
 
 import logging
 
+import cv2
+
 ####################################################################################################
 
-from .Painter import Painter
-from .PainterManager import PainterManager
-from .TexturePainter import  BackgroundPainter
+from Elbrea.Image.Image import Image
+from Elbrea.Tools.TimeStamp import ObjectWithTimeStamp
 
 ####################################################################################################
 
@@ -21,20 +24,52 @@ _module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
 
-class FrontBackPainter(Painter):
+class Sketcher(ObjectWithTimeStamp):
 
-    _logger = _module_logger.getChild('FrontBackPainter')
+    _logger = _module_logger.getChild('sketcher')
+    
+    ##############################################
+    
+    def __init__(self, image_format):
+
+        ObjectWithTimeStamp.__init__(self)
+
+        self._image = Image(image_format)
+
+    ##############################################
+
+    @property
+    def image(self):
+        return self._image
+        
+    ##############################################
+
+    def to_cv_point(self, point):
+
+        return (int(point[0]), int(point[1]))
+        
+    ##############################################
+
+    def draw_line(self, point1, point2, colour, thickness):
+
+        cv2.line(self._image,
+                 self.to_cv_point(point1), self.to_cv_point(point2),
+                 colour, thickness, 16)
+        # thickness, lineType, shift
+        self.modified()
+
+####################################################################################################
+
+class FrontBackSketcher(object):
+
+    _logger = _module_logger.getChild('FrontBackSketcher')
 
     ##############################################
     
-    def __init__(self, painter_manager, name, painter_class):
+    def __init__(self, image_format):
 
-        self.__painter_name__ = name
-       
-        super(FrontBackPainter, self).__init__(painter_manager)
-
-        self.front_painter = painter_class(painter_manager)
-        self.back_painter = painter_class(painter_manager)
+        self.front_sketcher = Sketcher(image_format)
+        self.back_sketcher = Sketcher(image_format)
         self._is_front = True
 
     ##############################################
@@ -46,44 +81,13 @@ class FrontBackPainter(Painter):
     ##############################################
 
     @property
-    def current_painter(self):
+    def current_face(self):
 
-        # current_side ?
-        
         if self._is_front:
-            return self.front_painter
+            return self.front_sketcher
         else:
-            return self.back_painter
+            return self.back_sketcher
 
-    ##############################################
-
-    def paint(self):
-
-        self.current_painter.paint()
-
-####################################################################################################
-
-class FrontBackPainterManager(PainterManager):
-
-    _logger = logging.getLogger(__name__)
-
-    ##############################################
-
-    def create_background_painter(self):
-
-        self._background_painter = FrontBackPainter(self, 'background', BackgroundPainter)
-
-    ##############################################
-
-    def switch_face(self):
-
-        self._background_painter.switch_face()
-        # register FrontBackPainter ?
-        for painter in self._foreground_painters.values():
-            if isinstance(painter, FrontBackPainter):
-                painter.switch_face()
-        self.glwidget.update()
-        
 ####################################################################################################
 #
 # End

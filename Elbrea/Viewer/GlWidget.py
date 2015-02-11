@@ -181,7 +181,7 @@ class GlWidget(GlWidgetBase):
             if current_tool is tool_bar.crop_tool_action:
                 self.cropper.end(event) # Fixme: call mouseReleaseEvent
                 self._logger.info(str(self.cropper.interval))
-                text_painter = self._painter_manager.foreground_painter('text')
+                text_painter = self._painter_manager['text']
                 text_painter.set_text(self.cropper.interval)
                 
     ##############################################
@@ -219,14 +219,12 @@ class GlWidget(GlWidgetBase):
             self.cropper.update(event) # Fixme: call mouseMoveEvent
         elif current_tool is tool_bar.pen_tool_action:
             position = self.window_to_gl_coordinate(event, round_to_integer=False)
-            painter = self._painter_manager.foreground_painter('sketcher').current_painter
-            painter.draw_line(tuple([int(x) for x in self._previous_position]), # rint
-                              tuple([int(x) for x in position]),
-                              (255, 255, 255),
-                              3)
-            painter.modified()
-            self._set_previous_position(position, self.event_position(event))
+            sketcher = self._application.sketcher.current_face
+            sketcher.draw_line(self._previous_position, position,
+                               (255, 255, 255),
+                               3)
             self.update()
+            self._set_previous_position(position, self.event_position(event))
            
     ##############################################
 
@@ -240,6 +238,7 @@ class GlWidget(GlWidgetBase):
 
     def _current_image(self):
 
+        # Fixme: move ?
         background_painter = self._painter_manager.background_painter.current_painter
         return background_painter.current_painter.source.image
 
@@ -334,11 +333,10 @@ class GlWidget(GlWidgetBase):
             if event_type == QtCore.QEvent.TabletMove:
                 position = self.window_to_gl_coordinate(event, round_to_integer=False)
                 if self._previous_position is not None:
-                    painter = self._painter_manager.foreground_painter('sketcher').current_painter
-                    painter.draw_line(tuple([int(x) for x in self._previous_position]), # rint
-                                      tuple([int(x) for x in position]),
+                    sketcher = self._application.sketcher.current_face
+                    sketcher.draw_line(self._previous_position, position,
                                       (255, 255, 255),
-                                      int(pressure*10))
+                                      3)
                     self.update()
                 self._set_previous_position(position, self.event_position(event))
 

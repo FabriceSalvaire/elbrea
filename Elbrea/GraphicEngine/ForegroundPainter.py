@@ -12,8 +12,6 @@ import os
 
 # from PyQt5 import QtCore
 
-import cv2
-
 ####################################################################################################
 
 from PyOpenGLng.HighLevelApi import GL
@@ -26,8 +24,7 @@ from PyOpenGLng.HighLevelApi.TextureVertexArray import GlTextureVertexArray
 
 # from .FrontBackPainter import FrontBackPainter
 from .Painter import RegisteredPainter, Painter # , PainterMetaClass
-from Elbrea.Image.Image import Image
-from Elbrea.Tools.TimeStamp import TimeStamp, ObjectWithTimeStamp
+from Elbrea.Tools.TimeStamp import ObjectWithTimeStamp
 
 # from .ShaderProgrames import shader_manager
 
@@ -210,11 +207,10 @@ class SketcherPainter(Painter, ObjectWithTimeStamp):
         Painter.__init__(self, painter_manager)
 
         self._glwidget = self._painter_manager.glwidget
-        self._image = None
+        self._sketcher = None
         self._shader_program = self._glwidget.shader_manager.texture_shader_program
         # self._shader_program = None
         self._texture_vertex_array = None
-        self._texture_timestamp = TimeStamp()
         self._uploaded = False
         
     ##############################################
@@ -229,24 +225,11 @@ class SketcherPainter(Painter, ObjectWithTimeStamp):
 
     ##############################################
 
-    @property
-    def image(self):
-        return self._image
-
-    ##############################################
-
-    def draw_line(self, point1, point2, colour, thickness):
-        
-        cv2.line(self._image, point1, point2, colour, thickness, 16)
-        # thickness, lineType, shift
-        self.modified()
-
-    ##############################################
-
-    def create_texture(self, image_format):
+    def create_texture(self, sketcher):
 
         self._logger.info("")
-        self._image = Image(image_format)
+        self._sketcher = sketcher
+        image_format = sketcher.image.image_format
         self._glwidget.makeCurrent() #?
         dimension = Offset(image_format.width, image_format.height)
         with GL.error_checker():
@@ -264,7 +247,8 @@ class SketcherPainter(Painter, ObjectWithTimeStamp):
 
         self._logger.info("")
         # should check image_format
-        self._texture_vertex_array.set(self._image)
+        self._texture_vertex_array.set(self._sketcher.image)
+        self.modified()
         self._uploaded = True
 
     ##############################################
@@ -278,8 +262,8 @@ class SketcherPainter(Painter, ObjectWithTimeStamp):
             self._logger.info("uploaded {}".format(self._uploaded))
 
             # if self.source > self: # timestamp
-            print(self._uploaded, self._modified_time, self._texture_timestamp)
-            if not self._uploaded or self._modified_time > self._texture_timestamp:
+            print(self._uploaded, self._sketcher.modified_time, self._modified_time)
+            if not self._uploaded or self._sketcher._modified_time > self._modified_time:
                 self.upload_data()
 
             GL.glEnable(GL.GL_BLEND)
