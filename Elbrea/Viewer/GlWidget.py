@@ -220,9 +220,7 @@ class GlWidget(GlWidgetBase):
         elif current_tool is tool_bar.pen_tool_action:
             position = self.window_to_gl_coordinate(event, round_to_integer=False)
             sketcher = self._application.sketcher.current_face
-            sketcher.draw_line(self._previous_position, position,
-                               (255, 255, 255),
-                               3)
+            sketcher.draw_line(self._previous_position, position)
             self.update()
             self._set_previous_position(position, self.event_position(event))
            
@@ -334,9 +332,7 @@ class GlWidget(GlWidgetBase):
                 position = self.window_to_gl_coordinate(event, round_to_integer=False)
                 if self._previous_position is not None:
                     sketcher = self._application.sketcher.current_face
-                    sketcher.draw_line(self._previous_position, position,
-                                      (255, 255, 255),
-                                      3)
+                    sketcher.draw_line(self._previous_position, position)
                     self.update()
                 self._set_previous_position(position, self.event_position(event))
 
