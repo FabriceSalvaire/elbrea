@@ -8,6 +8,7 @@
 ###################################################################################################
 
 import logging
+import os
 
 ####################################################################################################
 
@@ -115,6 +116,8 @@ class ViewerApplication(GuiApplicationBase):
         # from PyOpenGLng.HighLevelApi.RandomTexture import GlRandomTexture
         # shader_manager.texture_label_shader_program._random_texture = GlRandomTexture(size=1000, texture_unit=1)
         # glwidget.doneCurrent()
+
+        self.load()
         
         glwidget.init_tools() # Fixme: for shader
         glwidget._ready = True
@@ -153,6 +156,33 @@ class ViewerApplication(GuiApplicationBase):
         background_painter.select_painter(filter_name)
         self._main_window.glwidget.update()
 
+    ##############################################
+
+    def save(self): # get False ???
+
+        self._logger.info("")
+
+        from .HdfAnnotation import HdfAnnotation
+        path = 'test.hdf5'
+        hdf_annotation = HdfAnnotation(path, update=True)
+         # Fixme: recto/verso
+        group = hdf_annotation.create_group('front')
+        self.sketcher.front_sketcher.save(group)
+        group = hdf_annotation.create_group('back')
+        self.sketcher.back_sketcher.save(group)
+
+    ##############################################
+
+    def load(self):
+
+        from .HdfAnnotation import HdfAnnotation
+        from .Sketcher import Path
+        path = 'test.hdf5'
+        if os.path.exists(path):
+            hdf_annotation = HdfAnnotation(path, update=False) # rewrite
+            # Fixme: recto/verso
+            self.sketcher.front_sketcher.from_hdf5(hdf_annotation['front'])
+            
 ####################################################################################################
 #
 # End

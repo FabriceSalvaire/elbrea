@@ -24,6 +24,7 @@ from PyOpenGLng.HighLevelApi.Buffer import GlUniformBuffer
 from PyOpenGLng.HighLevelApi.GlWidgetBase import GlWidgetBase
 from PyOpenGLng.Tools.Interval import IntervalInt2D
 
+from .Sketcher import TabletEvent, TabletPointerType, TabletEventType
 from Elbrea.GraphicEngine.GraphicScene import GraphicScene
 from Elbrea.Image.Colour import RgbIntColour
 
@@ -138,6 +139,8 @@ class GlWidget(GlWidgetBase):
 
     def mousePressEvent(self, event):
 
+        self._logger.info("")
+       
         if not (event.buttons() & QtCore.Qt.LeftButton):
             return
 
@@ -159,14 +162,19 @@ class GlWidget(GlWidgetBase):
                 else:
                     self.colour_picker(event)
             elif current_tool is tool_bar.pen_tool_action:
-                # Fixme:
                 position = self.window_to_gl_coordinate(event, round_to_integer=False)
-                self._set_previous_position(position, self.event_position(event))
+                tablet_event = TabletEvent(TabletEventType.press,
+                                           TabletPointerType.pen,
+                                           position)
+                if self._application.sketcher.on_tablet_event(tablet_event):
+                    self.update()
                 
     ##############################################
         
     def mouseReleaseEvent(self, event):
 
+        self._logger.info("")
+        
         button = event.button()
         if button & QtCore.Qt.RightButton:
             self.contextual_menu.exec_(event.globalPos())
@@ -183,6 +191,13 @@ class GlWidget(GlWidgetBase):
                 self._logger.info(str(self.cropper.interval))
                 text_painter = self._painter_manager['text']
                 text_painter.set_text(self.cropper.interval)
+            elif current_tool is tool_bar.pen_tool_action:
+                position = self.window_to_gl_coordinate(event, round_to_integer=False)
+                tablet_event = TabletEvent(TabletEventType.release,
+                                           TabletPointerType.pen,
+                                           position)
+                if self._application.sketcher.on_tablet_event(tablet_event):
+                    self.update()
                 
     ##############################################
 
@@ -219,10 +234,11 @@ class GlWidget(GlWidgetBase):
             self.cropper.update(event) # Fixme: call mouseMoveEvent
         elif current_tool is tool_bar.pen_tool_action:
             position = self.window_to_gl_coordinate(event, round_to_integer=False)
-            sketcher = self._application.sketcher.current_face
-            sketcher.draw_line(self._previous_position, position)
-            self.update()
-            self._set_previous_position(position, self.event_position(event))
+            tablet_event = TabletEvent(TabletEventType.move,
+                                       TabletPointerType.pen,
+                                       position)
+            if self._application.sketcher.on_tablet_event(tablet_event):
+                self.update()
            
     ##############################################
 
@@ -305,39 +321,38 @@ class GlWidget(GlWidgetBase):
 
     def tabletEvent(self, event):
 
-        pointer_type = event.pointerType()
-        # QtGui.QTabletEvent.UnknownPointer
-        # QtGui.QTabletEvent.Pen
-        # QtGui.QTabletEvent.Eraser
+        self._logger.info("")
 
-        position = event.pos()
-        pressure = event.pressure()
-        x_tilt = event.xTilt()
-        y_tilt = event.yTilt()
-
-        event_type = event.type()
-        # QtCore.QEvent.TabletPress
-        # QtCore.QEvent.TabletRelease
-
-        self._logger.info("type {} pointer {} pos {} pressure {} tilt {} {}".format(
-            event_type,
-            pointer_type,
-            position,
-            pressure, x_tilt, y_tilt))
+        # pressure = event.pressure()
+        # x_tilt = event.xTilt()
+        # y_tilt = event.yTilt()
+        # self._logger.info("type {} pointer {} pos {} pressure {} tilt {} {}".format(
+        #     event_type,
+        #     pointer_type,
+        #     position,
+        #     pressure, x_tilt, y_tilt))
 
         tool_bar = self._application.main_window.tool_bar
         current_tool = tool_bar.current_tool()
         if current_tool is tool_bar.pen_tool_action:
-            if event_type == QtCore.QEvent.TabletMove:
-                position = self.window_to_gl_coordinate(event, round_to_integer=False)
-                if self._previous_position is not None:
-                    sketcher = self._application.sketcher.current_face
-                    sketcher.draw_line(self._previous_position, position)
-                    self.update()
-                self._set_previous_position(position, self.event_position(event))
-
+            event_type = event.type()
+            if event_type == QtCore.QEvent.TabletPress:
+                event_type = TabletEventType.press
+            elif event_type == QtCore.QEvent.TabletMove:
+                event_type = TabletEventType.move
+            elif event_type == QtCore.QEvent.TabletRelease:
+                event_type = TabletEventType.release
+            pointer_type = event.pointerType()
+            if pointer_type == QtGui.QTabletEvent.Pen:
+                pointer_type = TabletPointerType.pen
+            elif pointer_type == QtGui.QTabletEvent.Eraser:
+                pointer_type = TabletPointerType.eraser
+            position = self.window_to_gl_coordinate(event, round_to_integer=False)
+            tablet_event = TabletEvent(event_type, pointer_type, position)
+            if self._application.sketcher.on_tablet_event(tablet_event):
+                self.update()
             event.accept()
-        # event.ignore()
+            # event.ignore()
         
 ####################################################################################################
 #
