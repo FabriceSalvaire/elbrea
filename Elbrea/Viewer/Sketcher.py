@@ -273,6 +273,7 @@ class Sketcher(ObjectWithTimeStamp):
         
         self._sketcher_state = sketcher_state
 
+        self._current_path = None
         self._paths = []
 
         self._point_filter = PointFilter(window_size=10)
@@ -283,10 +284,6 @@ class Sketcher(ObjectWithTimeStamp):
     def image(self):
         return self._image
 
-    @property
-    def last_path(self):
-        return self._paths[-1]
-    
     ##############################################
 
     def to_cv_point(self, point):
@@ -308,11 +305,20 @@ class Sketcher(ObjectWithTimeStamp):
 
     ##############################################
 
-    def _add_path(self):
+    def _start_path(self):
 
-        self._paths.append(DynamicPath(self._sketcher_state.pencil_colour, self._sketcher_state.pencil_size))
+        self._current_path = DynamicPath(self._sketcher_state.pencil_colour,
+                                         self._sketcher_state.pencil_size)
         self._point_filter.reset()
-        
+
+    ##############################################
+
+    def _end_path(self):
+
+        path = self._current_path.to_path()
+        self._paths.append(path)
+        self._current_path = None
+    
     ##############################################
 
     def on_tablet_event(self, tablet_event):
@@ -337,19 +343,19 @@ class Sketcher(ObjectWithTimeStamp):
                 delta = position - previous_position
                 distance = np.sqrt(np.sum(delta**2))
                 if distance > 1:
-                    last_path = self._paths[-1] # last_path
-                    if not last_path.same_sketcher_state(self._sketcher_state):
-                        self._add_path()
-                    last_path.add_point(position)
+                    path = self._current_path
+                    # if not path.same_sketcher_state(self._sketcher_state):
+                    #     self._end_path()
+                    #     self._start_path()
+                    path.add_point(position)
                     self.draw_line(previous_position, position)
                     modified = True # Fixme: modified signal ?
                     self._sketcher_state.previous_position = position
         else:
             if tablet_event.type == TabletEventType.press:
-                self._add_path()
+                self._start_path()
             elif tablet_event.type == TabletEventType.release:
-                path = self._paths.pop()
-                self._paths.append(path.to_path())
+                self._end_path()
             self._sketcher_state.previous_position = tablet_event.position
             
         return modified
