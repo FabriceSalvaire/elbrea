@@ -78,6 +78,33 @@ class Path(object):
             return None
 
     ##############################################
+
+    def nearest_point(self, point):
+
+        p0 = self.points[:-1]
+        p1 = self.points[1:]
+        p10 = p1 - p0
+        u10 = p10 / np.sqrt(np.sum(p10**2, axis=0))
+
+        delta = point - p0
+        # projection = np.dot(delta, u10)
+        projection = delta[:,0]*u10[:,0] + delta[:,1]*u10[:,1]
+        indexes = np.where(np.logical_and(0 <= projection, projection < 1))[0]
+        print(indexes)
+        if indexes.shape[0]:
+            distance = np.abs(np.cross(delta[indexes], u10[indexes]))
+            i_min = np.argmin(distance)
+            print(indexes, projection[indexes], distance)
+            print(i_min, indexes[i_min], distance[i_min])
+            return indexes[i_min], distance[i_min]
+        else:
+            return None, None
+        
+        # distance = np.sum((self.points - point)**2, axis=1)
+        # i_min = np.argmin(distance)
+        # return i_min, distance[i_min]
+        
+    ##############################################
         
     def subpath(self, lower=0, upper=None):
 
@@ -221,22 +248,50 @@ class Path(object):
         
 ####################################################################################################
 
-filename = 'curve-sample-loop.hdf5'
-# filename = 'curve-sample-erase.hdf5'
+# filename = 'curve-sample-loop.hdf5'
+filename = 'curve-sample-erase.hdf5'
 f = h5py.File(filename)
 
 g = f['front']
 
 p = np.array(g['path-0'].value, dtype=np.int64)
 path0 = Path(p)
+# plt.plot(path0.x, path0.y, 'o-')
+
+p = np.array(g['path-1'].value, dtype=np.int64)
+path1 = Path(p)
+plt.plot(path1.x, path1.y, 'o-')
+paths = [path0]
+for point in path1.points:
+    # i_min = path0.nearest_point(point)
+    # nearest_point = path0.points[i_min]
+    # plt.plot((point[0], nearest_point[0]), (point[1], nearest_point[1]), 'o-')
+    new_paths = []
+    for path in paths:
+        i_min, distance = path.nearest_point(point)
+        print(i_min, distance)
+        if i_min is not None and distance <= 2:
+            if i_min == 0:
+                new_paths.append(path.subpath(lower=1))
+            elif i_min == path.number_of_points -1:
+                new_paths.append(path.subpath(upper=i_min -1))
+            else:
+                new_paths.append(path.subpath(upper=i_min-1))
+                new_paths.append(path.subpath(lower=i_min+1))
+        else:
+            new_paths.append(path)
+    paths = new_paths
+for path in paths:
+    plt.plot(path.x, path.y, '-')
+
+####################################################################################################
 
 # path0.points = np.arange(1, 11)
 # path0_smooth = path0.smooth_window(radius=2)
-path0_smooth = path0.backward_smooth_window(radius=3)
+# path0_smooth = path0.backward_smooth_window(radius=3)
 # path0_smooth = path0_smooth.smooth_window(radius=1)
-# print(path0.points)
-plt.plot(path0.x, path0.y, 'o-')
-plt.plot(path0_smooth.x, path0_smooth.y, 'o-')
+# plt.plot(path0.x, path0.y, 'o-')
+# plt.plot(path0_smooth.x, path0_smooth.y, 'o-')
 
 # simplified_path0 = path0.simplify()
 # plt.plot(path0.x, path0.y, 'o-')
@@ -247,8 +302,6 @@ plt.plot(path0_smooth.x, path0_smooth.y, 'o-')
 # plt.plot([p[2][0] for p in intersections], [p[2][1] for p in intersections], 'o')
 
 # if intersections:
-#     # paths = []
-#     # paths.append(path)
 #     lower = 0
 #     for i, j, intersection in intersections:
 #         path = path0.subpath(lower=lower, upper=i)
@@ -259,29 +312,6 @@ plt.plot(path0_smooth.x, path0_smooth.y, 'o-')
 #         lower = j
 #     path = path0.subpath(lower=lower)
 #     plt.plot(path.x, path.y, 'o-')
-
-####################################################################################################
-
-# plt.plot(x, p[:,0], 'o', x, p[:,1], 'o')
-
-# p = g['path-1'].value
-# x = np.arange(p.shape[0])
-# plt.plot(x, p[:,0], '*', x, p[:,1], '*')
-
-# plt.plot(x[1:-1], (p[1:-1,0] + p[0:-2,0] + p[2:,0])/3,
-#          x, p[:,1])
-
-# y = f(x) for P0 -> 1
-# yl = (x - p0[0]) * p10[1]/p10[0]  + p0[1]
-# plt.plot(x, y, 'o-')
-# plt.plot(x, yl)
-
-# distance to line
-# plt.plot(x, distance)
-# plt.plot(x, y, 'o-')
-# plt.plot(x, yl)
-
-# self-intersection
 
 ####################################################################################################
 
