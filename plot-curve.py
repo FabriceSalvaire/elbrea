@@ -164,7 +164,41 @@ class Path(object):
                         print(i, j, intersection)
                         intersections.append((i, j, intersection))
         return intersections
-    
+
+    ##############################################
+
+    def smooth_window(self, radius=2):
+
+        window_size = 2*radius + 1
+        if window_size >= self.number_of_points:
+            raise ValueError()
+
+        if radius > 0:
+            points = np.array(self.points, dtype=np.float) # int64
+            # print(points)
+            view = points[radius:-radius]
+            for i in range(1, radius +1):
+                upper = -radius+i
+                if upper == 0:
+                    upper = None
+                # print(i, view, self.points[radius-i:-radius-i])
+                # print(i, view, self.points[radius+i:upper])
+                view += self.points[radius-i:-radius-i]
+                view += self.points[radius+i:upper]
+            view /= window_size
+            # for i in range(1, radius +1):
+            #     # print(i, points[:radius], self.points[i:radius+i])
+            #     # print(i, points[-radius:], self.points[-radius-i:-i])
+            #     points[:radius] += self.points[i:radius+i]
+            #     points[-radius:] += self.points[-radius-i:-i]
+            # points[:radius] /= radius + 1
+            # points[-radius:] /= radius + 1
+            return self.__class__(points)
+        elif radius < 0:
+            raise ValueError()
+        else:
+            return self
+        
 ####################################################################################################
 
 f = h5py.File('curve-sample-loop.hdf5')
@@ -174,27 +208,34 @@ g = f['front']
 p = np.array(g['path-0'].value, dtype=np.int64)
 path0 = Path(p)
 
-simplified_path0 = path0.simplify()
+# path0.points = np.arange(1, 11)
+path0_smooth = path0.smooth_window(radius=2)
+# path0_smooth = path0_smooth.smooth_window(radius=1)
+# print(path0.points)
 plt.plot(path0.x, path0.y, 'o-')
-plt.plot(simplified_path0.x, simplified_path0.y, 'o-')
+plt.plot(path0_smooth.x, path0_smooth.y, 'o-')
 
-intersections = path0.find_self_intersection()
-plt.plot(path0.x, path0.y, 'o-')
-plt.plot([p[2][0] for p in intersections], [p[2][1] for p in intersections], 'o')
+# simplified_path0 = path0.simplify()
+# plt.plot(path0.x, path0.y, 'o-')
+# plt.plot(simplified_path0.x, simplified_path0.y, 'o-')
 
-if intersections:
-    # paths = []
-    # paths.append(path)
-    lower = 0
-    for i, j, intersection in intersections:
-        path = path0.subpath(lower=lower, upper=i)
-        plt.plot(path.x, path.y, 'o-')
-        path = path0.subpath(lower=i, upper=j)
-        plt.plot(path.x, path.y, 'o-')
-        path = path0.subpath(lower=lower)
-        lower = j
-    path = path0.subpath(lower=lower)
-    plt.plot(path.x, path.y, 'o-')
+# intersections = path0.find_self_intersection()
+# plt.plot(path0.x, path0.y, 'o-')
+# plt.plot([p[2][0] for p in intersections], [p[2][1] for p in intersections], 'o')
+
+# if intersections:
+#     # paths = []
+#     # paths.append(path)
+#     lower = 0
+#     for i, j, intersection in intersections:
+#         path = path0.subpath(lower=lower, upper=i)
+#         plt.plot(path.x, path.y, 'o-')
+#         path = path0.subpath(lower=i, upper=j)
+#         plt.plot(path.x, path.y, 'o-')
+#         path = path0.subpath(lower=lower)
+#         lower = j
+#     path = path0.subpath(lower=lower)
+#     plt.plot(path.x, path.y, 'o-')
 
 ####################################################################################################
 
