@@ -175,20 +175,15 @@ class Path(object):
 
         if radius > 0:
             points = np.array(self.points, dtype=np.float) # int64
-            # print(points)
             view = points[radius:-radius]
             for i in range(1, radius +1):
-                upper = -radius+i
+                upper = -radius + i
                 if upper == 0:
                     upper = None
-                # print(i, view, self.points[radius-i:-radius-i])
-                # print(i, view, self.points[radius+i:upper])
                 view += self.points[radius-i:-radius-i]
                 view += self.points[radius+i:upper]
             view /= window_size
             # for i in range(1, radius +1):
-            #     # print(i, points[:radius], self.points[i:radius+i])
-            #     # print(i, points[-radius:], self.points[-radius-i:-i])
             #     points[:radius] += self.points[i:radius+i]
             #     points[-radius:] += self.points[-radius-i:-i]
             # points[:radius] /= radius + 1
@@ -201,10 +196,34 @@ class Path(object):
             raise ValueError()
         else:
             return self
+
+    ##############################################
+
+    def backward_smooth_window(self, radius=2):
+
+        # limite the rate of points: average last N points
+        
+        window_size = radius + 1
+        if window_size >= self.number_of_points:
+            raise ValueError()
+
+        if radius > 0:
+            points = np.array(self.points, dtype=np.float) # int64
+            view = points[radius:]
+            for i in range(1, radius +1):
+                view += self.points[radius-i:-i]
+            view /= window_size
+            return self.__class__(view)
+        elif radius < 0:
+            raise ValueError()
+        else:
+            return self
         
 ####################################################################################################
 
-f = h5py.File('curve-sample-loop.hdf5')
+filename = 'curve-sample-loop.hdf5'
+# filename = 'curve-sample-erase.hdf5'
+f = h5py.File(filename)
 
 g = f['front']
 
@@ -212,7 +231,8 @@ p = np.array(g['path-0'].value, dtype=np.int64)
 path0 = Path(p)
 
 # path0.points = np.arange(1, 11)
-path0_smooth = path0.smooth_window(radius=2)
+# path0_smooth = path0.smooth_window(radius=2)
+path0_smooth = path0.backward_smooth_window(radius=3)
 # path0_smooth = path0_smooth.smooth_window(radius=1)
 # print(path0.points)
 plt.plot(path0.x, path0.y, 'o-')
