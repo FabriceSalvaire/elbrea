@@ -97,7 +97,7 @@ class ToolBar(object):
         self.position_tool_action.setChecked(True)
 
         self._pencil_size_combobox = QtWidgets.QComboBox(self._main_window)
-        for pencil_size in (1, 3, 6, 12):
+        for pencil_size in (1, 2, 3, 6, 12):
             self._pencil_size_combobox.addItem(str(pencil_size), pencil_size)
             
         self._pencil_colour_combobox = QtWidgets.QComboBox(self._main_window)

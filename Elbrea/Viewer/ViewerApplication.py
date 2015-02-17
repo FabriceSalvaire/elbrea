@@ -54,8 +54,7 @@ class ViewerApplication(GuiApplicationBase):
 
         from PyOpenGLng.Tools.Interval import IntervalInt2D
         front_input = self.front_pipeline.input_filter.get_primary_output()
-        image_format = front_input.image_format
-        print(image_format)
+        image_format = front_input.image_format # assume identical
         glwidget._image_interval = IntervalInt2D((0, image_format.width), (0, image_format.height))
 
         from .Sketcher import FrontBackSketcher
@@ -88,12 +87,12 @@ class ViewerApplication(GuiApplicationBase):
         painter.shader_program = shader_manager.texture_shader_program
         front_input = self.front_pipeline.hls_filter.get_primary_output()
         painter.source = front_input
-        painter = background_painter.add_painter('user')
-        painter.shader_program = shader_manager.texture_shader_program
-        # painter.shader_program = shader_manager.texture_label_shader_program
-        front_input = self.front_pipeline.hls_filter.get_primary_output()
-        # front_input = self.front_pipeline.user_filter.get_primary_output()
-        painter.source = front_input
+        # painter = background_painter.add_painter('user')
+        # painter.shader_program = shader_manager.texture_shader_program
+        # # painter.shader_program = shader_manager.texture_label_shader_program
+        # front_input = self.front_pipeline.hls_filter.get_primary_output()
+        # # front_input = self.front_pipeline.user_filter.get_primary_output()
+        # painter.source = front_input
         background_painter.select_painter('raw')
 
         background_painter = self.painter_manager.background_painter.back_painter
@@ -108,7 +107,7 @@ class ViewerApplication(GuiApplicationBase):
         # painter = background_painter.add_painter('user')
         # # painter.shader_program = shader_manager.texture_label_shader_program
         # painter.shader_program = shader_manager.texture_shader_program
-        # back_input = self.back_pipeline.user_filter.get_primary_output()
+        # # back_input = self.back_pipeline.user_filter.get_primary_output()
         # painter.source = back_input
         background_painter.select_painter('raw')
 

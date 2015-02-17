@@ -10,7 +10,6 @@
 ####################################################################################################
 
 import logging
-import math
 
 import cv2
 import numpy as np
@@ -105,7 +104,7 @@ class Path(object):
 
         self._arrays.append(self._make_array(self._array_size))
         self._capacity += self._array_size
-        self.index = 0
+        self._index = 0
 
     ##############################################    
 
@@ -200,10 +199,16 @@ class Sketcher(ObjectWithTimeStamp):
         ObjectWithTimeStamp.__init__(self)
 
         self._image = Image(image_format)
+        self._image.clear()
         
         self._sketcher_state = sketcher_state
 
         self._paths = []
+
+        self._window_size = 10
+        self._window_points = None
+        self._window_counter = 0
+        self._window_index = 0
         
     ##############################################
 
@@ -236,6 +241,11 @@ class Sketcher(ObjectWithTimeStamp):
 
         self._paths.append(Path(self._sketcher_state.pencil_colour, self._sketcher_state.pencil_size))
 
+        self._window_points = np.zeros((self._window_size, 2), dtype=np.uint64)
+        # self._window_points[0] = tablet_event.position
+        self._window_index = 0
+        self._window_counter = 0
+        
     ##############################################
 
     def on_tablet_event(self, tablet_event):
@@ -253,17 +263,23 @@ class Sketcher(ObjectWithTimeStamp):
 
         modified = False
         if tablet_event.type == TabletEventType.move:
-            if self._sketcher_state.previous_position is not None:
+            position = tablet_event.position
+            self._window_points[self._window_index] = position
+            self._window_index = (self._window_index + 1) % self._window_size
+            self._window_counter += 1
+            if (self._sketcher_state.previous_position is not None and
+                self._window_counter >= self._window_size):
                 previous_position = self._sketcher_state.previous_position
-                delta = tablet_event.position - previous_position
+                position = np.mean(self._window_points, axis=0)
+                delta = position - previous_position
                 distance = np.sqrt(np.sum(delta**2))
-                if distance > 2:
+                if distance > 1:
                     if not self._paths[-1].same_sketcher_state(self._sketcher_state):
                         self._add_path()
-                    self._paths[-1].add_point(tablet_event.position)
-                    self.draw_line(previous_position, tablet_event.position)
+                    self._paths[-1].add_point(position)
+                    self.draw_line(previous_position, position)
                     modified = True # Fixme: modified signal ?
-                    self._sketcher_state.previous_position = tablet_event.position
+                    self._sketcher_state.previous_position = position
         else:
             if tablet_event.type == TabletEventType.press:
                 self._add_path()
