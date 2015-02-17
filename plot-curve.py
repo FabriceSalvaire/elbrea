@@ -193,7 +193,10 @@ class Path(object):
             #     points[-radius:] += self.points[-radius-i:-i]
             # points[:radius] /= radius + 1
             # points[-radius:] /= radius + 1
-            return self.__class__(points)
+            # points[radius-1] = np.mean(self.points[:radius], axis=0)
+            # points[-radius] = np.mean(self.points[-radius:], axis=0)
+            # return self.__class__(points[radius-1:-radius+1])
+            return self.__class__(view)
         elif radius < 0:
             raise ValueError()
         else:
