@@ -55,26 +55,24 @@ class TabletEvent(object):
 
 ####################################################################################################
 
-class Path(object):
+class PathBase(object):
 
     __path_id__ = 0
     
     ##############################################
 
-    def __init__(self, colour, pencil_size, array_size=500):
+    def __init__(self, colour, pencil_size, path_id=None):
 
-        self._path_id = self.__path_id__
-        self.__path_id__ += 1
+        if path_id is None:
+            self._path_id = self.__path_id__
+            self.__path_id__ += 1
+        else:
+            self._path_id = path_id
         
         self._colour = colour
         self._pencil_size = pencil_size
-        self._arrays = []
-        self._array_size = array_size
-        self._number_of_points = 0
-        self._capacity = 0
-        self._index = 0
         self._interval = None
-        
+
     ##############################################
 
     @property
@@ -85,6 +83,75 @@ class Path(object):
     def pencil_size(self):
         return self._pencil_size
 
+####################################################################################################
+
+class Path(PathBase):
+
+    ##############################################
+
+    def __init__(self, colour, pencil_size, points, path_id=None):
+
+        super(Path, self).__init__(colour, pencil_size, path_id)
+
+        self._points = points
+
+    ##############################################
+
+    @property
+    def points(self):
+        return self._points
+
+    @property
+    def number_of_points(self):
+        return self._points.shape[0]
+    
+    ##############################################
+
+    def save(self, group, name):
+
+        dataset = group.create_dataset(name, data=self._points,
+                                       shuffle=True, compression='lzf')
+        attributes = dataset.attrs
+        attributes['colour'] = self._colour
+        attributes['pencil_size'] = self._pencil_size
+
+    ##############################################
+
+    @staticmethod
+    def from_hdf5(group, name):
+
+        dataset = group[name]
+        attributes = dataset.attrs
+
+        colour = [int(x) for x in attributes['colour']]
+        pencil_size = int(attributes['pencil_size'])
+        points = np.array(dataset)
+
+        return Path(colour, pencil_size, points)
+
+    ##############################################
+
+    def pair_iterator(self):
+
+        for i in range(self.number_of_points -1):
+            yield self.points[i], self.points[i+1]
+            
+####################################################################################################
+
+class DynamicPath(PathBase):
+
+    ##############################################
+
+    def __init__(self, colour, pencil_size, array_size=500):
+
+        super(DynamicPath, self).__init__(colour, pencil_size)
+        
+        self._arrays = []
+        self._array_size = array_size
+        self._number_of_points = 0
+        self._capacity = 0
+        self._index = 0
+        
     ##############################################
 
     def same_sketcher_state(self, sketcher_state):
@@ -136,56 +203,59 @@ class Path(object):
             self._interval = point_interval
         else:
             self._interval |= point_interval
+
+    ##############################################
+
+    def to_path(self):
+
+        return Path(self._colour, self._pencil_size, self.flatten(), self._path_id)
+
+
+####################################################################################################
+
+class PointFilter(object):
+
+    ##############################################   
+
+    def __init__(self, window_size):
         
-    ##############################################
-
-    def save(self, group, name):
-
-        dataset = group.create_dataset(name, data=self.flatten(),
-                                       shuffle=True, compression='lzf')
-        attributes = dataset.attrs
-        attributes['colour'] = self._colour
-        attributes['pencil_size'] = self._pencil_size
+        self._window_size = window_size
+        self._window_points = np.zeros((self._window_size, 2), dtype=np.uint64)
+        self._window_counter = 0
+        self._window_index = 0
 
     ##############################################
 
-    @staticmethod
-    def from_hdf5(group, name):
+    def __bool__(self):
 
-        dataset = group[name]
-        attributes = dataset.attrs
+        return self._window_counter >= self._window_size
+    
+    ##############################################
 
-        colour = [int(x) for x in attributes['colour']]
-        pencil_size = int(attributes['pencil_size'])
-        obj = Path(colour, pencil_size)
-        obj._arrays = [np.array(dataset)]
-        obj._number_of_points = dataset.shape[0]
-        obj._capacity = obj._number_of_points
-        obj._index = obj._number_of_points
+    def reset(self):
 
-        return obj
+        self._window_index = 0
+        self._window_counter = 0
+        self._window_points[...] = 0 # fixme: required ???
 
     ##############################################
 
-    def iter_on_segments(self):
+    def send(self, point):
 
-        number_of_yielded_points = 0
-        for k, points in enumerate(self._arrays):
-            number_of_points = min(points.shape[0], self._number_of_points - number_of_yielded_points)
-            if k and number_of_points:
-                yield self.arrays[k-1][-1], self.arrays[k][0]
-            for i in range(number_of_points -1):
-                yield points[i], points[i+1]
-            number_of_yielded_points += number_of_points
-                
+        self._window_points[self._window_index] = point
+        self._window_index = (self._window_index + 1) % self._window_size
+        self._window_counter += 1
+
     ##############################################
 
-    def erase(self, point, radius):
+    @property
+    def value(self):
 
-        radius_square = radius**2
-        for points in self._arrays:
-            print(np.where((points - point)**2 < radius_square))
-            
+        if bool(self):
+            return np.mean(self._window_points, axis=0)
+        else:
+            return None
+    
 ####################################################################################################
 
 class Sketcher(ObjectWithTimeStamp):
@@ -205,17 +275,18 @@ class Sketcher(ObjectWithTimeStamp):
 
         self._paths = []
 
-        self._window_size = 10
-        self._window_points = None
-        self._window_counter = 0
-        self._window_index = 0
+        self._point_filter = PointFilter(window_size=10)
         
     ##############################################
 
     @property
     def image(self):
         return self._image
-        
+
+    @property
+    def last_path(self):
+        return self._paths[-1]
+    
     ##############################################
 
     def to_cv_point(self, point):
@@ -239,12 +310,8 @@ class Sketcher(ObjectWithTimeStamp):
 
     def _add_path(self):
 
-        self._paths.append(Path(self._sketcher_state.pencil_colour, self._sketcher_state.pencil_size))
-
-        self._window_points = np.zeros((self._window_size, 2), dtype=np.uint64)
-        # self._window_points[0] = tablet_event.position
-        self._window_index = 0
-        self._window_counter = 0
+        self._paths.append(DynamicPath(self._sketcher_state.pencil_colour, self._sketcher_state.pencil_size))
+        self._point_filter.reset()
         
     ##############################################
 
@@ -263,26 +330,26 @@ class Sketcher(ObjectWithTimeStamp):
 
         modified = False
         if tablet_event.type == TabletEventType.move:
-            position = tablet_event.position
-            self._window_points[self._window_index] = position
-            self._window_index = (self._window_index + 1) % self._window_size
-            self._window_counter += 1
-            if (self._sketcher_state.previous_position is not None and
-                self._window_counter >= self._window_size):
+            self._point_filter.send(tablet_event.position)
+            position = self._point_filter.value
+            if position is not None and self._sketcher_state.previous_position is not None:
                 previous_position = self._sketcher_state.previous_position
-                position = np.mean(self._window_points, axis=0)
                 delta = position - previous_position
                 distance = np.sqrt(np.sum(delta**2))
                 if distance > 1:
-                    if not self._paths[-1].same_sketcher_state(self._sketcher_state):
+                    last_path = self._paths[-1] # last_path
+                    if not last_path.same_sketcher_state(self._sketcher_state):
                         self._add_path()
-                    self._paths[-1].add_point(position)
+                    last_path.add_point(position)
                     self.draw_line(previous_position, position)
                     modified = True # Fixme: modified signal ?
                     self._sketcher_state.previous_position = position
         else:
             if tablet_event.type == TabletEventType.press:
                 self._add_path()
+            elif tablet_event.type == TabletEventType.release:
+                path = self._paths.pop()
+                self._paths.append(path.to_path())
             self._sketcher_state.previous_position = tablet_event.position
             
         return modified
@@ -295,8 +362,8 @@ class Sketcher(ObjectWithTimeStamp):
 
         modified = False
 
-        for path in self._paths:
-            path.erase(tablet_event.position, radius=self._sketcher_state.pencil_size)
+        # for path in self._paths:
+        #     path.erase(tablet_event.position, radius=self._sketcher_state.pencil_size)
         
         return modified
     
@@ -313,7 +380,7 @@ class Sketcher(ObjectWithTimeStamp):
 
         for name in group:
             path = Path.from_hdf5(group, name)
-            for point1, point2 in path.iter_on_segments():
+            for point1, point2 in path.pair_iterator():
                 self.draw_line(point1, point2, path.colour, path.pencil_size)
             self._paths.append(path)
             
