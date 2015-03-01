@@ -18,7 +18,6 @@ uniform float antialias_diameter = 1.;
 
 layout(lines_adjacency) in;
 layout(triangle_strip, max_vertices=4) out;
-// layout(triangle_strip, max_vertices=6) out;
 
 /* *********************************************************************************************** */
 
@@ -36,14 +35,30 @@ out VertexAttributes
   float line_width;
   float line_length;
   vec4 colour;
+  float cap;
 } vertex;
 
 /* *********************************************************************************************** */
 
-void emit_vertex(vec2 position, vec2 uv, vec4 colour)
+void
+compute_offsets(in vec2 dir1, in vec2 dir2, in float w,
+		out vec2 offset, out float u_offset)
 {
-  vertex.colour = colour;
-  // vertex.colour = vec4(1);
+  float angle = atan(dir1.x*dir2.y - dir1.y*dir2.x,
+		     dir1.x*dir2.x + dir1.y*dir2.y);
+  angle /= 2.;
+  vec2 t = normalize(dir1 + dir2);
+  vec2 n = vec2(-t.y, t.x);
+  offset = w / cos(angle) * n;
+  u_offset = w * tan(angle);
+}
+
+/* *********************************************************************************************** */
+
+void
+emit_vertex(in vec2 position, in vec2 uv, in float cap)
+{
+  vertex.cap = cap;
   vertex.uv = uv;
   gl_Position =  model_view_projection_matrix * vec4(position, 0, 1);
   EmitVertex();
@@ -53,7 +68,7 @@ void emit_vertex(vec2 position, vec2 uv, vec4 colour)
 
 void main()
 {
-  // vertex.colour = vertexIn[0].colour;
+  vertex.colour = vertexIn[0].colour;
 
   // If color is fully transparent we just will discard the fragment later
   /* if (vertex.colour.a <= .0) */
@@ -76,9 +91,6 @@ void main()
   float w = ceil(1.25*antialias_diameter + line_width) / 2.;
 
   vec2 dir0 = normalize(pos1 - pos0);
-  vec2 normal0 = vec2(-dir0.y, dir0.x);
-  vec2 tangential_offset0 = dir0 * w;
-  vec2 normal_offset0 = normal0 * w;
   
   vec2 dir1 = normalize(pos2 - pos1);
   vec2 normal1 = vec2(-dir1.y, dir1.x);
@@ -86,46 +98,39 @@ void main()
   vec2 normal_offset1 = normal1 * w;
 
   vec2 dir2 = normalize(pos3 - pos2);
-  vec2 normal2 = vec2(-dir2.y, dir2.x);
-  vec2 tangential_offset2 = dir2 * w;
-  vec2 normal_offset2 = normal2 * w;
 
-  float angle1 = atan(dir0.x*dir1.y - dir0.y*dir1.x,
-		      dir0.x*dir1.x + dir0.y*dir1.y);
-  vec2 t1 = normalize(dir0 + dir1);
-  vec2 n1 = vec2(-t1.y, t1.x);
-  vec2 l1 = w / cos(angle1/2.) * n1;
-  float m1 = w * tan(angle1/2.); // sign of angle
+  float cap1 = .0;
+  if (pos0 == pos1) {
+    cap1 = -1.;
+    pos1 -= tangential_offset1;
+
+    emit_vertex(pos1 - normal_offset1, vec2(-w, -w), cap1);
+    emit_vertex(pos1 + normal_offset1, vec2(-w, w), cap1);
+  } else {
+    vec2 o1;
+    float u1;
+    compute_offsets(dir0, dir1, w, o1, u1);
     
-  float angle2 = atan(dir1.x*dir2.y - dir1.y*dir2.x,
-		      dir1.x*dir2.x + dir1.y*dir2.y);
-  vec2 t2 = normalize(dir1 + dir2);
-  vec2 n2 = vec2(-t2.y, t2.x);
-  vec2 l2 = w / cos(angle2/2.) * n2;
-  float m2 = w * tan(angle2/2.);
+    emit_vertex(pos1 - o1, vec2(-u1, -w), cap1);
+    emit_vertex(pos1 + o1, vec2(u1, w), cap1);
+  }
 
-  /* float u_max = vertex.line_length + w; */
-  /* emit_vertex(pos1 - tangential_offset1 - normal_offset1, vec2(-w, -w)); */
-  /* emit_vertex(pos1 - tangential_offset1 + normal_offset1, vec2(-w, w)); */
-  /* emit_vertex(pos2 + tangential_offset1 - normal_offset1, vec2(u_max, -w)); */
-  /* emit_vertex(pos2 + tangential_offset1 + normal_offset1, vec2(u_max, w)); */
+  float cap2 = .0;
+  if (pos2 == pos3) {
+    cap2 = 1.;
+    pos2 += tangential_offset1;
+    float u = line_length + w;
 
-  emit_vertex(pos1 - l1, vec2(-m1, -w), vec4(1, 0, 0, 1));
-  emit_vertex(pos1 + l1, vec2(m1, w), vec4(1, 0, 0, 1));
-  emit_vertex(pos2 - l2, vec2(line_length + m2, -w), vec4(0, 1, 0, 1));
-  emit_vertex(pos2 + l2, vec2(line_length - m2,  w), vec4(0, 1, 0, 1));
+    emit_vertex(pos2 - normal_offset1, vec2(u, -w), cap2);
+    emit_vertex(pos2 + normal_offset1, vec2(u, w), cap2);
+  } else {
+    vec2 o2;
+    float u2;
+    compute_offsets(dir1, dir2, w, o2, u2);
 
-  /* m1 = 0; */
-  /* m2 = 0; */
-  
-  /* emit_vertex(pos1 - abs(m1) * dir1 - normal_offset1, vec2(-abs(m1), -w), vec4(1, 1, 0, 1)); */
-  /* emit_vertex(pos1 - abs(m1) * dir1 + normal_offset1, vec2(-abs(m1), w), vec4(1, 1, 0, 1)); */
-  /* emit_vertex(pos2 + abs(m2) * dir1 - normal_offset1, vec2(line_length + abs(m2), -w), vec4(1, 1, 0, 1)); */
-  /* EndPrimitive(); */
-
-  /* emit_vertex(pos1 - abs(m1) * dir1 + normal_offset1, vec2(-abs(m1), w), vec4(0, 1, 1, 1)); */
-  /* emit_vertex(pos2 + abs(m2) * dir1 + normal_offset1, vec2(line_length + abs(m2),  w), vec4(0, 1, 1, 1)); */
-  /* emit_vertex(pos2 + abs(m2) * dir1 - normal_offset1, vec2(line_length + abs(m2), -w), vec4(0, 1, 1, 1)); */
+    emit_vertex(pos2 - o2, vec2(line_length + u2, -w), cap2);
+    emit_vertex(pos2 + o2, vec2(line_length - u2,  w), cap2);
+  }
   
   EndPrimitive();
 }

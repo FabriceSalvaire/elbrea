@@ -18,6 +18,7 @@ in VertexAttributes
   float line_length;
   float line_width;
   vec4 colour;
+  float cap;
 } vertex;
 
 /* *********************************************************************************************** */
@@ -35,22 +36,15 @@ cap(int type, float dx, float dy, float t)
 
 // Compute distance to join
 float
-join(in vec2 uv, in float line_stop, in float line_width, inout vec4 colour)
+join(in vec2 uv, in float line_stop, in float line_width)
 {
-  float dx = uv.x;
+  float u = uv.x;
   float d = abs(uv.y);
   
-  if (dx < .0) {
-    /* d = max(d, length(uv)); */
-    colour = vec4(1, 0, 0, .5);
-  }
-  else if (dx > line_stop) {
-    /* d = max(d, length(uv - vec2(line_stop, .0))); */
-    colour = vec4(0, 1, 0, .5);
-  }
-  else {
-    // colour = vec4(1, 1, 1, 1);
-  }
+  if (u < .0)
+    d = max(d, length(uv));
+  else if (u > line_stop)
+    d = max(d, length(uv - vec2(line_stop, .0)));
   
   return d;
 }
@@ -59,10 +53,11 @@ join(in vec2 uv, in float line_stop, in float line_width, inout vec4 colour)
 
 void main()
 {
+  vec4 colour = vertex.colour;
   // If colour is fully transparent we just discard the fragment
-  if (vertex.colour.a <= 0.0)
+  if (colour.a <= 0.0)
     discard;
-
+  
   float u = vertex.uv.x;
   float v = vertex.uv.y;
   float t = vertex.line_width/2. - antialias_diameter;
@@ -74,16 +69,15 @@ void main()
   
   float d = .0;
   // start cap
-  /* if (u < line_start) */
-  /*   d = cap(cap_type, abs(u), dy, t); */
-  /* // stop cap */
-  /* else if (u > line_stop) */
-  /*   d = cap(cap_type, abs(u) - line_stop, dy, t); */
-  /* else */
-  /* d = dy; */
-  vec4 colour = vertex.colour;
-  // d = dy;
-  d = join(vertex.uv, line_stop, vertex.line_width, colour);
+  if (vertex.cap == -1.) { //  && u < .0
+    d = cap(cap_type, abs(u), dy, t);
+    colour = vec4(1, 0, 0, 1); 
+  }
+  // stop cap
+  else if (vertex.cap == 1. && u > line_stop)
+    d = cap(cap_type, abs(u) - line_stop, dy, t);
+  else
+    d = join(vertex.uv, line_stop, vertex.line_width);
   
   // Anti-alias test, distance to border
   d -= t;
@@ -92,11 +86,7 @@ void main()
   else
     {
       d /= antialias_diameter;
-      /* fragment_colour = vec4(colour.xyz, exp(-d*d) * colour.a); */
-      if (colour == vec4(1, 1, 1, 1))
-	fragment_colour = vec4(0, 0, 1, 1);
-      else
-	fragment_colour = colour;
+      fragment_colour = vec4(colour.xyz, exp(-d*d) * colour.a);
     }
 }
 
