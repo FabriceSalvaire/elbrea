@@ -121,13 +121,6 @@ class ViewerApplication(GuiApplicationBase):
         glwidget.init_tools() # Fixme: for shader
         glwidget._ready = True
         glwidget.display_all()
-
-        # self.painter_manager.background_painter.disable()
-        from .Sketcher import Path
-        path_painter = self.painter_manager['path']
-        path_painter.update_path(Path(None, None, None))
-        path_painter.enable()
-        glwidget.update()
         
     ##############################################
 

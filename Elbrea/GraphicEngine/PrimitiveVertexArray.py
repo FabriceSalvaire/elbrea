@@ -77,41 +77,12 @@ class LineStripVertexArray(GlVertexArrayObject):
 
         """ Set the vertex array from an iterable of segments. """
 
-        # points = [[10, 10],
-        #           [100, 10], # 1
-        #           [200, 200], # 2
-        #           [200, 10],
-        #           [300, 300],
-        #           [100, 300],
-        #       ]
-        # dx = 2
-        # dy = 10
-        # for i in xrange(10):
-        #     points.append([100 - dx, 300 - 2*i*dy])
-        #     points.append([100 + dx, 300 - (2*i+1)*dy])
-
-        points = []
-        dx = 50
-        dy = 10
-        for i in xrange(5):
-            points.append([10 + 2*i*dx,     100 + dy])
-            points.append([10 + (2*i+1)*dx, 100 - dy])
-        print(points)
-            
-        points = np.array(points)
-        self._number_of_objects = points.shape[0]
-        # self._number_of_objects = path.number_of_points # Right ?
+        self._number_of_objects = path.number_of_points # Right ?
         vertex = np.zeros((self._number_of_objects + 2, 2), dtype=np.float32)
-        vertex[1:-1] = points
-        # vertex = np.asarray(path.points, dtype=np.float32)
-        # vertex[1:-1] = path.points
+        vertex[1:-1] = path.points
         vertex[0] = vertex[1]
         vertex[-1] = vertex[-2]
         vertex += .5
-        # vertex = np.zeros((self._number_of_objects, 2), dtype=np.float32)
-        # points = path.points
-        # for i in range(self._number_of_objects):
-        #     vertex[i] = points[i]
         self._vertex_array_buffer.set(vertex)
 
 ####################################################################################################
