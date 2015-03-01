@@ -22,7 +22,7 @@ import cv2 # Fixme
 from PyOpenGLng.HighLevelApi import GL
 from PyOpenGLng.HighLevelApi.Buffer import GlUniformBuffer
 from PyOpenGLng.HighLevelApi.GlWidgetBase import GlWidgetBase
-from PyOpenGLng.Tools.Interval import IntervalInt2D
+from PyOpenGLng.Math.Interval import IntervalInt2D # duplicated
 
 from .Sketcher import TabletEvent, TabletPointerType, TabletEventType
 from Elbrea.GraphicEngine.GraphicScene import GraphicScene

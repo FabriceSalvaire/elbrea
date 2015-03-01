@@ -14,6 +14,8 @@ import logging
 import cv2
 import numpy as np
 
+from PyQt5 import QtWidgets
+
 ####################################################################################################
 
 from Elbrea.Image.Image import Image
@@ -338,25 +340,35 @@ class Sketcher(ObjectWithTimeStamp):
         if tablet_event.type == TabletEventType.move:
             self._point_filter.send(tablet_event.position)
             position = self._point_filter.value
+            # if position is None:
+            #     self._logger.warning('Not ready')
             if position is not None and self._sketcher_state.previous_position is not None:
                 previous_position = self._sketcher_state.previous_position
-                delta = position - previous_position
-                distance = np.sqrt(np.sum(delta**2))
+                distance = np.sum((position - previous_position)**2) # _square
                 if distance > 1:
-                    path = self._current_path
+                    # path = self._current_path
                     # if not path.same_sketcher_state(self._sketcher_state):
                     #     self._end_path()
                     #     self._start_path()
-                    path.add_point(position)
+                    self._current_path.add_point(position)
                     self.draw_line(previous_position, position)
                     modified = True # Fixme: modified signal ?
                     self._sketcher_state.previous_position = position
         else:
+            position = tablet_event.position
             if tablet_event.type == TabletEventType.press:
                 self._start_path()
+                self._point_filter.send(position)
+                self._current_path.add_point(position)
             elif tablet_event.type == TabletEventType.release:
+                # add point ?
                 self._end_path()
-            self._sketcher_state.previous_position = tablet_event.position
+                application = QtWidgets.QApplication.instance()
+                path_painter = application.painter_manager['path']
+                path_painter.update_path(self._paths[-1])
+                path_painter.enable()
+                modified = True
+            self._sketcher_state.previous_position = position
             
         return modified
 

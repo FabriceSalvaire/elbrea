@@ -52,7 +52,7 @@ class ViewerApplication(GuiApplicationBase):
 
         glwidget = self._main_window.glwidget
 
-        from PyOpenGLng.Tools.Interval import IntervalInt2D
+        from PyOpenGLng.Math.Interval import IntervalInt2D # duplicated
         front_input = self.front_pipeline.input_filter.get_primary_output()
         image_format = front_input.image_format # assume identical
         glwidget._image_interval = IntervalInt2D((0, image_format.width), (0, image_format.height))
@@ -117,11 +117,18 @@ class ViewerApplication(GuiApplicationBase):
         # glwidget.doneCurrent()
 
         self.load()
-        
+
         glwidget.init_tools() # Fixme: for shader
         glwidget._ready = True
         glwidget.display_all()
 
+        # self.painter_manager.background_painter.disable()
+        from .Sketcher import Path
+        path_painter = self.painter_manager['path']
+        path_painter.update_path(Path(None, None, None))
+        path_painter.enable()
+        glwidget.update()
+        
     ##############################################
 
     def switch_face(self):

@@ -12,8 +12,8 @@ import logging
 ####################################################################################################
 
 from PyOpenGLng.HighLevelApi import GL
-from PyOpenGLng.HighLevelApi.Geometry import Point, Offset
 from PyOpenGLng.HighLevelApi.TextureVertexArray import GlTextureVertexArray
+from PyOpenGLng.Math.Geometry import Point, Offset
 
 ####################################################################################################
 
@@ -78,7 +78,7 @@ class BackgroundPainter(Painter):
 
         if self._current_painter is not None:
             self._logger.info("current painter {}".format(self._current_painter))
-            self._texture_painters[self._current_painter].paint()
+            # self._texture_painters[self._current_painter].paint()
 
 ####################################################################################################
 

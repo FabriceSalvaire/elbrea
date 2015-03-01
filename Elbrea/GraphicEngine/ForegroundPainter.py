@@ -10,23 +10,20 @@
 import logging
 import os
 
-# from PyQt5 import QtCore
-
 ####################################################################################################
 
 from PyOpenGLng.HighLevelApi import GL
-from PyOpenGLng.HighLevelApi.Geometry import Point, Offset, Segment
 from PyOpenGLng.HighLevelApi.ImageTexture import ImageTexture
 from PyOpenGLng.HighLevelApi.PrimitiveVertexArray import GlSegmentVertexArray
 from PyOpenGLng.HighLevelApi.TextVertexArray import TextVertexArray
 from PyOpenGLng.HighLevelApi.TextureFont import TextureFont
 from PyOpenGLng.HighLevelApi.TextureVertexArray import GlTextureVertexArray
+from PyOpenGLng.Math.Geometry import Point, Offset, Segment
 
-# from .FrontBackPainter import FrontBackPainter
-from .Painter import RegisteredPainter, Painter # , PainterMetaClass
+from .Painter import RegisteredPainter, Painter
 from Elbrea.Tools.TimeStamp import ObjectWithTimeStamp
 
-# from .ShaderProgrames import shader_manager
+from .PrimitiveVertexArray import LineStripVertexArray
 
 ####################################################################################################
 
@@ -283,10 +280,63 @@ class SketcherPainter(Painter, ObjectWithTimeStamp):
 
 ####################################################################################################
 
-# class FrontBackSketcherPainter(FrontBackPainter, metaclass = PainterMetaClass):
+class PathPainter(RegisteredPainter):
 
-#     __painter_name__ = 'sketcher'
+    __painter_name__ = 'path'
+
+    _logger = _module_logger.getChild('PathPainter')
+
+    ##############################################
     
+    def __init__(self, painter_manager):
+
+        super(PathPainter, self).__init__(painter_manager)
+
+        self._glwidget = self._painter_manager.glwidget
+        self._shader_program = self._glwidget.shader_manager.wide_line_shader_program
+        self.reset()
+
+    ##############################################
+
+    def reset(self):
+
+        self._segment_vertex_array = None
+        self.disable()
+
+    ##############################################
+
+    def update_path(self, path):
+
+        self._logger.debug('Update path')
+        # Fixme: move to glwidget
+        self._glwidget.makeCurrent()
+        # segments = [Segment(Point(point1), Point(point2))
+        #             for point1, point2 in path.pair_iterator()]
+        # self._segment_vertex_array = GlSegmentVertexArray(segments)
+        self._segment_vertex_array = LineStripVertexArray(path)
+        self._segment_vertex_array.bind_to_shader(self._shader_program.interface.attributes.position)
+        self._glwidget.doneCurrent()
+
+    ##############################################
+
+    def paint(self):
+
+        GL.glEnable(GL.GL_BLEND)
+        # Blending: O = Sf*S + Df*D
+        # alpha: 0: complete transparency, 1: complete opacity
+        # Set (Sf, Df) for transparency: O = Sa*S + (1-Sa)*D 
+        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+        
+        if self._segment_vertex_array is not None:
+            self._shader_program.bind()
+            self._shader_program.uniforms.colour = (1, 1, 1)
+            # self._shader_program.uniforms.cap_type = 1
+            self._shader_program.uniforms.antialias_diameter = 1.
+            self._shader_program.uniforms.line_width = 10
+            self._segment_vertex_array.draw()
+
+        GL.glDisable(GL.GL_BLEND)
+            
 ####################################################################################################
 #
 # End
