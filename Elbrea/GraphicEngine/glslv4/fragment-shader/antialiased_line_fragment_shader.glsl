@@ -41,15 +41,15 @@ join(in vec2 uv, in float line_stop, in float line_width, inout vec4 colour)
   float d = abs(uv.y);
   
   if (dx < .0) {
-    d = max(d, length(uv));
+    /* d = max(d, length(uv)); */
     colour = vec4(1, 0, 0, .5);
   }
   else if (dx > line_stop) {
-    d = max(d, length(uv - vec2(line_stop, .0)));
+    /* d = max(d, length(uv - vec2(line_stop, .0))); */
     colour = vec4(0, 1, 0, .5);
   }
   else {
-    colour = vec4(1, 1, 1, .5);
+    // colour = vec4(1, 1, 1, 1);
   }
   
   return d;
@@ -82,6 +82,7 @@ void main()
   /* else */
   /* d = dy; */
   vec4 colour = vertex.colour;
+  // d = dy;
   d = join(vertex.uv, line_stop, vertex.line_width, colour);
   
   // Anti-alias test, distance to border
@@ -91,8 +92,11 @@ void main()
   else
     {
       d /= antialias_diameter;
-      fragment_colour = vec4(colour.xyz, exp(-d*d) * colour.a);
-      /* fragment_colour = vec4(0, 0, 1, 1); */
+      /* fragment_colour = vec4(colour.xyz, exp(-d*d) * colour.a); */
+      if (colour == vec4(1, 1, 1, 1))
+	fragment_colour = vec4(0, 0, 1, 1);
+      else
+	fragment_colour = colour;
     }
 }
 

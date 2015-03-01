@@ -96,7 +96,8 @@ class LineStripVertexArray(GlVertexArrayObject):
         for i in xrange(5):
             points.append([10 + 2*i*dx,     100 + dy])
             points.append([10 + (2*i+1)*dx, 100 - dy])
-
+        print(points)
+            
         points = np.array(points)
         self._number_of_objects = points.shape[0]
         # self._number_of_objects = path.number_of_points # Right ?
