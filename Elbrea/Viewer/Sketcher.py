@@ -73,7 +73,7 @@ class PathBase(object):
 
         if path_id is None:
             self._path_id = self.__path_id__
-            self.__path_id__ += 1
+            PathBase.__path_id__ += 1
         else:
             self._path_id = path_id
         
@@ -83,6 +83,10 @@ class PathBase(object):
 
     ##############################################
 
+    @property
+    def id(self):
+        return self._path_id
+    
     @property
     def colour(self):
         return self._colour
@@ -444,7 +448,7 @@ class PointFilter(object):
     def __init__(self, window_size):
         
         self._window_size = window_size
-        self._window_points = np.zeros((self._window_size, 2), dtype=np.uint64)
+        self._window_points = np.zeros((self._window_size, 2), dtype=np.float32)
         self._window_counter = 0
         self._window_index = 0
 
@@ -476,7 +480,7 @@ class PointFilter(object):
     def value(self):
 
         if bool(self):
-            return np.mean(self._window_points, axis=0)
+            return np.rint(np.mean(self._window_points, axis=0))
         else:
             return None
     
@@ -560,6 +564,9 @@ class Sketcher(ObjectWithTimeStamp):
 
         self._logger.info(str(tablet_event))
 
+        application = QtWidgets.QApplication.instance()
+        path_painter = application.painter_manager['path']
+        
         modified = False
         if tablet_event.type == TabletEventType.move:
             self._point_filter.send(tablet_event.position)
@@ -571,7 +578,8 @@ class Sketcher(ObjectWithTimeStamp):
                 distance = np.sum((position - previous_position)**2) # _square
                 if distance > 1:
                     self._current_path.add_point(position)
-                    self.draw_line(previous_position, position)
+                    path_painter.update_current_path(self._current_path.to_path())
+                    # self.draw_line(previous_position, position)
                     modified = True # Fixme: modified signal ?
                     self._sketcher_state.previous_position = position
         else:
@@ -583,12 +591,12 @@ class Sketcher(ObjectWithTimeStamp):
             elif tablet_event.type == TabletEventType.release:
                 # add point ?
                 self._end_path()
-                application = QtWidgets.QApplication.instance()
-                path_painter = application.painter_manager['path']
-                path_painter.update_path(self._paths[-1])
-                path_painter.enable()
+                path_painter.reset_current_path()
+                path_painter.add_path(self._paths[-1])
                 modified = True
             self._sketcher_state.previous_position = position
+
+        path_painter.enable()
             
         return modified
 

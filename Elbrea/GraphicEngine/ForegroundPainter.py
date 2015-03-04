@@ -300,23 +300,44 @@ class PathPainter(RegisteredPainter):
 
     def reset(self):
 
-        self._segment_vertex_array = None
+        self._current_path = None
+        self._paths = {}
         self.disable()
 
     ##############################################
 
-    def update_path(self, path):
+    def reset_current_path(self):
 
-        self._logger.debug('Update path')
+        self._current_path = None
+        
+    ##############################################
+
+    def update_current_path(self, path):
+
+        self._logger.debug('Update current path')
         # Fixme: move to glwidget
         self._glwidget.makeCurrent()
-        # segments = [Segment(Point(point1), Point(point2))
-        #             for point1, point2 in path.pair_iterator()]
-        # self._segment_vertex_array = GlSegmentVertexArray(segments)
-        self._segment_vertex_array = LineStripVertexArray(path)
-        self._segment_vertex_array.bind_to_shader(self._shader_program.interface.attributes.position)
+        self._current_path = LineStripVertexArray(path)
+        self._current_path.colour = path.colour
+        self._current_path.line_width = path.pencil_size
+        self._current_path.bind_to_shader(self._shader_program.interface.attributes.position)
         self._glwidget.doneCurrent()
 
+    ##############################################
+
+    def add_path(self, path):
+
+        self._logger.debug('Add path {}'.format(path.id))
+        # Fixme: move to glwidget
+        self._glwidget.makeCurrent()
+        path_vao = LineStripVertexArray(path)
+        path_vao.id = path.id
+        path_vao.colour = path.colour
+        path_vao.line_width = path.pencil_size
+        path_vao.bind_to_shader(self._shader_program.interface.attributes.position)
+        self._paths[path_vao.id] = path_vao
+        self._glwidget.doneCurrent()
+        
     ##############################################
 
     def paint(self):
@@ -326,16 +347,24 @@ class PathPainter(RegisteredPainter):
         # alpha: 0: complete transparency, 1: complete opacity
         # Set (Sf, Df) for transparency: O = Sa*S + (1-Sa)*D 
         GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-        
-        if self._segment_vertex_array is not None:
-            self._shader_program.bind()
-            self._shader_program.uniforms.colour = (1, 1, 1)
-            self._shader_program.uniforms.antialias_diameter = 1.
-            self._shader_program.uniforms.line_width = 5.
-            self._segment_vertex_array.draw()
 
-        GL.glDisable(GL.GL_BLEND)
+        self._shader_program.bind()
+        self._shader_program.uniforms.antialias_diameter = 1.
+        for vao in self._paths.values():
+            self._paint_vao(vao)
+        if self._current_path is not None:
+            self._paint_vao(self._current_path)
             
+        GL.glDisable(GL.GL_BLEND)
+
+    ##############################################
+
+    def _paint_vao(self, vao):
+
+        self._shader_program.uniforms.colour = vao.colour
+        self._shader_program.uniforms.line_width = vao.line_width
+        vao.draw()
+        
 ####################################################################################################
 #
 # End
