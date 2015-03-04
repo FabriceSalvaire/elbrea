@@ -331,7 +331,7 @@ class PathPainter(RegisteredPainter):
             self._shader_program.bind()
             self._shader_program.uniforms.colour = (1, 1, 1)
             self._shader_program.uniforms.antialias_diameter = 1.
-            self._shader_program.uniforms.line_width = 3.
+            self._shader_program.uniforms.line_width = 5.
             self._segment_vertex_array.draw()
 
         GL.glDisable(GL.GL_BLEND)

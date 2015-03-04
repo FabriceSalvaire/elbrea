@@ -341,18 +341,18 @@ class GlWidget(GlWidgetBase):
             if current_tool is tool_bar.pen_tool_action:
                 event_type = event.type()
                 if event_type == QtCore.QEvent.TabletPress:
-                    event_type = TabletEventType.press
+                    tablet_event_type = TabletEventType.press
                 elif event_type == QtCore.QEvent.TabletMove:
-                    event_type = TabletEventType.move
+                    tablet_event_type = TabletEventType.move
                 elif event_type == QtCore.QEvent.TabletRelease:
-                    event_type = TabletEventType.release
+                    tablet_event_type = TabletEventType.release
                 pointer_type = event.pointerType()
                 if pointer_type == QtGui.QTabletEvent.Pen:
                     pointer_type = TabletPointerType.pen
                 elif pointer_type == QtGui.QTabletEvent.Eraser:
                     pointer_type = TabletPointerType.eraser
                 position = self.window_to_gl_coordinate(event, round_to_integer=False)
-                tablet_event = TabletEvent(event_type, pointer_type, position)
+                tablet_event = TabletEvent(tablet_event_type, pointer_type, position)
                 if self._application.sketcher.on_tablet_event(tablet_event):
                     self.update()
         except Exception as exception:

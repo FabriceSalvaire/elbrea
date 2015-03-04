@@ -55,6 +55,12 @@ class TabletEvent(object):
         self.position = position
         self.pressure = pressure
 
+    ##############################################
+
+    def __repr__(self):
+
+        return "type {} pointer type {}".format(self.type, self.pointer_type)
+    
 ####################################################################################################
 
 class PathBase(object):
@@ -552,7 +558,7 @@ class Sketcher(ObjectWithTimeStamp):
 
     def on_pen_event(self, tablet_event):
 
-        self._logger.info("")
+        self._logger.info(str(tablet_event))
 
         modified = False
         if tablet_event.type == TabletEventType.move:
@@ -564,12 +570,8 @@ class Sketcher(ObjectWithTimeStamp):
                 previous_position = self._sketcher_state.previous_position
                 distance = np.sum((position - previous_position)**2) # _square
                 if distance > 1:
-                    # path = self._current_path
-                    # if not path.same_sketcher_state(self._sketcher_state):
-                    #     self._end_path()
-                    #     self._start_path()
                     self._current_path.add_point(position)
-                    #!# self.draw_line(previous_position, position)
+                    self.draw_line(previous_position, position)
                     modified = True # Fixme: modified signal ?
                     self._sketcher_state.previous_position = position
         else:
