@@ -565,7 +565,7 @@ class Sketcher(ObjectWithTimeStamp):
         self._logger.info(str(tablet_event))
 
         application = QtWidgets.QApplication.instance()
-        path_painter = application.painter_manager['path']
+        path_painter = application.painter_manager['path'].current_painter
         
         modified = False
         if tablet_event.type == TabletEventType.move:
