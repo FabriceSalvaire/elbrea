@@ -161,11 +161,14 @@ class GlWidget(GlWidgetBase):
                     self.intensity_profile_picker(event)
                 else:
                     self.colour_picker(event)
-            elif current_tool is tool_bar.pen_tool_action:
+            elif current_tool in (tool_bar.pen_tool_action, tool_bar.eraser_tool_action):
+                # Fixme: to func
+                if current_tool is tool_bar.pen_tool_action:
+                    pointer_type = TabletPointerType.pen
+                else:
+                    pointer_type = TabletPointerType.eraser
                 position = self.window_to_gl_coordinate(event, round_to_integer=False)
-                tablet_event = TabletEvent(TabletEventType.press,
-                                           TabletPointerType.pen,
-                                           position)
+                tablet_event = TabletEvent(TabletEventType.press, pointer_type, position)
                 if self._application.sketcher.on_tablet_event(tablet_event):
                     self.update()
                 
@@ -191,11 +194,13 @@ class GlWidget(GlWidgetBase):
                 self._logger.info(str(self.cropper.interval))
                 text_painter = self._painter_manager['text']
                 text_painter.set_text(self.cropper.interval)
-            elif current_tool is tool_bar.pen_tool_action:
+            elif current_tool in (tool_bar.pen_tool_action, tool_bar.eraser_tool_action):
+                if current_tool is tool_bar.pen_tool_action:
+                    pointer_type = TabletPointerType.pen
+                else:
+                    pointer_type = TabletPointerType.eraser
                 position = self.window_to_gl_coordinate(event, round_to_integer=False)
-                tablet_event = TabletEvent(TabletEventType.release,
-                                           TabletPointerType.pen,
-                                           position)
+                tablet_event = TabletEvent(TabletEventType.release, pointer_type, position)
                 if self._application.sketcher.on_tablet_event(tablet_event):
                     self.update()
                 
@@ -232,11 +237,13 @@ class GlWidget(GlWidgetBase):
             self.colour_picker(event)
         elif current_tool is tool_bar.crop_tool_action:
             self.cropper.update(event) # Fixme: call mouseMoveEvent
-        elif current_tool is tool_bar.pen_tool_action:
+        elif current_tool in (tool_bar.pen_tool_action, tool_bar.eraser_tool_action):
+            if current_tool is tool_bar.pen_tool_action:
+                pointer_type = TabletPointerType.pen
+            else:
+                pointer_type = TabletPointerType.eraser
             position = self.window_to_gl_coordinate(event, round_to_integer=False)
-            tablet_event = TabletEvent(TabletEventType.move,
-                                       TabletPointerType.pen,
-                                       position)
+            tablet_event = TabletEvent(TabletEventType.move, pointer_type, position)
             if self._application.sketcher.on_tablet_event(tablet_event):
                 self.update()
            

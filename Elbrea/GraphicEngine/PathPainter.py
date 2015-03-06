@@ -79,7 +79,13 @@ class PathPainter(Painter):
         path_vao.bind_to_shader(self._shader_program.interface.attributes.position)
         self._paths[path_vao.id] = path_vao
         self._glwidget.doneCurrent()
-        
+
+    ##############################################
+
+    def remove_path(self, path):
+
+        del self._paths[path.id]
+    
     ##############################################
 
     def paint(self):

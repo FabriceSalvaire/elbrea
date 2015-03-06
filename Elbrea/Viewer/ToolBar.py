@@ -114,6 +114,7 @@ class ToolBar(object):
             self._eraser_size_combobox.addItem(str(eraser_size), eraser_size)
 
         self._pencil_size_combobox.currentIndexChanged.connect(self._on_pencil_size_changed)
+        self._eraser_size_combobox.currentIndexChanged.connect(self._on_eraser_size_changed)
         self._pencil_colour_combobox.currentIndexChanged.connect(self._on_pencil_colour_changed)
         # self._eraser_size_combobox.currentIndexChanged.connect(self._on_eraser_size_changed)
         
@@ -153,6 +154,12 @@ class ToolBar(object):
     def _on_pencil_size_changed(self, index):
 
         self._application.sketcher.state.pencil_size = self._pencil_size_combobox.currentData()
+
+    ##############################################
+
+    def _on_eraser_size_changed(self, index):
+
+        self._application.sketcher.state.eraser_size = self._eraser_size_combobox.currentData()
         
     ##############################################
 

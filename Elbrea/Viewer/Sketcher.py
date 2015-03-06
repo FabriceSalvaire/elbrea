@@ -34,6 +34,7 @@ class SketcherState(object):
     def __init__(self):
 
         self.pencil_size = 1
+        self.eraser_size = 1
         self.pencil_colour = (255, 255, 255)
         self.previous_position = None
 
@@ -206,12 +207,12 @@ class Path(PathBase):
         # projection = np.dot(delta, u10)
         projection = delta[:,0]*u10[:,0] + delta[:,1]*u10[:,1]
         indexes = np.where(np.logical_and(0 <= projection, projection < 1))[0]
-        print(indexes)
+        # print(indexes)
         if indexes.shape[0]:
             distance = np.abs(np.cross(delta[indexes], u10[indexes]))
             i_min = np.argmin(distance)
-            print(indexes, projection[indexes], distance)
-            print(i_min, indexes[i_min], distance[i_min])
+            # print(indexes, projection[indexes], distance)
+            # print(i_min, indexes[i_min], distance[i_min])
             return indexes[i_min], distance[i_min]
         else:
             return None, None
@@ -305,7 +306,7 @@ class Path(PathBase):
                     vector10 = point1 - point0
                     intersection = self.segment_intersection(point0, vector10, point2, point3)
                     if intersection is not None:
-                        print(i, j, intersection)
+                        # print(i, j, intersection)
                         intersections.append((i, j, intersection))
         return intersections
 
@@ -363,6 +364,24 @@ class Path(PathBase):
         else:
             return self
 
+    ##############################################
+
+    def erase(self, point, radius):
+
+        i_min, distance = self.nearest_point(point)
+        # print(distance)
+        # Fixme: check distance, path removed (only a point)
+        if i_min is not None and distance <= radius:
+            if i_min == 0:
+                return (self.subpath(lower=1),)
+            elif i_min == self.number_of_points -1:
+                return (self.subpath(upper=i_min -1),)
+            else:
+                return (self.subpath(upper=i_min-1),
+                        self.subpath(lower=i_min+1))
+        else:
+            return None
+                        
 ####################################################################################################
 
 class DynamicPath(PathBase):
@@ -605,9 +624,25 @@ class Sketcher(ObjectWithTimeStamp):
 
         modified = False
 
-        # for path in self._paths:
-        #     path.erase(tablet_event.position, radius=self._sketcher_state.pencil_size)
-        
+        radius = self._sketcher_state.eraser_size
+        position = tablet_event.position
+        erased_paths = []
+        # Fixme: user rtree
+        for path in self._paths:
+            subpaths = path.erase(position, radius)
+            if subpaths is not None:
+                self._logger.info("Erase path {}".format(path.id))
+                erased_paths.append((path, subpaths))
+        for path, subpaths in erased_paths:
+            self._paths.remove(path)
+            self._painter.remove_path(path)
+            self._paths.extend(subpaths)
+            for subpath in subpaths:
+                # subpath._colour = (255, 0, 0)
+                self._painter.add_path(subpath)
+            
+        modified = bool(erased_paths)
+            
         return modified
     
     ##############################################
