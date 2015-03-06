@@ -57,15 +57,21 @@ class ViewerApplication(GuiApplicationBase):
         image_format = front_input.image_format # assume identical
         glwidget._image_interval = IntervalInt2D((0, image_format.width), (0, image_format.height))
 
-        from .Sketcher import FrontBackSketcher
-        self.sketcher = FrontBackSketcher(image_format)
-        
-        # Load Painters
+        # Load registered painters
         from Elbrea.GraphicEngine import ForegroundPainter 
+        
         from Elbrea.GraphicEngine.FrontBackPainter import FrontBackPainterManager
+        from Elbrea.GraphicEngine.FrontBackPainter import FrontBackPainter
         self.painter_manager = FrontBackPainterManager(glwidget)
 
-        from Elbrea.GraphicEngine.FrontBackPainter import FrontBackPainter
+        from Elbrea.GraphicEngine.PathPainter import PathPainter
+        path_painter = FrontBackPainter(self.painter_manager, 'path', PathPainter)
+        self.painter_manager.register_foreground_painter(path_painter)
+        path_painter.enable()
+
+        from .Sketcher import FrontBackSketcher
+        self.sketcher = FrontBackSketcher(image_format, path_painter)
+
         from Elbrea.GraphicEngine.ForegroundPainter import SketcherPainter
         painter = FrontBackPainter(self.painter_manager, 'sketcher', SketcherPainter)
         self.painter_manager.register_foreground_painter(painter)
@@ -74,7 +80,7 @@ class ViewerApplication(GuiApplicationBase):
                               ):
             painter.create_texture(sketcher)
         painter.enable()
-        
+              
         from Elbrea.GraphicEngine import ShaderProgrames as ShaderProgrames
         shader_manager = ShaderProgrames.shader_manager
 
@@ -175,12 +181,11 @@ class ViewerApplication(GuiApplicationBase):
     def load(self):
 
         from .HdfAnnotation import HdfAnnotation
-        from .Sketcher import Path
         path = 'test.hdf5'
         if os.path.exists(path):
             hdf_annotation = HdfAnnotation(path, update=False) # rewrite
-            # Fixme: recto/verso
             self.sketcher.front_sketcher.from_hdf5(hdf_annotation['front'])
+            self.sketcher.back_sketcher.from_hdf5(hdf_annotation['back'])
             
 ####################################################################################################
 #

@@ -492,7 +492,7 @@ class Sketcher(ObjectWithTimeStamp):
     
     ##############################################
     
-    def __init__(self, image_format, sketcher_state):
+    def __init__(self, image_format, sketcher_state, painter):
 
         ObjectWithTimeStamp.__init__(self)
 
@@ -501,6 +501,8 @@ class Sketcher(ObjectWithTimeStamp):
         
         self._sketcher_state = sketcher_state
 
+        self._painter = painter
+        
         self._current_path = None
         self._paths = []
 
@@ -564,9 +566,6 @@ class Sketcher(ObjectWithTimeStamp):
 
         self._logger.info(str(tablet_event))
 
-        application = QtWidgets.QApplication.instance()
-        path_painter = application.painter_manager['path'].current_painter
-        
         modified = False
         if tablet_event.type == TabletEventType.move:
             self._point_filter.send(tablet_event.position)
@@ -578,7 +577,7 @@ class Sketcher(ObjectWithTimeStamp):
                 distance = np.sum((position - previous_position)**2) # _square
                 if distance > 1:
                     self._current_path.add_point(position)
-                    path_painter.update_current_path(self._current_path.to_path())
+                    self._painter.update_current_path(self._current_path.to_path())
                     # self.draw_line(previous_position, position)
                     modified = True # Fixme: modified signal ?
                     self._sketcher_state.previous_position = position
@@ -591,12 +590,12 @@ class Sketcher(ObjectWithTimeStamp):
             elif tablet_event.type == TabletEventType.release:
                 # add point ?
                 self._end_path()
-                path_painter.reset_current_path()
-                path_painter.add_path(self._paths[-1])
+                self._painter.reset_current_path()
+                self._painter.add_path(self._paths[-1])
                 modified = True
             self._sketcher_state.previous_position = position
 
-        path_painter.enable()
+        self._painter.enable()
             
         return modified
 
@@ -626,9 +625,10 @@ class Sketcher(ObjectWithTimeStamp):
 
         for name in group:
             path = Path.from_hdf5(group, name)
-            for point1, point2 in path.pair_iterator():
-                self.draw_line(point1, point2, path.colour, path.pencil_size)
+            # for point1, point2 in path.pair_iterator():
+            #     self.draw_line(point1, point2, path.colour, path.pencil_size)
             self._paths.append(path)
+            self._painter.add_path(path)
             
 ####################################################################################################
 
@@ -638,11 +638,11 @@ class FrontBackSketcher(object):
 
     ##############################################
     
-    def __init__(self, image_format):
+    def __init__(self, image_format, painter):
 
         self.state = SketcherState()
-        self.front_sketcher = Sketcher(image_format, self.state)
-        self.back_sketcher = Sketcher(image_format, self.state)
+        self.front_sketcher = Sketcher(image_format, self.state, painter.front_painter)
+        self.back_sketcher = Sketcher(image_format, self.state, painter.back_painter)
         self._is_front = True
 
     ##############################################
