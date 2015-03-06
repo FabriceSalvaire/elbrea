@@ -122,7 +122,7 @@ class ViewerApplication(GuiApplicationBase):
         # shader_manager.texture_label_shader_program._random_texture = GlRandomTexture(size=1000, texture_unit=1)
         # glwidget.doneCurrent()
 
-        self.load()
+        self.load(self.args.board)
 
         glwidget.init_tools() # Fixme: for shader
         glwidget._ready = True
@@ -163,13 +163,15 @@ class ViewerApplication(GuiApplicationBase):
 
     ##############################################
 
-    def save(self): # get False ???
+    def save(self, board_path=None):
 
         self._logger.info("")
 
+        if board_path is None:
+            board_path = self.args.board
+            
         from .HdfAnnotation import HdfAnnotation
-        path = 'test.hdf5'
-        hdf_annotation = HdfAnnotation(path, update=True)
+        hdf_annotation = HdfAnnotation(board_path, update=True)
          # Fixme: recto/verso
         group = hdf_annotation.create_group('front')
         self.sketcher.front_sketcher.save(group)
@@ -178,12 +180,11 @@ class ViewerApplication(GuiApplicationBase):
 
     ##############################################
 
-    def load(self):
+    def load(self, board_path):
 
         from .HdfAnnotation import HdfAnnotation
-        path = 'test.hdf5'
-        if os.path.exists(path):
-            hdf_annotation = HdfAnnotation(path, update=False) # rewrite
+        if os.path.exists(board_path):
+            hdf_annotation = HdfAnnotation(board_path, update=False) # rewrite
             self.sketcher.front_sketcher.from_hdf5(hdf_annotation['front'])
             self.sketcher.back_sketcher.from_hdf5(hdf_annotation['back'])
             

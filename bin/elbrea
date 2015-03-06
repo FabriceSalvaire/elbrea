@@ -53,6 +53,10 @@ argument_parser.add_argument('back_image', metavar='BACK',
                              action=PathAction,
                              help='back image path')
 
+argument_parser.add_argument('board', metavar='FILE.hdf5',
+                             action=PathAction,
+                             help='board path')
+
 argument_parser.add_argument('--user-script',
                              action=PathAction,
                              default=None,

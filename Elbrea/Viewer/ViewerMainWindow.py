@@ -52,7 +52,7 @@ class ViewerMainWindow(MainWindowBase):
                     'Save',
                     self,
                     toolTip='Save',
-                    triggered=self._application.save,
+                    triggered=self.save_board,
                     shortcut='Ctrl+S',
                     shortcutContext=Qt.ApplicationShortcut,
                 )
@@ -151,6 +151,13 @@ class ViewerMainWindow(MainWindowBase):
 
         pass
 
+    ##############################################
+
+    def save_board(self, checked):
+
+        # triggered -> checked ???
+        self._application.save()
+    
 ####################################################################################################
 #
 # End
