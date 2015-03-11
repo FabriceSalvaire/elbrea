@@ -43,7 +43,7 @@ class PathPainter(Painter):
     def reset(self):
 
         self._current_path = None
-        self._paths = {}
+        self._paths = {} # Fixme: must be extern for pages
         self.disable()
 
     ##############################################

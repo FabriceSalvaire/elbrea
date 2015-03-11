@@ -28,6 +28,9 @@ class Pages(list):
 
 class Page(object):
 
+    # Page is scene, GL page keeps reference to vao, painter render the scene
+    # We could reimplement add_path and remove_path
+    
     ##############################################
 
     def __init__(self):
@@ -50,20 +53,20 @@ class Page(object):
 
     ##############################################
 
-    def add_paths(self, paths):
-
-        # self._paths.update({path.id:path for path in paths})
-        for path in paths:
-            self.add_path(path)
-        
-    ##############################################
-
     def remove_path(self, path):
 
         print(self._paths)
         del self._paths[path.id]
         # self._rtree.delete(path.id, path.interval.bounding_box())
 
+    ##############################################
+
+    def add_paths(self, paths):
+
+        # self._paths.update({path.id:path for path in paths})
+        for path in paths:
+            self.add_path(path)
+        
     ##############################################
 
     def save(self, group):

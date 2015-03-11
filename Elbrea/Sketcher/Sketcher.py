@@ -106,15 +106,13 @@ class SketcherState(object):
         
 ####################################################################################################
 
-class Sketcher(ObjectWithTimeStamp):
+class PathSketcher(object):
 
-    _logger = _module_logger.getChild('Sketcher')
+    _logger = _module_logger.getChild('PathSketcher')
     
     ##############################################
     
     def __init__(self, sketcher_state, page, painter):
-
-        ObjectWithTimeStamp.__init__(self)
 
         self._sketcher_state = sketcher_state
 

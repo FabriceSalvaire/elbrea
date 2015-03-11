@@ -65,8 +65,9 @@ class SketcherApplication(GuiApplicationBase):
         from .Page import Page
         self._page = Page()
         
-        from .Sketcher import SketcherState, Sketcher
-        self.sketcher = Sketcher(SketcherState(), self._page, path_painter)
+        from .Sketcher import SketcherState, PathSketcher
+        self.sketcher_state = SketcherState()
+        self.sketcher = PathSketcher(self.sketcher_state, self._page, path_painter)
         
         self.load(self.args.journal)
 
