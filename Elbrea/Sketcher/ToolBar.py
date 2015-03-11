@@ -44,6 +44,13 @@ class ToolBar(object):
                           triggered=self.clear_tool,
                           )
 
+        self.position_tool_action = \
+            QtWidgets.QAction(icon_loader.get_icon('position-tool', self.icon_size),
+                          'Position Tool',
+                          self._application,
+                          checkable=True,
+                          )
+        
         self.pen_tool_action = \
             QtWidgets.QAction(icon_loader.get_icon('pencil', self.icon_size),
                           'Pen Tool',
@@ -94,8 +101,6 @@ class ToolBar(object):
         
         self._tool_bar.addAction(self.clear_tool_action)
         items = (self.position_tool_action,
-                 self.colour_picker_tool_action,
-                 self.crop_tool_action,
                  self.pen_tool_action,
                  self._pencil_size_combobox,
                  self._pencil_colour_combobox,
@@ -118,10 +123,12 @@ class ToolBar(object):
 
     def clear_tool(self):
 
-        current_tool = self.current_tool()
+        pass
 
-        if current_tool is self.crop_tool_action:
-            self._application.main_window.glwidget.cropper.reset()
+        # current_tool = self.current_tool()
+
+        # if current_tool is self.crop_tool_action:
+        #     self._application.main_window.glwidget.cropper.reset()
 
     ##############################################
 

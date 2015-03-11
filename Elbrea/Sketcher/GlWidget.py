@@ -53,23 +53,23 @@ class GlWidget(GlWidgetBase):
 
         self._painter_manager = None
 
-        cursor_size = 16
-        # B=1 M=1 black
-        # B=0 M=1 white
-        # B=0 M=0 transparent
-        data = np.zeros((cursor_size, cursor_size), dtype=np.uint8)
-        border = 3
-        data[...] = 1
-        data[:border] = 0
-        data[-border:] = 0
-        data[:,:border] = 0
-        data[:,-border:] = 0
-        bitmap = QtGui.QBitmap.fromData(QtCore.QSize(cursor_size, cursor_size), data.flatten())
-        data = np.zeros((cursor_size, cursor_size), dtype=np.bool)
-        data[...] = 1
-        mask = QtGui.QBitmap.fromData(QtCore.QSize(cursor_size, cursor_size), data.flatten())
-        self._cursor = QtGui.QCursor(bitmap, mask)
-        self.setCursor(self._cursor)
+        # cursor_size = 16
+        # # B=1 M=1 black
+        # # B=0 M=1 white
+        # # B=0 M=0 transparent
+        # data = np.zeros((cursor_size, cursor_size), dtype=np.uint8)
+        # border = 3
+        # data[...] = 1
+        # data[:border] = 0
+        # data[-border:] = 0
+        # data[:,:border] = 0
+        # data[:,-border:] = 0
+        # bitmap = QtGui.QBitmap.fromData(QtCore.QSize(cursor_size, cursor_size), data.flatten())
+        # data = np.zeros((cursor_size, cursor_size), dtype=np.bool)
+        # data[...] = 1
+        # mask = QtGui.QBitmap.fromData(QtCore.QSize(cursor_size, cursor_size), data.flatten())
+        # self._cursor = QtGui.QCursor(bitmap, mask)
+        # self.setCursor(self._cursor)
         
     ##############################################
 
@@ -227,10 +227,8 @@ class GlWidget(GlWidgetBase):
             self.translate_xy(dxy_screen)
             self._set_previous_position(position, position_screen)
             self.show_coordinate(position)
-        elif current_tool is tool_bar.colour_picker_tool_action:
-            self.colour_picker(event)
-        elif current_tool is tool_bar.crop_tool_action:
-            self.cropper.update(event) # Fixme: call mouseMoveEvent
+        # elif current_tool is tool_bar.crop_tool_action:
+        #     self.cropper.update(event) # Fixme: call mouseMoveEvent
         elif current_tool in (tool_bar.pen_tool_action, tool_bar.eraser_tool_action):
             if current_tool is tool_bar.pen_tool_action:
                 pointer_type = TabletPointerType.pen
