@@ -62,9 +62,11 @@ class SketcherApplication(GuiApplicationBase):
         self.painter_manager.register_foreground_painter(path_painter)
         path_painter.enable()
 
+        from .Page import Page
+        self._page = Page()
+        
         from .Sketcher import SketcherState, Sketcher
-        # Fixme: image_format=None
-        self.sketcher = Sketcher(None, SketcherState(), path_painter)
+        self.sketcher = Sketcher(SketcherState(), self._page, path_painter)
         
         self.load(self.args.journal)
 
@@ -85,7 +87,7 @@ class SketcherApplication(GuiApplicationBase):
         from Elbrea.Viewer.HdfAnnotation import HdfAnnotation
         hdf_annotation = HdfAnnotation(journal_path, update=True)
         group = hdf_annotation.create_group('page')
-        self.sketcher.save(group)
+        self._page.save(group)
 
     ##############################################
 
@@ -94,7 +96,10 @@ class SketcherApplication(GuiApplicationBase):
         from Elbrea.Viewer.HdfAnnotation import HdfAnnotation
         if os.path.exists(journal_path):
             hdf_annotation = HdfAnnotation(journal_path, update=False) # rewrite
-            self.sketcher.from_hdf5(hdf_annotation['page'])
+            self._page.from_hdf5(hdf_annotation['page'])
+            path_painter = self.painter_manager['path']
+            for path in self._page.paths:
+                path_painter.add_path(path)
             
 ####################################################################################################
 #
