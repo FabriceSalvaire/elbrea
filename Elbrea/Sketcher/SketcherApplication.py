@@ -57,6 +57,11 @@ class SketcherApplication(GuiApplicationBase):
         from Elbrea.GraphicEngine.PainterManager import BasicPainterManager
         self.painter_manager = BasicPainterManager(glwidget)
 
+        from .PagePainter import PagePainter
+        page_painter = PagePainter(self.painter_manager)
+        self.painter_manager.register_foreground_painter(page_painter)
+        page_painter.enable()
+
         from Elbrea.GraphicEngine.PathPainter import PathPainter
         path_painter = PathPainter(self.painter_manager)
         self.painter_manager.register_foreground_painter(path_painter)

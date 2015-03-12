@@ -391,13 +391,16 @@ class Segment(Path):
     
     ##############################################
 
-    def __init__(self, colour, pencil_size, first_point):
+    def __init__(self, colour, pencil_size, first_point=None, points=None):
 
         # Fixme: make_array
-        points = np.zeros((2, 2), dtype=np.uint16)
-        points[0] = first_point
-        
-        super(Segment, self).__init__(colour, pencil_size, points)
+        points_ = np.zeros((2, 2), dtype=np.uint16)
+        if points is None:
+            points_[0] = first_point
+        else:
+            points_[...] = points
+            
+        super(Segment, self).__init__(colour, pencil_size, points_)
         
     ##############################################
 
