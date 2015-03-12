@@ -54,7 +54,7 @@ if shader_manager.has_visual():
         #
         'fragment-shader/simple_fragment_shader',
         'fragment-shader/stipple_line_fragment_shader',
-        'fragment-shader/antialiased_line_fragment_shader',
+        'fragment-shader/antialiased_segment_fragment_shader',
         #
         'geometry-shader/fixed_colour_vertex_shader_in',
         #
@@ -62,7 +62,8 @@ if shader_manager.has_visual():
         'geometry-shader/rectangle_geometry_shader',
         'geometry-shader/roi_geometry_shader',
         'geometry-shader/stipple_line_geometry_shader',
-        'geometry-shader/wide_line_geometry_shader',
+        'geometry-shader/segment_geometry_shader',
+        'geometry-shader/path_geometry_shader',
         #
         'texture-shader/texture_vertex_shader',
         'texture-shader/texture_fragment_shader',
@@ -124,13 +125,20 @@ if shader_manager.has_visual():
         #  'program_interface':position_shader_program_interface,
         #  },
     
-        {'program_name':'wide_line_shader_program',
+        {'program_name':'segment_shader_program',
          'shader_list':('fixed_colour_vertex_shader_in',
-                        'wide_line_geometry_shader',
-                        'antialiased_line_fragment_shader'),
+                        'segment_geometry_shader',
+                        'antialiased_segment_fragment_shader'),
          'program_interface':position_shader_program_interface,
          },
-    
+
+        {'program_name':'path_shader_program',
+         'shader_list':('fixed_colour_vertex_shader_in',
+                        'path_geometry_shader',
+                        'antialiased_segment_fragment_shader'),
+         'program_interface':position_shader_program_interface,
+         },
+            
         # {'program_name':'stipple_line_shader_program',
         #  'shader_list':('fixed_colour_vertex_shader_in',
         #                 'stipple_line_geometry_shader',

@@ -14,7 +14,7 @@ import logging
 from PyOpenGLng.HighLevelApi import GL
 
 from .Painter import Painter
-from .PrimitiveVertexArray import LineStripVertexArray
+from .PrimitiveVertexArray import LineVertexArray, LineStripVertexArray
 
 ####################################################################################################
 
@@ -22,20 +22,19 @@ _module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
 
-class PathPainter(Painter):
+class PrimitivePainter(Painter):
 
-    __painter_name__ = 'path'
+    __primitive_class__ = None
 
-    _logger = _module_logger.getChild('PathPainter')
-
+    _logger = _module_logger.getChild('PrimitivePainter')
+    
     ##############################################
     
     def __init__(self, painter_manager):
 
-        super(PathPainter, self).__init__(painter_manager)
+        super(PrimitivePainter, self).__init__(painter_manager)
 
         self._glwidget = self._painter_manager.glwidget
-        self._shader_program = self._glwidget.shader_manager.wide_line_shader_program
         self.reset()
 
     ##############################################
@@ -59,7 +58,7 @@ class PathPainter(Painter):
         self._logger.debug('Update current path')
         # Fixme: move to glwidget
         self._glwidget.makeCurrent()
-        self._current_path = LineStripVertexArray(path)
+        self._current_path = self.__primitive_class__(path)
         self._current_path.colour = path.colour
         self._current_path.line_width = path.pencil_size
         self._current_path.bind_to_shader(self._shader_program.interface.attributes.position)
@@ -72,7 +71,7 @@ class PathPainter(Painter):
         self._logger.debug('Add path {}'.format(path.id))
         # Fixme: move to glwidget
         self._glwidget.makeCurrent()
-        path_vao = LineStripVertexArray(path)
+        path_vao = self.__primitive_class__(path)
         path_vao.id = path.id
         path_vao.colour = path.colour
         path_vao.line_width = path.pencil_size
@@ -112,7 +111,35 @@ class PathPainter(Painter):
         self._shader_program.uniforms.colour = vao.colour
         self._shader_program.uniforms.line_width = vao.line_width
         vao.draw()
-               
+
+####################################################################################################
+
+class SegmentPainter(PrimitivePainter):
+
+    __painter_name__ = 'segment'
+    __primitive_class__ = LineVertexArray
+
+    ##############################################
+    
+    def __init__(self, painter_manager):
+
+        super(SegmentPainter, self).__init__(painter_manager)
+        self._shader_program = self._glwidget.shader_manager.segment_shader_program
+    
+####################################################################################################
+
+class PathPainter(PrimitivePainter):
+
+    __painter_name__ = 'path'
+    __primitive_class__ = LineStripVertexArray
+
+    ##############################################
+    
+    def __init__(self, painter_manager):
+
+        super(PathPainter, self).__init__(painter_manager)
+        self._shader_program = self._glwidget.shader_manager.path_shader_program
+    
 ####################################################################################################
 #
 # End

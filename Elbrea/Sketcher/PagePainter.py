@@ -17,7 +17,7 @@ from PyOpenGLng.HighLevelApi import GL
 
 from .Path import Segment 
 from Elbrea.GraphicEngine.Painter import Painter
-from Elbrea.GraphicEngine.PrimitiveVertexArray import LineStripVertexArray
+from Elbrea.GraphicEngine.PrimitiveVertexArray import LineVertexArray
 
 ####################################################################################################
 
@@ -38,7 +38,7 @@ class PagePainter(Painter):
         super(PagePainter, self).__init__(painter_manager)
 
         self._glwidget = self._painter_manager.glwidget
-        self._shader_program = self._glwidget.shader_manager.wide_line_shader_program
+        self._shader_program = self._glwidget.shader_manager.segment_shader_program
         self.reset()
 
         self.set_page(step)
@@ -72,7 +72,7 @@ class PagePainter(Painter):
 
     def add_path(self, path):
 
-        path_vao = LineStripVertexArray(path)
+        path_vao = LineVertexArray(path)
         path_vao.id = path.id
         path_vao.colour = path.colour
         path_vao.line_width = path.pencil_size

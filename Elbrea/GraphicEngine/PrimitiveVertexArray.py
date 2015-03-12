@@ -32,17 +32,17 @@ _module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
 
-class LineStripVertexArray(GlVertexArrayObject):
+class LineVertexArray(GlVertexArrayObject):
 
     """ Base class to draw segments primitives as lines. """
 
-    _logger = _module_logger.getChild('LineStripVertexArray')
+    _logger = _module_logger.getChild('LineVertexArray')
     
     ##############################################
     
     def __init__(self, path=None):
 
-        super(LineStripVertexArray, self).__init__()
+        super(LineVertexArray, self).__init__()
 
         self._number_of_objects = 0
         self._vertex_array_buffer = GlArrayBuffer()
@@ -60,6 +60,36 @@ class LineStripVertexArray(GlVertexArrayObject):
         self.bind()
         shader_program_interface_attribute.bind_to_buffer(self._vertex_array_buffer)
         self.unbind()
+
+    ##############################################
+    
+    def draw(self):
+
+        """ Draw the vertex array as lines. """
+
+        self.bind()
+        GL.glDrawArrays(GL.GL_LINES, 0, self._number_of_objects)
+        self.unbind()
+
+    ##############################################
+    
+    def set(self, path):
+
+        """ Set the vertex array from an iterable of segments. """
+
+        self._number_of_objects = path.number_of_points # Right ?
+        vertex = np.zeros((self._number_of_objects, 2), dtype=np.float32)
+        vertex[...] = path.points
+        vertex += .5
+        self._vertex_array_buffer.set(vertex)
+
+####################################################################################################
+
+class LineStripVertexArray(LineVertexArray):
+
+    """ Base class to draw segments primitives as line strips. """
+
+    _logger = _module_logger.getChild('LineStripVertexArray')
 
     ##############################################
     

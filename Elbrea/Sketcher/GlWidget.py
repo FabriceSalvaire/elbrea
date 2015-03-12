@@ -26,7 +26,6 @@ from PyOpenGLng.Math.Interval import IntervalInt2D # duplicated
 
 from .Sketcher import TabletEvent, TabletPointerType, TabletEventType
 from Elbrea.GraphicEngine.GraphicScene import GraphicScene
-from Elbrea.Image.Colour import RgbIntColour
 
 ####################################################################################################
  
@@ -45,7 +44,8 @@ class GlWidget(GlWidgetBase):
         self._logger.debug('Initialise GlWidget')
 
         super(GlWidget, self).__init__(parent)
-
+        self.clear_colour = (1, 1, 1, 0)
+        
         self._application = QtWidgets.QApplication.instance()
 
         self._previous_position = None

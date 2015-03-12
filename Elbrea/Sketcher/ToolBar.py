@@ -88,10 +88,10 @@ class ToolBar(object):
             self._pencil_size_combobox.addItem(str(pencil_size), pencil_size)
             
         self._pencil_colour_combobox = QtWidgets.QComboBox(self._main_window)
-        self._pencil_colours = (Qt.white, Qt.black,
+        self._pencil_colours = (Qt.black,
                                 Qt.red, Qt.blue, Qt.green,
                                 Qt.cyan, Qt.magenta, Qt.yellow,
-                            )
+                                Qt.white)
         for colour in self._pencil_colours:
             pixmap = QtGui.QPixmap(10, 10)
             pixmap.fill(colour)
@@ -105,8 +105,8 @@ class ToolBar(object):
         self._pencil_size_combobox.currentIndexChanged.connect(self._on_pencil_size_changed)
         self._eraser_size_combobox.currentIndexChanged.connect(self._on_eraser_size_changed)
         self._pencil_colour_combobox.currentIndexChanged.connect(self._on_pencil_colour_changed)
-        # self._eraser_size_combobox.currentIndexChanged.connect(self._on_eraser_size_changed)
-        
+        self._eraser_size_combobox.currentIndexChanged.connect(self._on_eraser_size_changed)
+       
         self._tool_bar.addAction(self.clear_tool_action)
         items = (self.position_tool_action,
                  self.pen_tool_action,
@@ -157,7 +157,16 @@ class ToolBar(object):
 
         colour = QtGui.QColor(self._pencil_colours[index])
         self._application.sketcher_state.pencil_colour = (colour.red(), colour.green(), colour.blue())
+
+    ##############################################
+
+    def init_sketcher_state(self):
         
+        self._on_pencil_size_changed(0)
+        self._on_eraser_size_changed(0)
+        self._on_pencil_colour_changed(0)
+        self._on_eraser_size_changed(0)
+    
 ####################################################################################################
 #
 # End

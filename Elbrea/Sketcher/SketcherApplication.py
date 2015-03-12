@@ -62,7 +62,10 @@ class SketcherApplication(GuiApplicationBase):
         self.painter_manager.register_foreground_painter(page_painter)
         page_painter.enable()
 
-        from Elbrea.GraphicEngine.PathPainter import PathPainter
+        from Elbrea.GraphicEngine.PathPainter import SegmentPainter, PathPainter
+        segment_painter = SegmentPainter(self.painter_manager)
+        self.painter_manager.register_foreground_painter(segment_painter)
+        segment_painter.enable()
         path_painter = PathPainter(self.painter_manager)
         self.painter_manager.register_foreground_painter(path_painter)
         path_painter.enable()
@@ -72,7 +75,8 @@ class SketcherApplication(GuiApplicationBase):
         
         from .Sketcher import SketcherState, SegmentSketcher, PathSketcher
         self.sketcher_state = SketcherState()
-        self.segment_sketcher = SegmentSketcher(self.sketcher_state, self._page, path_painter)
+        self._main_window.tool_bar.init_sketcher_state()
+        self.segment_sketcher = SegmentSketcher(self.sketcher_state, self._page, segment_painter)
         self.path_sketcher = PathSketcher(self.sketcher_state, self._page, path_painter)
         
         self.load(self.args.journal)
