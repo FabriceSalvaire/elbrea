@@ -75,7 +75,8 @@ class Path(PathBase):
         
         self._points = points
         # self._interval = self._compute_interval()
-
+        self._number_of_points = self._points.shape[0]
+        
         self.index_interval = None
         # if index_interval is None:
         #     self.index_interval = IntervalInt(0, self.number_of_points -1)
@@ -99,27 +100,27 @@ class Path(PathBase):
 
     @property
     def number_of_points(self):
-        return self._points.shape[0]
+        return self._number_of_points
     
     @property
     def indexes(self):
-        return np.arange(self.number_of_points)
+        return np.arange(self._number_of_points)
     
     @property
     def x(self):
-        return self.points[:,0]
+        return self._points[:,0]
 
     @property
     def y(self):
-        return self.points[:,1]
+        return self._points[:,1]
     
     @property
     def p0(self):
-        return self.points[0]
+        return self._points[0]
 
     @property
     def p1(self):
-        return self.points[-1]
+        return self._points[-1]
 
     @property
     def p10(self):
@@ -169,7 +170,7 @@ class Path(PathBase):
         # A x u = sin * |A|
         # sin = d / |A|
         # d = (P - P0) x u 
-        delta = self.points - self.p0
+        delta = self._points - self.p0
         distance = np.abs(np.cross(delta, self.u10))
         i_max = np.argmax(distance)
         distance_max = distance[i_max]
@@ -182,8 +183,8 @@ class Path(PathBase):
 
     def nearest_point(self, point):
 
-        p0 = self.points[:-1]
-        p1 = self.points[1:]
+        p0 = self._points[:-1]
+        p1 = self._points[1:]
         p10 = p1 - p0
         u10 = p10 / np.sqrt(np.sum(p10**2, axis=0))
 
@@ -201,7 +202,7 @@ class Path(PathBase):
         else:
             return None, None
         
-        # distance = np.sum((self.points - point)**2, axis=1)
+        # distance = np.sum((self._points - point)**2, axis=1)
         # i_min = np.argmin(distance)
         # return i_min, distance[i_min]
         
@@ -212,20 +213,20 @@ class Path(PathBase):
         # global_lower = self.index_interval.inf + lower
         # if upper is None:
         #     stop = None
-        #     global_upper = self.index_interval.inf + self.number_of_points -1
+        #     global_upper = self.index_interval.inf + self._number_of_points -1
         # else:
         #     stop = upper + 1
         #     global_upper = self.index_interval.inf + upper
 
         # return self.__class__(self._colour, self._pencil_size,
-        #                       self.points[lower:stop],
+        #                       self._points[lower:stop],
         #                       index_interval=IntervalInt(global_lower, global_upper))
 
         if upper is None:
             stop = None
         else:
             stop = upper + 1
-        points = self.points[lower:stop]
+        points = self._points[lower:stop]
             
         if points.shape[1] > 1:
             return self.__class__(self._colour, self._pencil_size, points)
@@ -247,13 +248,13 @@ class Path(PathBase):
             farthest_point = path.farthest_point(tolerance)
             if farthest_point is not None:
                 global_farthest_point = path.index_interval.inf + farthest_point
-                # print('farthest point in', str(path.index_interval), global_farthest_point, path.points[farthest_point])
+                # print('farthest point in', str(path.index_interval), global_farthest_point, path._points[farthest_point])
                 farthest_points.append(global_farthest_point)
                 queue.append(path.subpath(lower=farthest_point))
                 queue.append(path.subpath(upper=farthest_point))
-        farthest_points.append(self.number_of_points -1)
+        farthest_points.append(self._number_of_points -1)
         farthest_points.sort()
-        points = self.points[farthest_points]
+        points = self._points[farthest_points]
         
         return self.__class__(self._colour, self._pencil_size, points)
 
@@ -261,8 +262,8 @@ class Path(PathBase):
 
     def pair_iterator(self):
 
-        for i in range(self.number_of_points -1):
-            yield self.points[i], self.points[i+1]
+        for i in range(self._number_of_points -1):
+            yield self._points[i], self._points[i+1]
 
     ##############################################
             
@@ -313,26 +314,26 @@ class Path(PathBase):
     def smooth_window(self, radius=2):
 
         window_size = 2*radius + 1
-        if window_size >= self.number_of_points:
+        if window_size >= self._number_of_points:
             raise ValueError()
 
         if radius > 0:
-            points = np.array(self.points, dtype=np.float) # int64
+            points = np.array(self._points, dtype=np.float) # int64
             view = points[radius:-radius]
             for i in range(1, radius +1):
                 upper = -radius + i
                 if upper == 0:
                     upper = None
-                view += self.points[radius-i:-radius-i]
-                view += self.points[radius+i:upper]
+                view += self._points[radius-i:-radius-i]
+                view += self._points[radius+i:upper]
             view /= window_size
             # for i in range(1, radius +1):
-            #     points[:radius] += self.points[i:radius+i]
-            #     points[-radius:] += self.points[-radius-i:-i]
+            #     points[:radius] += self._points[i:radius+i]
+            #     points[-radius:] += self._points[-radius-i:-i]
             # points[:radius] /= radius + 1
             # points[-radius:] /= radius + 1
-            # points[radius-1] = np.mean(self.points[:radius], axis=0)
-            # points[-radius] = np.mean(self.points[-radius:], axis=0)
+            # points[radius-1] = np.mean(self._points[:radius], axis=0)
+            # points[-radius] = np.mean(self._points[-radius:], axis=0)
             # return self.__class__(points[radius-1:-radius+1])
             return self.__class__(self._colour, self._pencil_size, view)
         elif radius < 0:
@@ -347,14 +348,14 @@ class Path(PathBase):
         # limite the rate of points: average last N points
         
         window_size = radius + 1
-        if window_size >= self.number_of_points:
+        if window_size >= self._number_of_points:
             raise ValueError()
 
         if radius > 0:
-            points = np.array(self.points, dtype=np.float) # int64
+            points = np.array(self._points, dtype=np.float) # int64
             view = points[radius:]
             for i in range(1, radius +1):
-                view += self.points[radius-i:-i]
+                view += self._points[radius-i:-i]
             view /= window_size
             return self.__class__(self._colour, self._pencil_size, view)
         elif radius < 0:
@@ -372,7 +373,7 @@ class Path(PathBase):
         if i_min is not None and distance <= radius:
             if i_min == 0:
                 return (self.subpath(lower=1),)
-            elif i_min == self.number_of_points -1:
+            elif i_min == self._number_of_points -1:
                 return (self.subpath(upper=i_min -1),)
             else:
                 # Fixme: check before
@@ -381,6 +382,29 @@ class Path(PathBase):
                         if subpath is not None]
         else:
             return None
+
+####################################################################################################
+
+class Segment(Path):
+
+    # _logger = _module_logger.getChild('Segment')
+    
+    ##############################################
+
+    def __init__(self, colour, pencil_size, first_point):
+
+        # Fixme: make_array
+        points = np.zeros((2, 2), dtype=np.uint16)
+        points[0] = first_point
+        
+        super(Segment, self).__init__(colour, pencil_size, points)
+        
+    ##############################################
+
+    def update_second_point(self, point):
+
+        self._points[1] = point
+        # self._compute_interval()
         
 ####################################################################################################
 
@@ -397,14 +421,7 @@ class DynamicPath(PathBase):
         self._number_of_points = 0
         self._capacity = 0
         self._index = 0
-        
-    ##############################################
-
-    def same_sketcher_state(self, sketcher_state):
-
-        return (self._colour == sketcher_state.pencil_colour
-                and self._pencil_size == sketcher_state.pencil_size)
-    
+   
     ##############################################    
 
     def _make_array(self, size):
@@ -457,7 +474,7 @@ class DynamicPath(PathBase):
 
         # Fixme: self._interval
         return Path(self._colour, self._pencil_size, self.flatten(), self._path_id)
-
+    
 ####################################################################################################
 # 
 # End

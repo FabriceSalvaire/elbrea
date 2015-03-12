@@ -58,6 +58,13 @@ class ToolBar(object):
                           checkable=True,
                           )
 
+        self.segment_tool_action = \
+            QtWidgets.QAction(icon_loader.get_icon('pencil', self.icon_size), # Fixme:
+                          'Segment Tool',
+                          self._application,
+                          checkable=True,
+                          )
+        
         self.eraser_tool_action = \
             QtWidgets.QAction(icon_loader.get_icon('eraser', self.icon_size),
                           'Eraser Tool',
@@ -67,6 +74,7 @@ class ToolBar(object):
         
         self._action_group = QtWidgets.QActionGroup(self._application)
         for action in (self.pen_tool_action,
+                       self.segment_tool_action,
                        self.eraser_tool_action,
                        ):
             self._action_group.addAction(action)
@@ -102,6 +110,7 @@ class ToolBar(object):
         self._tool_bar.addAction(self.clear_tool_action)
         items = (self.position_tool_action,
                  self.pen_tool_action,
+                 self.segment_tool_action,
                  self._pencil_size_combobox,
                  self._pencil_colour_combobox,
                  self.eraser_tool_action,
@@ -134,20 +143,20 @@ class ToolBar(object):
 
     def _on_pencil_size_changed(self, index):
 
-        self._application.sketcher.state.pencil_size = self._pencil_size_combobox.currentData()
+        self._application.sketcher_state.pencil_size = self._pencil_size_combobox.currentData()
 
     ##############################################
 
     def _on_eraser_size_changed(self, index):
 
-        self._application.sketcher.state.eraser_size = self._eraser_size_combobox.currentData()
+        self._application.sketcher_state.eraser_size = self._eraser_size_combobox.currentData()
         
     ##############################################
 
     def _on_pencil_colour_changed(self, index):
 
         colour = QtGui.QColor(self._pencil_colours[index])
-        self._application.sketcher.state.pencil_colour = (colour.red(), colour.green(), colour.blue())
+        self._application.sketcher_state.pencil_colour = (colour.red(), colour.green(), colour.blue())
         
 ####################################################################################################
 #

@@ -18,7 +18,7 @@ from Elbrea.Image.Image import Image
 from Elbrea.Math.Interval import IntervalInt2D, Interval2D
 from Elbrea.Tools.EnumFactory import EnumFactory
 from Elbrea.Tools.TimeStamp import ObjectWithTimeStamp
-from .Path import DynamicPath
+from .Path import Segment, DynamicPath
 
 ####################################################################################################
 
@@ -46,6 +46,99 @@ class TabletEvent(object):
 
         return "type {} pointer type {}".format(self.type, self.pointer_type)
 
+
+####################################################################################################
+
+class SketcherState(object):
+
+    ##############################################
+
+    def __init__(self):
+
+        self.pencil_size = 1
+        self.eraser_size = 1
+        self.pencil_colour = (255, 255, 255)
+        self.previous_position = None
+    
+####################################################################################################
+
+class SegmentSketcher(object):
+
+    _logger = _module_logger.getChild('SegmentSketcher')
+    
+    ##############################################
+    
+    def __init__(self, sketcher_state, page, painter):
+
+        self._sketcher_state = sketcher_state
+
+        self._page = page
+        self._painter = painter
+        
+        self._current_segment = None
+       
+    ##############################################
+
+    def _start_segment(self, position):
+
+        self._current_segment = Segment(self._sketcher_state.pencil_colour,
+                                        self._sketcher_state.pencil_size,
+                                        position)
+
+    ##############################################
+
+    def _update_segment(self, position):
+
+        self._current_segment.update_second_point(position)
+        
+    ##############################################
+
+    def _end_segment(self, position):
+
+        self._current_segment.update_second_point(position)
+        self._page.add_path(self._current_segment)
+        self._first_point = None
+
+        return self._current_segment
+        
+    ##############################################
+
+    def on_tablet_event(self, tablet_event):
+
+        # Fixme: eraser make no sense ???
+        if tablet_event.pointer_type == TabletPointerType.pen:
+            return self.on_pen_event(tablet_event)
+        
+    ##############################################
+
+    def on_pen_event(self, tablet_event):
+
+        self._logger.info(str(tablet_event))
+
+        modified = False
+        position = tablet_event.position
+        if tablet_event.type == TabletEventType.move:
+            previous_position = self._sketcher_state.previous_position
+            distance = np.sum((position - previous_position)**2) # _square
+            if distance > 1:
+                self._update_segment(position)
+                self._painter.update_current_path(self._current_segment)
+                modified = True # Fixme: modified signal ?
+                self._sketcher_state.previous_position = position
+        else:
+            if tablet_event.type == TabletEventType.press:
+                self._start_segment(position)
+            elif tablet_event.type == TabletEventType.release:
+                path = self._end_segment(position)
+                self._painter.reset_current_path()
+                self._painter.add_path(path)
+                modified = True
+            self._sketcher_state.previous_position = position
+
+        self._painter.enable() # Fixme: here ?
+            
+        return modified
+    
 ####################################################################################################
 
 class PointFilter(object):
@@ -90,19 +183,6 @@ class PointFilter(object):
             return np.rint(np.mean(self._window_points, axis=0))
         else:
             return None
-
-####################################################################################################
-
-class SketcherState(object):
-
-    ##############################################
-
-    def __init__(self):
-
-        self.pencil_size = 1
-        self.eraser_size = 1
-        self.pencil_colour = (255, 255, 255)
-        self.previous_position = None
         
 ####################################################################################################
 
@@ -121,12 +201,6 @@ class PathSketcher(object):
         
         self._current_path = None
         self._point_filter = PointFilter(window_size=10)
-        
-    ##############################################
-
-    @property
-    def state(self):
-        return self._sketcher_state
 
     ##############################################
 
@@ -169,6 +243,7 @@ class PathSketcher(object):
             position = self._point_filter.value
             # if position is None:
             #     self._logger.warning('Not ready')
+            # Fixme: case previous_position is None ?
             if position is not None and self._sketcher_state.previous_position is not None:
                 previous_position = self._sketcher_state.previous_position
                 distance = np.sum((position - previous_position)**2) # _square
@@ -191,7 +266,7 @@ class PathSketcher(object):
                 modified = True
             self._sketcher_state.previous_position = position
 
-        self._painter.enable()
+        self._painter.enable() # Fixme: here ?
             
         return modified
 
@@ -223,7 +298,7 @@ class PathSketcher(object):
         modified = bool(erased_paths)
             
         return modified
-
+    
 ####################################################################################################
 
 class ImageSketcher(ObjectWithTimeStamp):

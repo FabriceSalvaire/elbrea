@@ -165,15 +165,22 @@ class GlWidget(GlWidgetBase):
 
         tool_bar = self._application.main_window.tool_bar
         current_tool = tool_bar.current_tool()
-        if current_tool in (tool_bar.pen_tool_action, tool_bar.eraser_tool_action):
+        if current_tool in (tool_bar.pen_tool_action,
+                            tool_bar.segment_tool_action,
+                            tool_bar.eraser_tool_action):
             # Fixme: to func
             if current_tool is tool_bar.pen_tool_action:
                 pointer_type = TabletPointerType.pen
+                sketcher = self._application.path_sketcher
+            elif current_tool is tool_bar.segment_tool_action:
+                pointer_type = TabletPointerType.pen
+                sketcher = self._application.segment_sketcher
             else:
                 pointer_type = TabletPointerType.eraser
+                sketcher = self._application.path_sketcher
             position = self.window_to_gl_coordinate(event, round_to_integer=False)
             tablet_event = TabletEvent(TabletEventType.press, pointer_type, position)
-            if self._application.sketcher.on_tablet_event(tablet_event):
+            if sketcher.on_tablet_event(tablet_event):
                 self.update()
                 
     ##############################################
@@ -188,14 +195,22 @@ class GlWidget(GlWidgetBase):
         elif button & QtCore.Qt.LeftButton:
             tool_bar = self._application.main_window.tool_bar
             current_tool = tool_bar.current_tool()
-            if current_tool in (tool_bar.pen_tool_action, tool_bar.eraser_tool_action):
+            if current_tool in (tool_bar.pen_tool_action,
+                                tool_bar.segment_tool_action,
+                                tool_bar.eraser_tool_action):
+                # Fixme: to func
                 if current_tool is tool_bar.pen_tool_action:
                     pointer_type = TabletPointerType.pen
+                    sketcher = self._application.path_sketcher
+                elif current_tool is tool_bar.segment_tool_action:
+                    pointer_type = TabletPointerType.pen
+                    sketcher = self._application.segment_sketcher
                 else:
                     pointer_type = TabletPointerType.eraser
+                    sketcher = self._application.path_sketcher
                 position = self.window_to_gl_coordinate(event, round_to_integer=False)
                 tablet_event = TabletEvent(TabletEventType.release, pointer_type, position)
-                if self._application.sketcher.on_tablet_event(tablet_event):
+                if sketcher.on_tablet_event(tablet_event):
                     self.update()
                 
     ##############################################
@@ -229,14 +244,22 @@ class GlWidget(GlWidgetBase):
             self.show_coordinate(position)
         # elif current_tool is tool_bar.crop_tool_action:
         #     self.cropper.update(event) # Fixme: call mouseMoveEvent
-        elif current_tool in (tool_bar.pen_tool_action, tool_bar.eraser_tool_action):
+        elif current_tool in (tool_bar.pen_tool_action,
+                              tool_bar.segment_tool_action,
+                              tool_bar.eraser_tool_action):
+            # Fixme: to func
             if current_tool is tool_bar.pen_tool_action:
                 pointer_type = TabletPointerType.pen
+                sketcher = self._application.path_sketcher
+            elif current_tool is tool_bar.segment_tool_action:
+                pointer_type = TabletPointerType.pen
+                sketcher = self._application.segment_sketcher
             else:
                 pointer_type = TabletPointerType.eraser
+                sketcher = self._application.path_sketcher
             position = self.window_to_gl_coordinate(event, round_to_integer=False)
             tablet_event = TabletEvent(TabletEventType.move, pointer_type, position)
-            if self._application.sketcher.on_tablet_event(tablet_event):
+            if sketcher.on_tablet_event(tablet_event):
                 self.update()
 
     ##############################################
