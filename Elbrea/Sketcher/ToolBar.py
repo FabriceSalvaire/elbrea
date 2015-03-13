@@ -21,27 +21,47 @@ class ToolBar(object):
 
     icon_size = 22
 
-    ##############################################
+    __name__= None
     
-    def __init__(self, main_window, name):
-
-        self._application = QtWidgets.QApplication.instance()
-        self._main_window = main_window
-        self._tool_bar = main_window.addToolBar(name)
-
-####################################################################################################
-
-class MainToolBar(ToolBar):
-
     ##############################################
     
     def __init__(self, main_window):
 
-        super(MainToolBar, self).__init__(main_window, 'main')
+        self._application = QtWidgets.QApplication.instance()
+        self._main_window = main_window
+        self._tool_bar = main_window.addToolBar(self.__name__)
 
         self._create_actions()
         self._init_tool_bar()
 
+    ##############################################
+    
+    def _create_actions(self):
+
+        raise NotImplementedError
+
+    ##############################################
+    
+    def _init_tool_bar(self):
+
+        raise NotImplementedError
+
+    ##############################################
+
+    def _add_items(self, items):
+
+        for item in items:
+            if isinstance(item, QtWidgets.QAction):
+                self._tool_bar.addAction(item)
+            else:
+                self._tool_bar.addWidget(item)
+    
+####################################################################################################
+
+class MainToolBar(ToolBar):
+
+    __name__= 'main'
+   
     ##############################################
     
     def _create_actions(self):
@@ -70,13 +90,10 @@ class MainToolBar(ToolBar):
 
     def _init_tool_bar(self):
         
-        for item in (self._save_action,
-                     self._display_all_action,
-                    ):
-            if isinstance(item, QtWidgets.QAction):
-                self._tool_bar.addAction(item)
-            else:
-                self._tool_bar.addWidget(item)
+        items = (self._save_action,
+                 self._display_all_action,
+                )
+        self._add_items(items)
 
     ##############################################
 
@@ -89,14 +106,7 @@ class MainToolBar(ToolBar):
 
 class SketcherToolBar(ToolBar):
 
-    ##############################################
-    
-    def __init__(self, main_window):
-
-        super(SketcherToolBar, self).__init__(main_window, 'sketcher')
-
-        self._create_actions()
-        self._init_tool_bar()
+    __name__= 'sketcher'
 
     ##############################################
     
@@ -172,21 +182,17 @@ class SketcherToolBar(ToolBar):
         self._pencil_colour_combobox.currentIndexChanged.connect(self._on_pencil_colour_changed)
         self._eraser_size_combobox.currentIndexChanged.connect(self._on_eraser_size_changed)
        
-        self._tool_bar.addAction(self.clear_tool_action)
-        items = (self.position_tool_action,
+        items = (self.clear_tool_action,
+                 self.position_tool_action,
                  self.pen_tool_action,
                  self.segment_tool_action,
                  self._pencil_size_combobox,
                  self._pencil_colour_combobox,
                  self.eraser_tool_action,
                  self._eraser_size_combobox,
-        )
-        for item in items:
-            if isinstance(item, QtWidgets.QAction):
-                self._tool_bar.addAction(item)
-            else:
-                self._tool_bar.addWidget(item)
-            
+                )
+        self._add_items(items)
+        
     ##############################################
 
     def current_tool(self):
@@ -231,6 +237,55 @@ class SketcherToolBar(ToolBar):
         self._on_eraser_size_changed(0)
         self._on_pencil_colour_changed(0)
         self._on_eraser_size_changed(0)
+
+####################################################################################################
+
+class PageToolBar(ToolBar):
+
+    __name__ = 'page'
+
+    ##############################################
+    
+    def _create_actions(self):
+
+        self.previous_page_action = \
+            QtWidgets.QAction('Previous',
+                          self._application,
+                          toolTip='Previous page',
+                          # triggered=self.goto_previous_page,
+                          )
+
+        self.next_page_action = \
+            QtWidgets.QAction('Next',
+                          self._application,
+                          toolTip='Next page',
+                          # triggered=self.goto_next_page,
+                          )
+
+    ##############################################
+
+    def _init_tool_bar(self):
+
+        self._page_spinbox = QtWidgets.QSpinBox(self._main_window)
+        self._page_spinbox.setMinimum(1)
+        self._page_number_label = QtWidgets.QLabel(self._main_window)
+        numer_of_pages = 1
+        self._page_number_label.setText(' / {}'.format(numer_of_pages))
+        
+        self._page_spinbox.valueChanged.connect(self._on_page_changed)
+       
+        items = (self.previous_page_action,
+                 self.next_page_action,
+                 self._page_spinbox,
+                 self._page_number_label,
+                )
+        self._add_items(items)
+
+    ##############################################
+
+    def _on_page_changed(self, index):
+
+        pass
     
 ####################################################################################################
 #

@@ -51,9 +51,10 @@ class SketcherMainWindow(MainWindowBase):
     
     def _create_toolbars(self):
 
-        from .ToolBar import MainToolBar, SketcherToolBar
+        from .ToolBar import MainToolBar, SketcherToolBar, PageToolBar
         self.main_tool_bar = MainToolBar(self)
         self.sketcher_tool_bar = SketcherToolBar(self)
+        self.page_tool_bar = PageToolBar(self)
 
     ##############################################
 
