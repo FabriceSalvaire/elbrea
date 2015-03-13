@@ -57,13 +57,13 @@ class PagePainter(Painter):
         for y in range(interval.y.inf, interval.y.sup, step):
             points = np.array(((interval.x.inf, y),
                                (interval.x.sup, y)),
-                              dtype=np.uint16)
+                              dtype=np.int)
             path = Segment(colour, pencil_size, points=points)
             self.add_path(path)
         for x in range(interval.x.inf, interval.x.sup, step):
             points = np.array(((x, interval.y.inf),
                                (x, interval.y.sup)),
-                              dtype=np.uint16)
+                              dtype=np.int)
             path = Segment(colour, pencil_size, points=points)
             self.add_path(path)
             

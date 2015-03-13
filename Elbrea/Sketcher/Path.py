@@ -394,7 +394,7 @@ class Segment(Path):
     def __init__(self, colour, pencil_size, first_point=None, points=None):
 
         # Fixme: make_array
-        points_ = np.zeros((2, 2), dtype=np.uint16)
+        points_ = np.zeros((2, 2), dtype=np.int)
         if points is None:
             points_[0] = first_point
         else:
@@ -429,7 +429,7 @@ class DynamicPath(PathBase):
 
     def _make_array(self, size):
 
-        return np.zeros((size, 2), dtype=np.uint16)
+        return np.zeros((size, 2), dtype=np.int)
         
     ##############################################    
 
