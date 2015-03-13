@@ -113,7 +113,7 @@ class SegmentSketcher(object):
 
     def on_pen_event(self, tablet_event):
 
-        self._logger.info(str(tablet_event))
+        # self._logger.info(str(tablet_event))
 
         modified = False
         position = tablet_event.position
@@ -128,14 +128,12 @@ class SegmentSketcher(object):
         else:
             if tablet_event.type == TabletEventType.press:
                 self._start_segment(position)
-            elif tablet_event.type == TabletEventType.release:
+            else: # tablet_event.type == TabletEventType.release
                 path = self._end_segment(position)
                 self._painter.reset_current_path()
                 self._painter.add_path(path)
                 modified = True
             self._sketcher_state.previous_position = position
-
-        self._painter.enable() # Fixme: here ?
             
         return modified
     

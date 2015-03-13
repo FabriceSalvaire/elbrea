@@ -163,6 +163,7 @@ class GlWidget(GlWidgetBase):
         if not (event.buttons() & QtCore.Qt.LeftButton):
             return
 
+        # Fixme: tool triggered -> event receiver
         tool_bar = self._application.main_window.tool_bar
         current_tool = tool_bar.current_tool()
         if current_tool in (tool_bar.pen_tool_action,
