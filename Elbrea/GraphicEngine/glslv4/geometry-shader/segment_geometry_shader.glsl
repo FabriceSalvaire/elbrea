@@ -67,6 +67,7 @@ void main()
   
   // Thickness below 1 pixel are represented using a 1 pixel thickness
   // and a modified alpha
+  float line_width = line_width;
   vertex.colour.a = min(line_width, vertex.colour.a);
   vertex.line_width = max(line_width, 1.);
 

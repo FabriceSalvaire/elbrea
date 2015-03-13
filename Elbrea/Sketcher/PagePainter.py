@@ -18,6 +18,7 @@ from PyOpenGLng.HighLevelApi import GL
 from .Path import Segment 
 from Elbrea.GraphicEngine.Painter import Painter
 from Elbrea.GraphicEngine.PrimitiveVertexArray import LineVertexArray
+from Elbrea.Image.Colour import RgbIntColour
 
 ####################################################################################################
 
@@ -51,7 +52,7 @@ class PagePainter(Painter):
         self._glwidget.makeCurrent()
 
         interval =  self._glwidget._image_interval
-        colour = (0, 1, 0)
+        colour = RgbIntColour(64, 160, 255).normalise() # xournal
         pencil_size = 1. # > 1
         for y in range(interval.y.inf, interval.y.sup, step):
             points = np.array(((interval.x.inf, y),
