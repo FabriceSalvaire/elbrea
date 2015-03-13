@@ -12,6 +12,7 @@ import os
 
 ####################################################################################################
 
+from .Page import Page
 from Elbrea.GUI.Base.GuiApplicationBase import GuiApplicationBase
 
 ####################################################################################################
@@ -45,6 +46,16 @@ class SketcherApplication(GuiApplicationBase):
 
         super(SketcherApplication, self).post_init()
 
+        journal_path = self.args.journal 
+        if os.path.exists(journal_path):
+            self.load(journal_path)
+        else:
+            self._page = Page()
+        
+        # for screen in self.platform.screens:
+        #     print(screen)
+        # dpi_x, dpi_y = self.platform.screens[0].dpi
+        
         glwidget = self._main_window.glwidget
 
         from Elbrea.Math.Interval import IntervalInt2D
@@ -64,17 +75,16 @@ class SketcherApplication(GuiApplicationBase):
         segment_painter = SegmentPainter(self.painter_manager)
         path_painter = PathPainter(self.painter_manager)
 
-        from .Page import Page
-        self._page = Page()
-        
         from .Sketcher import SketcherState, SegmentSketcher, PathSketcher
         self.sketcher_state = SketcherState()
         self._main_window.tool_bar.init_sketcher_state()
         self.segment_sketcher = SegmentSketcher(self.sketcher_state, self._page, segment_painter)
         self.path_sketcher = PathSketcher(self.sketcher_state, self._page, path_painter)
-        
-        self.load(self.args.journal)
 
+        # Update painter
+        for path in self._page.paths:
+            path_painter.add_path(path)
+            
         glwidget.init_tools() # Fixme: for shader
         glwidget._ready = True
         glwidget.display_all()
@@ -87,24 +97,21 @@ class SketcherApplication(GuiApplicationBase):
 
         if journal_path is None:
             journal_path = self.args.journal
-            
-        # Fixme:
-        from Elbrea.Viewer.HdfAnnotation import HdfAnnotation
-        hdf_annotation = HdfAnnotation(journal_path, update=True)
-        group = hdf_annotation.create_group('page')
-        self._page.save(group)
 
+        from .Importer.Hdf import HdfWriter
+        hdf_writer = HdfWriter(journal_path)
+        hdf_writer.save_page(self._page)
+        
     ##############################################
 
     def load(self, journal_path):
 
-        from Elbrea.Viewer.HdfAnnotation import HdfAnnotation
-        if os.path.exists(journal_path):
-            hdf_annotation = HdfAnnotation(journal_path, update=False) # rewrite
-            self._page.from_hdf5(hdf_annotation['page'])
-            path_painter = self.painter_manager['path']
-            for path in self._page.paths:
-                path_painter.add_path(path)
+        if not  os.path.exists(journal_path):
+            raise NameError()    
+        
+        from .Importer.Hdf import HdfImporter
+        hdf_importer = HdfImporter(journal_path)
+        self._page = hdf_importer.read_page('page')
             
 ####################################################################################################
 #

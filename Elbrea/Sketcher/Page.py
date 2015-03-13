@@ -66,23 +66,6 @@ class Page(object):
         # self._paths.update({path.id:path for path in paths})
         for path in paths:
             self.add_path(path)
-        
-    ##############################################
-
-    def save(self, group):
-
-        for i, path in enumerate(self._paths.values()):
-            path.save(group, 'path-{}'.format(i))
-
-    ##############################################
-
-    def from_hdf5(self, group):
-
-        for name in group:
-            path = Path.from_hdf5(group, name)
-            # for point1, point2 in path.pair_iterator():
-            #     self.draw_line(point1, point2, path.colour, path.pencil_size)
-            self._paths[path.id] = path
 
     ##############################################
 

@@ -136,30 +136,6 @@ class Path(PathBase):
     @property
     def interval(self):
         return self._interval
-    
-    ##############################################
-
-    def save(self, group, name):
-
-        dataset = group.create_dataset(name, data=self._points,
-                                       shuffle=True, compression='lzf')
-        attributes = dataset.attrs
-        attributes['colour'] = self._colour
-        attributes['pencil_size'] = self._pencil_size
-
-    ##############################################
-
-    @staticmethod
-    def from_hdf5(group, name):
-
-        dataset = group[name]
-        attributes = dataset.attrs
-
-        colour = [int(x) for x in attributes['colour']]
-        pencil_size = int(attributes['pencil_size'])
-        points = np.array(dataset)
-
-        return Path(colour, pencil_size, points)
 
     ##############################################
 
