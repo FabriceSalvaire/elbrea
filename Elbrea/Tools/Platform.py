@@ -5,25 +5,13 @@
 # 
 ####################################################################################################
 
-####################################################################################################
-#
-#                                              Audit
-#
-# - 21/08/2014 simplify ?
-#
-# - 13/02/2013 Fabrice
-#   - add dict interface ?
-#   - property
-#
-####################################################################################################
+# Fixme: check code
 
 ####################################################################################################
 
 import os
 import platform
 import sys
-
-from PyQt5 import QtCore, QtWidgets
 
 ####################################################################################################
 
@@ -43,8 +31,6 @@ class Platform(object):
     def __init__(self):
 
         self.python_version = platform.python_version()
-        self.qt_version = QtCore.QT_VERSION_STR
-        self.pyqt_version = QtCore.PYQT_VERSION_STR
 
         self.os = self._get_os()
         self.node = platform.node()
@@ -61,24 +47,6 @@ class Platform(object):
         # RAM
         self.memory_size_kb = self._get_memory_size_kb()
         self.memory_size_mb = rint(self.memory_size_kb/float(1024))
-        
-        # Screen
-        try:
-            application = QtWidgets.QApplication.instance()
-            self.desktop = application.desktop()
-            self.number_of_screens = self.desktop.screenCount() 
-        except:
-            self.desktop = None
-            self.number_of_screens = 0
-        self.screens = []
-        for i in range(self.number_of_screens):
-            self.screens.append(Screen(self, i))
-        
-        # OpenGL
-        self.gl_renderer = None
-        self.gl_version = None
-        self.gl_vendor = None
-        self.gl_extensions = None
 
     ##############################################
 
@@ -149,6 +117,20 @@ class Platform(object):
         if self.os == platform_enum.windows:
             raise NotImplementedError
 
+    ##############################################
+
+    def query_qt(self):
+
+        from PyQt5 import QtCore, QtWidgets
+
+        self.qt_version = QtCore.QT_VERSION_STR
+        self.pyqt_version = QtCore.PYQT_VERSION_STR
+        
+        application = QtWidgets.QApplication.instance()
+        self.desktop = application.desktop()
+        self.number_of_screens = self.desktop.screenCount() 
+        self.screens = [Screen(self, i) for i in range(self.number_of_screens)]
+    
     ##############################################
 
     def query_opengl(self):

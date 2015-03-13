@@ -121,6 +121,9 @@ class GuiApplicationBase(ApplicationBase, QtWidgets.QApplication):
 
         self.show_message('Welcome to Elbrea')
 
+        self._platform.query_qt()
+        self._platform.query_opengl()
+        
         # return to main and then enter to event loop
         
     ##############################################
