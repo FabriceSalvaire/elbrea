@@ -164,7 +164,7 @@ class GlWidget(GlWidgetBase):
             return
 
         # Fixme: tool triggered -> event receiver
-        tool_bar = self._application.main_window.tool_bar
+        tool_bar = self._application.main_window.sketcher_tool_bar
         current_tool = tool_bar.current_tool()
         if current_tool in (tool_bar.pen_tool_action,
                             tool_bar.segment_tool_action,
@@ -194,7 +194,7 @@ class GlWidget(GlWidgetBase):
         if button & QtCore.Qt.RightButton:
             self.contextual_menu.exec_(event.globalPos())
         elif button & QtCore.Qt.LeftButton:
-            tool_bar = self._application.main_window.tool_bar
+            tool_bar = self._application.main_window.sketcher_tool_bar
             current_tool = tool_bar.current_tool()
             if current_tool in (tool_bar.pen_tool_action,
                                 tool_bar.segment_tool_action,
@@ -229,7 +229,7 @@ class GlWidget(GlWidgetBase):
         if not (event.buttons() & QtCore.Qt.LeftButton):
             return
 
-        tool_bar = self._application.main_window.tool_bar
+        tool_bar = self._application.main_window.sketcher_tool_bar
         current_tool = tool_bar.current_tool()
         if current_tool is tool_bar.position_tool_action:
             position_screen = self.event_position(event)
@@ -282,7 +282,7 @@ class GlWidget(GlWidgetBase):
         #     pressure, x_tilt, y_tilt))
 
         try:
-            tool_bar = self._application.main_window.tool_bar
+            tool_bar = self._application.main_window.sketcher_tool_bar
             current_tool = tool_bar.current_tool()
             if current_tool is tool_bar.pen_tool_action:
                 event_type = event.type()

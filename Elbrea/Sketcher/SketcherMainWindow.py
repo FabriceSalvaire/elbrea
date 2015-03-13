@@ -36,7 +36,7 @@ class SketcherMainWindow(MainWindowBase):
 
         self._init_ui()
         self._create_actions()
-        self._create_toolbar()
+        self._create_toolbars()
 
         from .StatusBar import StatusBar
         self.status_bar = StatusBar(self)
@@ -45,43 +45,15 @@ class SketcherMainWindow(MainWindowBase):
     
     def _create_actions(self):
 
-        icon_loader = IconLoader()
-
-        self._save_action = \
-                QtWidgets.QAction(# icon_loader[''],
-                    'Save',
-                    self,
-                    toolTip='Save',
-                    triggered=self.save_board,
-                    shortcut='Ctrl+S',
-                    shortcutContext=Qt.ApplicationShortcut,
-                )
-        
-        self._display_all_action = \
-                QtWidgets.QAction(# icon_loader[''],
-                    'Display All',
-                    self,
-                    toolTip='Display All',
-                    triggered=self.glwidget.display_all,
-                    shortcut='Ctrl+A',
-                    shortcutContext=Qt.ApplicationShortcut,
-                )
-
+        pass
+    
     ##############################################
     
-    def _create_toolbar(self):
+    def _create_toolbars(self):
 
-        self._image_tool_bar = self.addToolBar('Main')
-        for item in (self._save_action,
-                     self._display_all_action,
-                    ):
-            if isinstance(item,QtWidgets.QAction):
-                self._image_tool_bar.addAction(item)
-            else:
-                self._image_tool_bar.addWidget(item)
-
-        from .ToolBar import ToolBar
-        self.tool_bar = ToolBar(self)
+        from .ToolBar import MainToolBar, SketcherToolBar
+        self.main_tool_bar = MainToolBar(self)
+        self.sketcher_tool_bar = SketcherToolBar(self)
 
     ##############################################
 
@@ -113,13 +85,6 @@ class SketcherMainWindow(MainWindowBase):
     def _translate_ui(self):
 
         pass
-
-    ##############################################
-
-    def save_board(self, checked):
-
-        # triggered -> checked ???
-        self._application.save()
     
 ####################################################################################################
 #

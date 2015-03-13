@@ -13,6 +13,7 @@ from PyQt5.QtCore import Qt
 ####################################################################################################
 
 from Elbrea.GUI.Base.IconLoader import IconLoader
+icon_loader = IconLoader()
 
 ####################################################################################################
 
@@ -22,11 +23,21 @@ class ToolBar(object):
 
     ##############################################
     
-    def __init__(self, main_window):
+    def __init__(self, main_window, name):
 
         self._application = QtWidgets.QApplication.instance()
         self._main_window = main_window
-        self._tool_bar = main_window.addToolBar('Main')
+        self._tool_bar = main_window.addToolBar(name)
+
+####################################################################################################
+
+class MainToolBar(ToolBar):
+
+    ##############################################
+    
+    def __init__(self, main_window):
+
+        super(MainToolBar, self).__init__(main_window, 'main')
 
         self._create_actions()
         self._init_tool_bar()
@@ -35,7 +46,61 @@ class ToolBar(object):
     
     def _create_actions(self):
 
-        icon_loader = IconLoader()
+        self._save_action = \
+                QtWidgets.QAction(# icon_loader[''],
+                    'Save',
+                    self._application,
+                    toolTip='Save',
+                    triggered=self.save_board,
+                    shortcut='Ctrl+S',
+                    shortcutContext=Qt.ApplicationShortcut,
+                )
+        
+        self._display_all_action = \
+                QtWidgets.QAction(# icon_loader[''],
+                    'Display All',
+                    self._application,
+                    toolTip='Display All',
+                    triggered=self._main_window.glwidget.display_all,
+                    shortcut='Ctrl+A',
+                    shortcutContext=Qt.ApplicationShortcut,
+                )
+
+    ##############################################
+
+    def _init_tool_bar(self):
+        
+        for item in (self._save_action,
+                     self._display_all_action,
+                    ):
+            if isinstance(item, QtWidgets.QAction):
+                self._tool_bar.addAction(item)
+            else:
+                self._tool_bar.addWidget(item)
+
+    ##############################################
+
+    def save_board(self, checked):
+
+        # triggered -> checked ???
+        self._application.save()
+                
+####################################################################################################
+
+class SketcherToolBar(ToolBar):
+
+    ##############################################
+    
+    def __init__(self, main_window):
+
+        super(SketcherToolBar, self).__init__(main_window, 'sketcher')
+
+        self._create_actions()
+        self._init_tool_bar()
+
+    ##############################################
+    
+    def _create_actions(self):
 
         self.clear_tool_action = \
             QtWidgets.QAction('Clear',

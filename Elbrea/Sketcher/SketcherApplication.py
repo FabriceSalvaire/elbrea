@@ -77,7 +77,7 @@ class SketcherApplication(GuiApplicationBase):
 
         from .Sketcher import SketcherState, SegmentSketcher, PathSketcher
         self.sketcher_state = SketcherState()
-        self._main_window.tool_bar.init_sketcher_state()
+        self._main_window.sketcher_tool_bar.init_sketcher_state()
         self.segment_sketcher = SegmentSketcher(self.sketcher_state, self._page, segment_painter)
         self.path_sketcher = PathSketcher(self.sketcher_state, self._page, path_painter)
 
