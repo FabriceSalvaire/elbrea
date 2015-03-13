@@ -34,9 +34,9 @@ class PagePainter(Painter):
 
     ##############################################
     
-    def __init__(self, painter_manager, step=10):
+    def __init__(self, painter_manager, z_value=-1, status=True, step=10):
 
-        super(PagePainter, self).__init__(painter_manager)
+        super(PagePainter, self).__init__(painter_manager, z_value=z_value, status=status)
 
         self._glwidget = self._painter_manager.glwidget
         self._shader_program = self._glwidget.shader_manager.segment_shader_program
@@ -85,7 +85,7 @@ class PagePainter(Painter):
     def reset(self):
 
         self._paths = []
-        self.disable()
+        #? self.disable()
     
     ##############################################
 

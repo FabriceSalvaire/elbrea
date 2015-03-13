@@ -13,10 +13,6 @@ The aim of these classes has to be used by a Geometry Shader.
 
 ####################################################################################################
 
-from six.moves import xrange
-
-####################################################################################################
-
 import logging
 import numpy as np
 

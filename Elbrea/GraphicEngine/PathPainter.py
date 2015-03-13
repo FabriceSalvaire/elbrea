@@ -30,9 +30,9 @@ class PrimitivePainter(Painter):
     
     ##############################################
     
-    def __init__(self, painter_manager):
+    def __init__(self, painter_manager, **kwargs):
 
-        super(PrimitivePainter, self).__init__(painter_manager)
+        super(PrimitivePainter, self).__init__(painter_manager, **kwargs)
 
         self._glwidget = self._painter_manager.glwidget
         self.reset()
@@ -121,9 +121,9 @@ class SegmentPainter(PrimitivePainter):
 
     ##############################################
     
-    def __init__(self, painter_manager):
+    def __init__(self, painter_manager, **kwargs):
 
-        super(SegmentPainter, self).__init__(painter_manager)
+        super(SegmentPainter, self).__init__(painter_manager, **kwargs)
         self._shader_program = self._glwidget.shader_manager.segment_shader_program
     
 ####################################################################################################
@@ -135,9 +135,9 @@ class PathPainter(PrimitivePainter):
 
     ##############################################
     
-    def __init__(self, painter_manager):
+    def __init__(self, painter_manager, **kwargs):
 
-        super(PathPainter, self).__init__(painter_manager)
+        super(PathPainter, self).__init__(painter_manager, **kwargs)
         self._shader_program = self._glwidget.shader_manager.path_shader_program
     
 ####################################################################################################

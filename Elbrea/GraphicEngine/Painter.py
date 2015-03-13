@@ -33,37 +33,75 @@ class Painter(object):
 
     ##############################################
     
-    def __init__(self, painter_manager):
+    def __init__(self, painter_manager, z_value=0, status=True):
 
         self._painter_manager = painter_manager
+        
+        self._z_value = z_value
+        self._status = status
 
-        self._status = True
+        self._painter_manager.register_painter(self)
 
     ##############################################
 
-    def __nonzero__(self):
+    def __repr__(self):
+        return "Painter {} z={} s={}".format(self.__painter_name__, self._z_value, self._status)
+    
+    ##############################################
+
+    def __bool__(self):
         return self._status
 
+    ##############################################
+
+    def __lt__(self, other):
+
+        return self._z_value < other.z_value
+    
+    ##############################################
+
+    def _notify_painter_manager(self):
+        self._painter_manager.resort()
+    
     ##############################################
 
     @property
     def name(self):
         return self.__painter_name__
 
+    @property
+    def z_value(self):
+        return self._z_value
+
+    @z_value.setter
+    def z_value(self, value):
+        self._z_value = value
+        self._notify_painter_manager()
+
+    @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self, value):
+        self._status = value
+        self._notify_painter_manager()
+    
     ##############################################
 
     def switch(self):
-        self._status = not self._status
-
+        # Fixme: name, useful ?
+        self.status = not self._status
+        
     ##############################################
 
     def disable(self):
-        self._status = False
+        self.status = False
 
     ##############################################
 
     def enable(self):
-        self._status = True
+        self.status = True
 
     ##############################################
 
@@ -81,12 +119,12 @@ class PainterMetaClass(type):
     _logger = _module_logger.getChild('PainterMetaClass')
 
     ##############################################
-
+    
     def __init__(cls, class_name, super_classes, class_attribute_dict):
 
         type.__init__(cls, class_name, super_classes, class_attribute_dict)
         if class_name != 'RegisteredPainter':
-            # PainterMetaClass._logger.debug("Register foreground painter %s", cls.__painter_name__)
+            # PainterMetaClass._logger.debug("Register painter class %s", cls.__painter_name__)
             PainterMetaClass.classes[cls.__painter_name__] = cls
     
 ####################################################################################################
