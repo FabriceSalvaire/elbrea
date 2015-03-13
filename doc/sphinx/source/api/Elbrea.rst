@@ -12,6 +12,7 @@
   Elbrea/ImageProcessing
   Elbrea/Logging
   Elbrea/Math
+  Elbrea/Sketcher
   Elbrea/Tools
   Elbrea/Version
   Elbrea/Viewer

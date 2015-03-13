@@ -3,7 +3,6 @@
 ***************
 
 .. toctree::
-  Viewer/.#ViewerApplication
   Viewer/BoardData
   Viewer/Cropper
   Viewer/GlWidget
