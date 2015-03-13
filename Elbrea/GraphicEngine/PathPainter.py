@@ -43,7 +43,7 @@ class PrimitivePainter(Painter):
 
         self._current_path = None
         self._paths = {} # Fixme: must be extern for pages
-        self.disable()
+        # self.disable()
 
     ##############################################
 
