@@ -96,8 +96,11 @@ class SketcherMainWindow(MainWindowBase):
         # self._central_widget = QtWidgets.QWidget(self)
         # self._horizontal_layout = QtWidgets.QHBoxLayout(self._central_widget)
 
+        self.resize(500, 500)
+        
         self.glwidget = GlWidget(self) # ._central_widget
         self.glwidget.setFocusPolicy(QtCore.Qt.ClickFocus)
+        # self.glwidget.setMinimumSize(100, 100)
         self._central_widget = self.glwidget
 
         # self._horizontal_layout.addWidget(self.glwidget)
