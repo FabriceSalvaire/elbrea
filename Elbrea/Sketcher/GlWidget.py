@@ -45,6 +45,7 @@ class GlWidget(GlWidgetBase):
 
         super(GlWidget, self).__init__(parent)
         self.clear_colour = (1, 1, 1, 0)
+        self.zoom_step = 1.25
         
         self._application = QtWidgets.QApplication.instance()
 

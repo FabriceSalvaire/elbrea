@@ -45,10 +45,6 @@ class SketcherApplication(GuiApplicationBase):
 
         super(SketcherApplication, self).post_init()
 
-        # for screen in self.platform.screens:
-        #     print(screen)
-        # dpi_x, dpi_y = self.platform.screens[0].dpi
-        
         journal_path = self.args.journal 
         if os.path.exists(journal_path):
             pages = self.load_journal(journal_path)

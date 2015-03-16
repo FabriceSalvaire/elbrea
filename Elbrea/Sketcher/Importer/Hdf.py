@@ -13,6 +13,7 @@ import h5py
 ####################################################################################################
 
 from Elbrea.Sketcher.Page import Pages, Page
+from Elbrea.Sketcher.PageFormat import PageFormat
 from Elbrea.Sketcher.Path import Path
 
 ####################################################################################################
@@ -100,7 +101,13 @@ class HdfImporter(HdfFile):
 
     def read_pages(self):
 
-        pages = Pages()
+        attributes = self.root.attrs
+        page_format_name = attributes['page_format_name']
+        largest_length, smallest_length = attributes['page_format_lengths']
+        is_portrait = attributes['page_format_is_portrait']
+        page_format = PageFormat(page_format_name, largest_length, smallest_length, is_portrait)
+        
+        pages = Pages(page_format)
         for i in range(self._number_of_pages):
             pages.add_page(self.read_page(i))
 
@@ -143,7 +150,10 @@ class HdfWriter(HdfFile):
 
         attributes = self.root.attrs
         attributes['number_of_pages'] = pages.number_of_pages
-        
+        page_format = pages.page_format
+        attributes['page_format_name'] = page_format.name
+        attributes['page_format_lengths'] = (page_format.largest_length, page_format.smallest_length)
+        attributes['page_format_is_portrait'] = page_format.is_portrait
         for i, page in enumerate(pages):
             self.save_page(i, page)
             

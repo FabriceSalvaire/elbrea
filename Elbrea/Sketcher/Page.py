@@ -13,6 +13,11 @@ import rtree
 
 ####################################################################################################
 
+from .PageFormat import page_format_database
+a4_portrait = page_format_database('a4')
+
+####################################################################################################
+
 _module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
@@ -24,13 +29,18 @@ class Pages(object):
     
     ##############################################
 
-    def __init__(self):
+    def __init__(self, page_format=a4_portrait):
 
+        self._page_format = page_format
         self._pages = []
         # dict to quickly find a page ?
 
     ##############################################
 
+    @property
+    def page_format(self):
+        return self._page_format
+    
     @property
     def number_of_pages(self):
         return len(self._pages)

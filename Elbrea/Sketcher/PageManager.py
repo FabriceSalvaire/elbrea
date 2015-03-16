@@ -11,7 +11,8 @@ import logging
 
 ####################################################################################################
 
-from .Page import Pages, Page
+from .Page import Pages
+from .PageFormat import page_format_database
 
 ####################################################################################################
 
@@ -73,10 +74,14 @@ class PageManager(object):
         main_window = self._application.main_window
         glwidget = main_window.glwidget
 
-        # Page size
+        # for screen in self.platform.screens:
+        #     print(screen)
+        dpi_x, dpi_y = self._application.platform.screens[0].dpi
+        dpi = min(dpi_x, dpi_y)
         from Elbrea.Math.Interval import IntervalInt2D
-        width = height = 1000
-        glwidget._image_interval = IntervalInt2D((0, width), (0, height))
+        page_format = self._pages.page_format
+        glwidget._image_interval = IntervalInt2D((0, page_format.width_px(dpi)),
+                                                 (0, page_format.height_px(dpi)))
         
         # Fixme: Basic...
         from Elbrea.GraphicEngine.PainterManager import BasicPainterManager
