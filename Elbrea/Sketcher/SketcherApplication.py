@@ -65,10 +65,16 @@ class SketcherApplication(GuiApplicationBase):
 
         if not os.path.exists(journal_path):
             raise NameError()    
+
+        if journal_path.endswith('.hdf5'):
+            from .Importer.Hdf import HdfImporter
+            return HdfImporter(journal_path).read_pages()
+        elif journal_path.endswith('.xoj'):
+            from .Importer.Xournal import XournalImporter
+            return XournalImporter(journal_path).pages
+        else:
+            raise NameError('Unknown journal format')
         
-        from .Importer.Hdf import HdfImporter
-        return HdfImporter(journal_path).read_pages()
-       
     ##############################################
 
     def save(self, journal_path=None):

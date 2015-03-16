@@ -18,6 +18,9 @@ from lxml import etree
 
 ####################################################################################################
 
+from Elbrea.Sketcher.Page import Pages, Page
+from Elbrea.Sketcher.PageFormat import PageFormat
+from Elbrea.Sketcher.Path import Path
 from Elbrea.Sketcher.Unit import mm2pt
 
 ####################################################################################################
@@ -51,6 +54,9 @@ class XournalImporter(object):
         xml_file = gzip.open(file_path)
         tree = etree.parse(xml_file)
         root = tree.getroot()
+
+        page_format = PageFormat('a4', 297, 210) # Fixme: size is per page
+        self._pages = Pages(page_format) 
         
         for node in root:
             self._logger.debug(type(node), node.tag)
@@ -58,7 +64,13 @@ class XournalImporter(object):
                 self._parse_title(node)
             elif node.tag == 'page':
                 self._parse_page(node)
-                
+
+    ##############################################
+
+    @property
+    def pages(self):
+        return self._pages
+                    
     ##############################################
 
     def _parse_title(self, node):
@@ -76,6 +88,8 @@ class XournalImporter(object):
         
         kwargs = dict(page_node.attrib)
         self._logger.debug('Page {}'.format(kwargs))
+
+        self._page = self._pages.add_page()
         
         for node in page_node:
             self._logger.debug(type(node), node.tag)
@@ -181,6 +195,36 @@ class XournalImporter(object):
         points = points.reshape(points.shape[0]//2, 2)
         self._logger.debug('Stroke {}:\n {}'.format(kwargs, points))
 
+        colour = kwargs['color']
+        if colour == 'black':
+            colour = (0, 0, 0)
+        elif colour == 'red':
+            colour = (255, 0, 0)
+        elif colour == 'green':
+            colour = (0, 255, 0)
+        elif colour == 'blue':
+            colour = (0, 0, 255)
+        elif colour == 'yellow':
+            colour = (255, 255, 0)
+        elif colour == 'cyan':
+            colour = (0, 255, 255)
+        elif colour == 'magenta':
+            colour = (255, 0, 255)
+        elif colour == 'white':
+            colour = (255, 255, 255)
+        else:
+            colour = (0, 0, 0)
+            # raise ValueError
+        
+        pencil_size = float(kwargs['width']) * 131. / 72. # Fixme:
+
+        height_pt = 297 / 25.4 * 72
+        points[:,1] = height_pt - points[:,1] # invert y axis
+        points *= 131. / 72. # Fixme:
+
+        path = Path(colour, pencil_size, points)
+        self._page.add_path(path)
+        
     ##############################################
 
     def _parse_text(self, node):
