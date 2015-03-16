@@ -57,6 +57,7 @@ class PrimitivePainter(Painter):
 
         self._logger.debug('Update current path')
         # Fixme: move to glwidget
+        # Fixme: try to update vbo, allocate a larger buufer
         self._glwidget.makeCurrent()
         self._current_path = self.__primitive_class__(path)
         self._current_path.colour = path.colour

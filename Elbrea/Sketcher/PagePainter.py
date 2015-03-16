@@ -73,6 +73,8 @@ class PagePainter(Painter):
 
     def add_path(self, path):
 
+        # Merge segments, pass colour and width as (z, w)
+        
         path_vao = LineVertexArray(path)
         path_vao.id = path.id
         path_vao.colour = path.colour

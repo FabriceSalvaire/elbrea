@@ -73,6 +73,8 @@ class LineVertexArray(GlVertexArrayObject):
 
         """ Set the vertex array from an iterable of segments. """
 
+        # Fixme: make no sense, must be a list of paths
+        
         self._number_of_objects = path.number_of_points # Right ?
         vertex = np.zeros((self._number_of_objects, 2), dtype=np.float32)
         vertex[...] = path.points
