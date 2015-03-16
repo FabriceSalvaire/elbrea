@@ -18,6 +18,10 @@ from lxml import etree
 
 ####################################################################################################
 
+from Elbrea.Sketcher.Unit import mm2pt
+
+####################################################################################################
+
 _module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
@@ -212,6 +216,91 @@ class XournalImporter(object):
         decode_string = base64.decodestring(str.encode(node.text)) # PNG format
         self._logger.debug('Image {}'.format(kwargs))
 
+####################################################################################################
+
+class XournalWriter(object):
+
+    ##############################################
+
+    def __init__(self, file_path):
+    
+        # self._file = open(file_path, 'w')
+        self._file = gzip.open(file_path, 'wb')
+
+    ##############################################
+
+    def write_line(self, text):
+
+        self._file.write((text + '\n').encode('utf-8'))
+    
+    ##############################################
+
+    def __del__(self):
+
+        self._file.close()
+    
+    ##############################################
+
+    def save_path(self, path, height_pt):
+
+        colour = tuple(path.colour) # Fixme:
+        if   colour == (0, 0, 0):
+            colour = 'black'
+        elif colour == (255, 0, 0):
+            colour = 'red'
+        elif colour == (0, 255, 0):
+            colour = 'green'
+        elif colour == (0, 0, 255):
+            colour = 'blue'
+        elif colour == (255, 255, 0):
+            colour = 'yellow'
+        elif colour == (0, 255, 255):
+            colour = 'cyan'
+        elif colour == (255, 0, 255):
+            colour = 'magenta'
+        elif colour == (255, 255, 255):
+            colour = 'white'
+        else:
+            colour = 'black'
+            # raise ValueError
+        
+        self.write_line('<stroke tool="pen" color="{}" width="{:.2f}">'.format(colour, path.pencil_size))
+        points = path.points / 131. * 72. # Fixme: px dpi -> pt
+        points[:,1] = height_pt - points[:,1] # invert y axis
+        self.write_line(' '.join([str(x) for x in points.flatten()]) + '')
+        self.write_line('</stroke>')
+        
+    ##############################################
+
+    def save_page(self, page, width_pt, height_pt):
+
+        self.write_line('<page width="{:.2f}" height="{:.2f}">'.format(width_pt, height_pt))
+        self.write_line('<background type="solid" color="white" style="lined" />')
+        self.write_line('<layer>')
+        
+        for path in page.paths:
+            self.save_path(path, height_pt)
+        
+        self.write_line('</layer>')
+        self.write_line('</page>')
+            
+    ##############################################
+
+    def save_pages(self, pages):
+
+        self.write_line('<?xml version="1.0" standalone="no"?>')
+        self.write_line('<xournal version="0.4.8">')
+        self.write_line('<title>Untitled</title>')
+
+        page_format = pages.page_format
+        width_pt = mm2pt(page_format.width)
+        height_pt = mm2pt(page_format.height)
+        
+        for page in pages:
+            self.save_page(page, width_pt, height_pt)
+
+        self.write_line('</xournal>')
+            
 ####################################################################################################
 # 
 # End

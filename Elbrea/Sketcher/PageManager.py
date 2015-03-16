@@ -77,11 +77,12 @@ class PageManager(object):
         # for screen in self.platform.screens:
         #     print(screen)
         dpi_x, dpi_y = self._application.platform.screens[0].dpi
-        dpi = min(dpi_x, dpi_y)
+        self.dpi = min(dpi_x, dpi_y)
+        self._logger.info('dpi {}'.format(self.dpi))
         from Elbrea.Math.Interval import IntervalInt2D
         page_format = self._pages.page_format
-        glwidget._image_interval = IntervalInt2D((0, page_format.width_px(dpi)),
-                                                 (0, page_format.height_px(dpi)))
+        glwidget._image_interval = IntervalInt2D((0, page_format.width_px(self.dpi)),
+                                                 (0, page_format.height_px(self.dpi)))
         
         # Fixme: Basic...
         from Elbrea.GraphicEngine.PainterManager import BasicPainterManager

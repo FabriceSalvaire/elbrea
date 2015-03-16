@@ -18,8 +18,8 @@ class PageFormat(object):
     def __init__(self, name, largest_length, smallest_length, portrait=True):
 
         self._name = name
-        self._largest_length = max(largest_length, largest_length)
-        self._smallest_length = min(largest_length, largest_length)
+        self._largest_length = max(smallest_length, largest_length)
+        self._smallest_length = min(smallest_length, largest_length)
         self._portrait = portrait
 
     ##############################################

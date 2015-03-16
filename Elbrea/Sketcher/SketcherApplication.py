@@ -78,7 +78,12 @@ class SketcherApplication(GuiApplicationBase):
 
         from .Importer.Hdf import HdfWriter
         HdfWriter(journal_path).save_pages(self.page_manager.pages)
-    
+
+        from .Importer.Xournal import XournalWriter
+        # journal_path = journal_path.replace('.hdf5', '.xml')
+        journal_path = journal_path.replace('.hdf5', '.xoj')
+        XournalWriter(journal_path).save_pages(self.page_manager.pages)
+        
     ##############################################
 
     def refresh(self):
