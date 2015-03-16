@@ -28,7 +28,7 @@ class ToolBar(object):
     def __init__(self, main_window):
 
         self._application = QtWidgets.QApplication.instance()
-        self._main_window = main_window
+        self._main_window = main_window # self._application.main_window
         self._tool_bar = main_window.addToolBar(self.__name__)
 
         self._create_actions()
@@ -214,20 +214,23 @@ class SketcherToolBar(ToolBar):
 
     def _on_pencil_size_changed(self, index):
 
-        self._application.sketcher_state.pencil_size = self._pencil_size_combobox.currentData()
+        page_manager = self._application.page_manager
+        page_manager.sketcher_state.pencil_size = self._pencil_size_combobox.currentData()
 
     ##############################################
 
     def _on_eraser_size_changed(self, index):
 
-        self._application.sketcher_state.eraser_size = self._eraser_size_combobox.currentData()
+        page_manager = self._application.page_manager
+        page_manager.sketcher_state.eraser_size = self._eraser_size_combobox.currentData()
         
     ##############################################
 
     def _on_pencil_colour_changed(self, index):
 
+        page_manager = self._application.page_manager
         colour = QtGui.QColor(self._pencil_colours[index])
-        self._application.sketcher_state.pencil_colour = (colour.red(), colour.green(), colour.blue())
+        page_manager.sketcher_state.pencil_colour = (colour.red(), colour.green(), colour.blue())
 
     ##############################################
 
@@ -268,25 +271,35 @@ class PageToolBar(ToolBar):
 
         self._page_spinbox = QtWidgets.QSpinBox(self._main_window)
         self._page_spinbox.setMinimum(1)
-        self._page_number_label = QtWidgets.QLabel(self._main_window)
-        numer_of_pages = 1
-        self._page_number_label.setText(' / {}'.format(numer_of_pages))
+        self._number_of_pages_label = QtWidgets.QLabel(self._main_window)
+        self.update_number_of_pages(1)
         
         self._page_spinbox.valueChanged.connect(self._on_page_changed)
        
         items = (self.previous_page_action,
                  self.next_page_action,
                  self._page_spinbox,
-                 self._page_number_label,
+                 self._number_of_pages_label,
                 )
         self._add_items(items)
 
     ##############################################
 
+    def update_number_of_pages(self, number_of_pages):
+
+        self._number_of_pages_label.setText(' / {}'.format(number_of_pages))
+        
+    ##############################################
+
     def _on_page_changed(self, index):
 
-        pass
-    
+        page_index = index -1
+        page_manager = self._application.page_manager
+        if page_index > page_manager.last_page_index:
+            page_manager.add_page()
+            self.update_number_of_pages(page_manager.number_of_pages)
+        self._application.page_manager.select_page(page_index)
+        
 ####################################################################################################
 #
 # End

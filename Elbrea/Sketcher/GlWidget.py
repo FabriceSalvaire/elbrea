@@ -172,13 +172,13 @@ class GlWidget(GlWidgetBase):
             # Fixme: to func
             if current_tool is tool_bar.pen_tool_action:
                 pointer_type = TabletPointerType.pen
-                sketcher = self._application.path_sketcher
+                sketcher = self._application.page_manager.path_sketcher
             elif current_tool is tool_bar.segment_tool_action:
                 pointer_type = TabletPointerType.pen
-                sketcher = self._application.segment_sketcher
+                sketcher = self._application.page_manager.segment_sketcher
             else:
                 pointer_type = TabletPointerType.eraser
-                sketcher = self._application.path_sketcher
+                sketcher = self._application.page_manager.path_sketcher
             position = self.window_to_gl_coordinate(event, round_to_integer=False)
             tablet_event = TabletEvent(TabletEventType.press, pointer_type, position)
             if sketcher.on_tablet_event(tablet_event):
@@ -202,13 +202,13 @@ class GlWidget(GlWidgetBase):
                 # Fixme: to func
                 if current_tool is tool_bar.pen_tool_action:
                     pointer_type = TabletPointerType.pen
-                    sketcher = self._application.path_sketcher
+                    sketcher = self._application.page_manager.path_sketcher
                 elif current_tool is tool_bar.segment_tool_action:
                     pointer_type = TabletPointerType.pen
-                    sketcher = self._application.segment_sketcher
+                    sketcher = self._application.page_manager.segment_sketcher
                 else:
                     pointer_type = TabletPointerType.eraser
-                    sketcher = self._application.path_sketcher
+                    sketcher = self._application.page_manager.path_sketcher
                 position = self.window_to_gl_coordinate(event, round_to_integer=False)
                 tablet_event = TabletEvent(TabletEventType.release, pointer_type, position)
                 if sketcher.on_tablet_event(tablet_event):
@@ -251,13 +251,13 @@ class GlWidget(GlWidgetBase):
             # Fixme: to func
             if current_tool is tool_bar.pen_tool_action:
                 pointer_type = TabletPointerType.pen
-                sketcher = self._application.path_sketcher
+                sketcher = self._application.page_manager.path_sketcher
             elif current_tool is tool_bar.segment_tool_action:
                 pointer_type = TabletPointerType.pen
-                sketcher = self._application.segment_sketcher
+                sketcher = self._application.page_manager.segment_sketcher
             else:
                 pointer_type = TabletPointerType.eraser
-                sketcher = self._application.path_sketcher
+                sketcher = self._application.page_manager.path_sketcher
             position = self.window_to_gl_coordinate(event, round_to_integer=False)
             tablet_event = TabletEvent(TabletEventType.move, pointer_type, position)
             if sketcher.on_tablet_event(tablet_event):
@@ -299,7 +299,7 @@ class GlWidget(GlWidgetBase):
                     pointer_type = TabletPointerType.eraser
                 position = self.window_to_gl_coordinate(event, round_to_integer=False)
                 tablet_event = TabletEvent(tablet_event_type, pointer_type, position)
-                if self._application.sketcher.on_tablet_event(tablet_event):
+                if self._application.page_manager.sketcher.on_tablet_event(tablet_event):
                     self.update()
         except Exception as exception:
             self._logger.error(str(exception))

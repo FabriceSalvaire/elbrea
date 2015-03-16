@@ -28,7 +28,17 @@ class Pages(object):
 
         self._pages = []
         # dict to quickly find a page ?
-        
+
+    ##############################################
+
+    @property
+    def number_of_pages(self):
+        return len(self._pages)
+
+    @property
+    def last_page_index(self):
+        return len(self._pages) -1
+    
     ##############################################
 
     def __len__(self):

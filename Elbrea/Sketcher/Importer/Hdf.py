@@ -58,13 +58,18 @@ class HdfFile(object):
 
 ####################################################################################################
 
-class HdfImporter(object):
+class HdfImporter(HdfFile):
 
     ##############################################
 
     def __init__(self, file_path):
     
-        self._hdf_file = HdfFile(file_path)
+        super(HdfImporter, self).__init__(file_path)
+
+        self._pages_group = self['pages']
+
+        attributes = self.root.attrs
+        self._number_of_pages = attributes['number_of_pages']
 
     ##############################################
 
@@ -78,12 +83,12 @@ class HdfImporter(object):
         points = np.array(dataset)
 
         return Path(colour, pencil_size, points)
-
+   
     ##############################################
 
-    def read_page(self, name):
+    def read_page(self, page_index):
 
-        group = self._hdf_file[name]
+        group = self._pages_group[str(page_index)]
         page = Page()
         for name in group:
             path = self.read_path(group, name)
@@ -96,20 +101,22 @@ class HdfImporter(object):
     def read_pages(self):
 
         pages = Pages()
-        # Fixme:
-        pages.add_page(self.read_page('page'))
+        for i in range(self._number_of_pages):
+            pages.add_page(self.read_page(i))
 
         return pages
         
 ####################################################################################################
 
-class HdfWriter(object):
+class HdfWriter(HdfFile):
 
     ##############################################
 
     def __init__(self, file_path):
     
-        self._hdf_file = HdfFile(file_path, update=True)
+        super(HdfWriter, self).__init__(file_path, update=True)
+
+        self._pages_group = self.create_group('pages')
 
     ##############################################
 
@@ -124,11 +131,21 @@ class HdfWriter(object):
 
     ##############################################
 
-    def save_page(self, page):
+    def save_page(self, page_index, page):
 
-        group = self._hdf_file.create_group('page')
+        group = self._pages_group.create_group(str(page_index))
         for path in page.paths:
             self.save_path(group, path)
+            
+    ##############################################
+
+    def save_pages(self, pages):
+
+        attributes = self.root.attrs
+        attributes['number_of_pages'] = pages.number_of_pages
+        
+        for i, page in enumerate(pages):
+            self.save_page(i, page)
             
 ####################################################################################################
 # 
