@@ -12,7 +12,7 @@ import h5py
 
 ####################################################################################################
 
-from Elbrea.Sketcher.Page import Page
+from Elbrea.Sketcher.Page import Pages, Page
 from Elbrea.Sketcher.Path import Path
 
 ####################################################################################################
@@ -90,6 +90,16 @@ class HdfImporter(object):
             page.add_path(path)
 
         return page
+
+    ##############################################
+
+    def read_pages(self):
+
+        pages = Pages()
+        # Fixme:
+        pages.add_page(self.read_page('page'))
+
+        return pages
         
 ####################################################################################################
 

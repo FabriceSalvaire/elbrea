@@ -30,11 +30,13 @@ class PrimitivePainter(Painter):
     
     ##############################################
     
-    def __init__(self, painter_manager, **kwargs):
+    def __init__(self, painter_manager, page_provider, **kwargs):
 
         super(PrimitivePainter, self).__init__(painter_manager, **kwargs)
 
+        self._page_provider = page_provider
         self._glwidget = self._painter_manager.glwidget
+        # self._path_vaos = {}
         self.reset()
 
     ##############################################
@@ -42,7 +44,6 @@ class PrimitivePainter(Painter):
     def reset(self):
 
         self._current_path = None
-        self._paths = {} # Fixme: must be extern for pages
         # self.disable()
 
     ##############################################
@@ -78,6 +79,8 @@ class PrimitivePainter(Painter):
         path_vao.line_width = path.pencil_size
         path_vao.bind_to_shader(self._shader_program.interface.attributes.position)
         self._paths[path_vao.id] = path_vao
+        # self._path_vaos[path_vao.id] = path_vao
+        # self._paths.append(path_vao.id)
         self._glwidget.doneCurrent()
 
     ##############################################
@@ -85,7 +88,9 @@ class PrimitivePainter(Painter):
     def remove_path(self, path):
 
         del self._paths[path.id]
-    
+        # del self._path_vaos[path_vao.id]
+        # self._paths.remove(path_vao.id)
+        
     ##############################################
 
     def paint(self):
@@ -99,6 +104,8 @@ class PrimitivePainter(Painter):
         self._shader_program.bind()
         self._shader_program.uniforms.antialias_diameter = 1.
         for vao in self._paths.values():
+        # for vao_id in self._paths:
+        #     vao = self._path_vaos[vao_id]
             self._paint_vao(vao)
         if self._current_path is not None:
             self._paint_vao(self._current_path)
@@ -122,11 +129,17 @@ class SegmentPainter(PrimitivePainter):
 
     ##############################################
     
-    def __init__(self, painter_manager, **kwargs):
+    def __init__(self, painter_manager, page_provider, **kwargs):
 
-        super(SegmentPainter, self).__init__(painter_manager, **kwargs)
+        super(SegmentPainter, self).__init__(painter_manager, page_provider, **kwargs)
         self._shader_program = self._glwidget.shader_manager.segment_shader_program
-    
+
+    ##############################################
+
+    @property
+    def _paths(self,):
+        return self._page_provider.page_data.segments
+
 ####################################################################################################
 
 class PathPainter(PrimitivePainter):
@@ -136,11 +149,17 @@ class PathPainter(PrimitivePainter):
 
     ##############################################
     
-    def __init__(self, painter_manager, **kwargs):
+    def __init__(self, painter_manager, page_provider, **kwargs):
 
-        super(PathPainter, self).__init__(painter_manager, **kwargs)
+        super(PathPainter, self).__init__(painter_manager, page_provider, **kwargs)
         self._shader_program = self._glwidget.shader_manager.path_shader_program
-    
+
+    ##############################################
+
+    @property
+    def _paths(self,):
+        return self._page_provider.page_data.paths
+
 ####################################################################################################
 #
 # End

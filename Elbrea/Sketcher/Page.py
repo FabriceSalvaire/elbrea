@@ -13,17 +13,71 @@ import rtree
 
 ####################################################################################################
 
-from .Path import Path
-
-####################################################################################################
-
 _module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
 
-class Pages(list):
-    pass
+class Pages(object):
 
+    # We don't store a page number in page instance, since a page remaniment could require to update
+    # a lot of page numbers.
+    
+    ##############################################
+
+    def __init__(self):
+
+        self._pages = []
+        # dict to quickly find a page ?
+        
+    ##############################################
+
+    def __len__(self):
+
+        return len(self._pages)
+    
+    ##############################################
+
+    def __iter__(self):
+
+        return iter(self._pages)
+
+    ##############################################
+
+    def __getitem__(self, slice_):
+
+        return self._pages[slice_]
+    
+    ##############################################
+
+    def add_page(self, page=None):
+
+        if page is None:
+            page = Page()
+        self._pages.append(page)
+        return page
+
+    ##############################################
+
+    def insert_page(self, position):
+
+        page = Page()
+        self._pages.insert(position, page)
+        return page
+
+    ##############################################
+
+    def remove_page(self, position):
+
+        del self._pages[position]
+
+    ##############################################
+
+    def move_page(self, from_, to):
+
+        page = self._pages[from_]
+        del self._pages[from_]
+        self._pages.insert(to, page)
+        
 ####################################################################################################
 
 class Page(object):

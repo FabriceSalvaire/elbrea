@@ -68,11 +68,11 @@ class SegmentSketcher(object):
     
     ##############################################
     
-    def __init__(self, sketcher_state, page, painter):
+    def __init__(self, sketcher_state, page_provider, painter):
 
         self._sketcher_state = sketcher_state
 
-        self._page = page
+        self._page_provider = page_provider
         self._painter = painter
         
         self._current_segment = None
@@ -96,7 +96,7 @@ class SegmentSketcher(object):
     def _end_segment(self, position):
 
         self._current_segment.update_second_point(position)
-        self._page.add_path(self._current_segment)
+        self._page_provider.page.add_path(self._current_segment)
         self._first_point = None
 
         return self._current_segment
@@ -190,16 +190,22 @@ class PathSketcher(object):
     
     ##############################################
     
-    def __init__(self, sketcher_state, page, painter):
+    def __init__(self, sketcher_state, page_provider, painter):
 
         self._sketcher_state = sketcher_state
 
-        self._page = page
+        self._page_provider = page_provider
         self._painter = painter
         
         self._current_path = None
         self._point_filter = PointFilter(window_size=10)
 
+    ##############################################
+
+    @property
+    def _page(self):
+        return self._page_provider.page
+    
     ##############################################
 
     def _start_path(self):

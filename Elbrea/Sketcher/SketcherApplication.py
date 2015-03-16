@@ -12,7 +12,6 @@ import os
 
 ####################################################################################################
 
-from .Page import Page
 from Elbrea.GUI.Base.GuiApplicationBase import GuiApplicationBase
 
 ####################################################################################################
@@ -48,41 +47,47 @@ class SketcherApplication(GuiApplicationBase):
 
         journal_path = self.args.journal 
         if os.path.exists(journal_path):
-            self.load(journal_path)
+            pages = self.load_journal(journal_path)
         else:
-            self._page = Page()
-        
+            pages = None
+        from .PageManager import PageManager
+        self.page_manager = PageManager(pages)
+            
         # for screen in self.platform.screens:
         #     print(screen)
         # dpi_x, dpi_y = self.platform.screens[0].dpi
         
         glwidget = self._main_window.glwidget
 
+        # Page size
         from Elbrea.Math.Interval import IntervalInt2D
         width = height = 1000
         glwidget._image_interval = IntervalInt2D((0, width), (0, height))
 
         # Load registered painters
         # from Elbrea.GraphicEngine import ForegroundPainter 
-        
+
+        # Fixme: Basic...
         from Elbrea.GraphicEngine.PainterManager import BasicPainterManager
         self.painter_manager = BasicPainterManager(glwidget)
 
+        # steered by page size and type
         from .PagePainter import PagePainter
         page_painter = PagePainter(self.painter_manager)
 
         from Elbrea.GraphicEngine.PathPainter import SegmentPainter, PathPainter
-        segment_painter = SegmentPainter(self.painter_manager)
-        path_painter = PathPainter(self.painter_manager)
+        segment_painter = SegmentPainter(self.painter_manager, self.page_manager)
+        path_painter = PathPainter(self.painter_manager, self.page_manager)
 
         from .Sketcher import SketcherState, SegmentSketcher, PathSketcher
         self.sketcher_state = SketcherState()
         self._main_window.sketcher_tool_bar.init_sketcher_state()
-        self.segment_sketcher = SegmentSketcher(self.sketcher_state, self._page, segment_painter)
-        self.path_sketcher = PathSketcher(self.sketcher_state, self._page, path_painter)
+        # page should be a provider
+        self.segment_sketcher = SegmentSketcher(self.sketcher_state, self.page_manager, segment_painter)
+        self.path_sketcher = PathSketcher(self.sketcher_state, self.page_manager, path_painter)
 
         # Update painter
-        for path in self._page.paths:
+        for path in self.page_manager.page.paths:
             path_painter.add_path(path)
             
         glwidget.init_tools() # Fixme: for shader
@@ -100,19 +105,21 @@ class SketcherApplication(GuiApplicationBase):
 
         from .Importer.Hdf import HdfWriter
         hdf_writer = HdfWriter(journal_path)
-        hdf_writer.save_page(self._page)
+        hdf_writer.save_page(self.page_manager.page)
         
     ##############################################
 
-    def load(self, journal_path):
+    def load_journal(self, journal_path):
 
         if not  os.path.exists(journal_path):
             raise NameError()    
         
         from .Importer.Hdf import HdfImporter
         hdf_importer = HdfImporter(journal_path)
-        self._page = hdf_importer.read_page('page')
-            
+        pages = hdf_importer.read_pages()
+        
+        return pages
+
 ####################################################################################################
 #
 # End
