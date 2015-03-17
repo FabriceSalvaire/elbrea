@@ -4,9 +4,7 @@
 
 .. toctree::
   Viewer/BoardData
-  Viewer/Cropper
   Viewer/GlWidget
-  Viewer/HdfAnnotation
   Viewer/ImageProcessingPipeline
   Viewer/IntensityProfile
   Viewer/IntensityProfileForm

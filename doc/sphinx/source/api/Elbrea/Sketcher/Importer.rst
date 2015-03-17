@@ -3,6 +3,7 @@
 *****************
 
 .. toctree::
+  Importer/Hdf
   Importer/Xournal
 
 .. End
