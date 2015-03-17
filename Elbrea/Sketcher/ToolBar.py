@@ -75,6 +75,16 @@ class MainToolBar(ToolBar):
                     shortcut='Ctrl+S',
                     shortcutContext=Qt.ApplicationShortcut,
                 )
+
+        self._fit_width_action = \
+                QtWidgets.QAction(# icon_loader[''],
+                    'Fit width',
+                    self._application,
+                    toolTip='Fit width',
+                    triggered=self._main_window.glwidget.fit_width,
+                    shortcut='Ctrl+W',
+                    shortcutContext=Qt.ApplicationShortcut,
+                )
         
         self._display_all_action = \
                 QtWidgets.QAction(# icon_loader[''],
@@ -91,6 +101,7 @@ class MainToolBar(ToolBar):
     def _init_tool_bar(self):
         
         items = (self._save_action,
+                 self._fit_width_action,
                  self._display_all_action,
                 )
         self._add_items(items)
@@ -147,17 +158,19 @@ class SketcherToolBar(ToolBar):
                           checkable=True,
                           )
         
-        self._action_group = QtWidgets.QActionGroup(self._application)
+        self._sketcher_action_group = QtWidgets.QActionGroup(self._application)
         for action in (self.pen_tool_action,
                        self.segment_tool_action,
                        self.eraser_tool_action,
                        ):
-            self._action_group.addAction(action)
+            self._sketcher_action_group.addAction(action)
 
     ##############################################
 
     def _init_tool_bar(self):
-                
+
+        self.position_tool_action.setChecked(True)
+        
         self._pencil_size_combobox = QtWidgets.QComboBox(self._main_window)
         for pencil_size in (1, 2, 3, 6, 12):
             self._pencil_size_combobox.addItem(str(pencil_size), pencil_size)
@@ -192,12 +205,14 @@ class SketcherToolBar(ToolBar):
                  self._eraser_size_combobox,
                 )
         self._add_items(items)
+
+        self._sketcher_action_group.triggered.connect(self._main_window.glwidget.set_current_tool)
         
     ##############################################
 
     def current_tool(self):
 
-        return self._action_group.checkedAction()
+        return self._sketcher_action_group.checkedAction()
 
     ##############################################
 
@@ -276,8 +291,8 @@ class PageToolBar(ToolBar):
         
         self._page_spinbox.valueChanged.connect(self._on_page_changed)
        
-        items = (self.previous_page_action,
-                 self.next_page_action,
+        items = (# self.previous_page_action,
+                 # self.next_page_action,
                  self._page_spinbox,
                  self._number_of_pages_label,
                 )

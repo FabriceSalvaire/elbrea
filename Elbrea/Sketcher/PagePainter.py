@@ -51,7 +51,7 @@ class PagePainter(Painter):
 
         self._glwidget.makeCurrent()
 
-        interval =  self._glwidget._image_interval
+        interval =  self._glwidget.page_interval
         colour = RgbIntColour(64, 160, 255).normalise() # xournal
         pencil_size = 1. # > 1
         for y in range(interval.y.inf, interval.y.sup, step):

@@ -13,15 +13,13 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 import numpy as np
 
-import cv2 # Fixme
-
 ####################################################################################################
 
 #!# from PyOpenGLng.HighLevelApi.GlOrtho2D import ZoomManagerAbc
 
 from PyOpenGLng.HighLevelApi import GL
 from PyOpenGLng.HighLevelApi.Buffer import GlUniformBuffer
-from PyOpenGLng.HighLevelApi.GlWidgetBase import GlWidgetBase
+from PyOpenGLng.HighLevelApi.GlWidgetBase import GlWidgetBase, XAXIS
 from PyOpenGLng.Math.Interval import IntervalInt2D # duplicated
 
 from .Sketcher import TabletEvent, TabletPointerType, TabletEventType
@@ -53,7 +51,18 @@ class GlWidget(GlWidgetBase):
         self._previous_position_screen = None
 
         self._painter_manager = None
+        self._page_interval = None
 
+        self._sketcher = None
+        self._pointer_type = None
+        
+    ##############################################
+
+    def _set_cursor(self):
+
+        pass
+
+        # Don't work as expected 
         # cursor_size = 16
         # # B=1 M=1 black
         # # B=0 M=1 white
@@ -71,7 +80,17 @@ class GlWidget(GlWidgetBase):
         # mask = QtGui.QBitmap.fromData(QtCore.QSize(cursor_size, cursor_size), data.flatten())
         # self._cursor = QtGui.QCursor(bitmap, mask)
         # self.setCursor(self._cursor)
-        
+
+    ##############################################
+
+    @property
+    def page_interval(self):
+        return self._page_interval
+
+    @page_interval.setter
+    def page_interval(self, interval):
+        self._page_interval = interval
+    
     ##############################################
 
     def init_tools(self):
@@ -135,8 +154,37 @@ class GlWidget(GlWidgetBase):
 
     def display_all(self):
 
-        self.glortho2d.zoom_interval(self._image_interval)
+        self.glortho2d.zoom_interval(self._page_interval)
         self.update()
+
+    ##############################################
+
+    def fit_width(self):
+
+        # self.glortho2d.viewport_area.area.x.length()
+        self.glortho2d.fit_axis(self._page_interval.x.length(), XAXIS)
+        self.update()
+
+    ##############################################
+
+    def set_current_tool(self):
+
+        # Fixme: design, tool_bar.xxx ?
+        tool_bar = self._application.main_window.sketcher_tool_bar
+        current_tool = tool_bar.current_tool()
+        page_manager = self._application.page_manager
+        if current_tool is tool_bar.pen_tool_action:
+            self._sketcher = page_manager.path_sketcher
+            self._pointer_type = TabletPointerType.pen
+        elif current_tool is tool_bar.segment_tool_action:
+            self._sketcher = page_manager.segment_sketcher
+            self._pointer_type = TabletPointerType.pen
+        elif current_tool is tool_bar.eraser_tool_action:
+            self._sketcher = page_manager.path_sketcher
+            self._pointer_type = TabletPointerType.eraser
+        else:
+            self._sketcher = None
+            self._pointer_type = None
 
     ##############################################
 
@@ -164,25 +212,10 @@ class GlWidget(GlWidgetBase):
         if not (event.buttons() & QtCore.Qt.LeftButton):
             return
 
-        # Fixme: tool triggered -> event receiver
-        tool_bar = self._application.main_window.sketcher_tool_bar
-        current_tool = tool_bar.current_tool()
-        if current_tool in (tool_bar.pen_tool_action,
-                            tool_bar.segment_tool_action,
-                            tool_bar.eraser_tool_action):
-            # Fixme: to func
-            if current_tool is tool_bar.pen_tool_action:
-                pointer_type = TabletPointerType.pen
-                sketcher = self._application.page_manager.path_sketcher
-            elif current_tool is tool_bar.segment_tool_action:
-                pointer_type = TabletPointerType.pen
-                sketcher = self._application.page_manager.segment_sketcher
-            else:
-                pointer_type = TabletPointerType.eraser
-                sketcher = self._application.page_manager.path_sketcher
+        if self._sketcher is not None:
             position = self.window_to_gl_coordinate(event, round_to_integer=False)
-            tablet_event = TabletEvent(TabletEventType.press, pointer_type, position)
-            if sketcher.on_tablet_event(tablet_event):
+            tablet_event = TabletEvent(TabletEventType.press, self._pointer_type, position)
+            if self._sketcher.on_tablet_event(tablet_event):
                 self.update()
                 
     ##############################################
@@ -195,31 +228,11 @@ class GlWidget(GlWidgetBase):
         if button & QtCore.Qt.RightButton:
             self.contextual_menu.exec_(event.globalPos())
         elif button & QtCore.Qt.LeftButton:
-            tool_bar = self._application.main_window.sketcher_tool_bar
-            current_tool = tool_bar.current_tool()
-            if current_tool in (tool_bar.pen_tool_action,
-                                tool_bar.segment_tool_action,
-                                tool_bar.eraser_tool_action):
-                # Fixme: to func
-                if current_tool is tool_bar.pen_tool_action:
-                    pointer_type = TabletPointerType.pen
-                    sketcher = self._application.page_manager.path_sketcher
-                elif current_tool is tool_bar.segment_tool_action:
-                    pointer_type = TabletPointerType.pen
-                    sketcher = self._application.page_manager.segment_sketcher
-                else:
-                    pointer_type = TabletPointerType.eraser
-                    sketcher = self._application.page_manager.path_sketcher
+            if self._sketcher is not None:
                 position = self.window_to_gl_coordinate(event, round_to_integer=False)
-                tablet_event = TabletEvent(TabletEventType.release, pointer_type, position)
-                if sketcher.on_tablet_event(tablet_event):
+                tablet_event = TabletEvent(TabletEventType.release, self._pointer_type, position)
+                if self._sketcher.on_tablet_event(tablet_event):
                     self.update()
-                
-    ##############################################
-
-    def wheelEvent(self, event):
-
-        return self.wheel_zoom(event)
 
     ##############################################
 
@@ -246,24 +259,18 @@ class GlWidget(GlWidgetBase):
             self.show_coordinate(position)
         # elif current_tool is tool_bar.crop_tool_action:
         #     self.cropper.update(event) # Fixme: call mouseMoveEvent
-        elif current_tool in (tool_bar.pen_tool_action,
-                              tool_bar.segment_tool_action,
-                              tool_bar.eraser_tool_action):
-            # Fixme: to func
-            if current_tool is tool_bar.pen_tool_action:
-                pointer_type = TabletPointerType.pen
-                sketcher = self._application.page_manager.path_sketcher
-            elif current_tool is tool_bar.segment_tool_action:
-                pointer_type = TabletPointerType.pen
-                sketcher = self._application.page_manager.segment_sketcher
-            else:
-                pointer_type = TabletPointerType.eraser
-                sketcher = self._application.page_manager.path_sketcher
+        elif self._sketcher is not None:
             position = self.window_to_gl_coordinate(event, round_to_integer=False)
-            tablet_event = TabletEvent(TabletEventType.move, pointer_type, position)
-            if sketcher.on_tablet_event(tablet_event):
+            tablet_event = TabletEvent(TabletEventType.move, self._pointer_type, position)
+            if self._sketcher.on_tablet_event(tablet_event):
                 self.update()
 
+    ##############################################
+
+    def wheelEvent(self, event):
+
+        return self.wheel_zoom(event)
+                
     ##############################################
 
     def tabletEvent(self, event):
@@ -283,9 +290,7 @@ class GlWidget(GlWidgetBase):
         #     pressure, x_tilt, y_tilt))
 
         try:
-            tool_bar = self._application.main_window.sketcher_tool_bar
-            current_tool = tool_bar.current_tool()
-            if current_tool is tool_bar.pen_tool_action:
+            if self._sketcher is not None:
                 event_type = event.type()
                 if event_type == QtCore.QEvent.TabletPress:
                     tablet_event_type = TabletEventType.press
@@ -300,7 +305,7 @@ class GlWidget(GlWidgetBase):
                     pointer_type = TabletPointerType.eraser
                 position = self.window_to_gl_coordinate(event, round_to_integer=False)
                 tablet_event = TabletEvent(tablet_event_type, pointer_type, position)
-                if self._application.page_manager.sketcher.on_tablet_event(tablet_event):
+                if self._sketcher.on_tablet_event(tablet_event):
                     self.update()
         except Exception as exception:
             self._logger.error(str(exception))
