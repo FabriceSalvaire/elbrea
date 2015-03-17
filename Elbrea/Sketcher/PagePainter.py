@@ -38,14 +38,12 @@ class PagePainter(Painter):
 
         super(PagePainter, self).__init__(painter_manager, z_value=z_value, status=status)
 
-        self._glwidget = self._painter_manager.glwidget
         self._shader_program = self._glwidget.shader_manager.segment_shader_program
         self.reset()
 
         self.set_page(step)
         
     ##############################################
-
 
     def set_page(self, step=10):
 

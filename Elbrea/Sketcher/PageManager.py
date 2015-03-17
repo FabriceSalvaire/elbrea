@@ -92,6 +92,12 @@ class PageManager(object):
         from .PagePainter import PagePainter
         page_painter = PagePainter(self.painter_manager)
 
+        from Elbrea.GraphicEngine.TexturePainter import TexturePainter
+        texture_painter = TexturePainter(self.painter_manager)
+        from Elbrea.Image import ImageLoader
+        image = ImageLoader.load_image('flower.jpg')
+        texture_painter.upload(None, None, image)
+        
         from Elbrea.GraphicEngine.PathPainter import SegmentPainter, PathPainter
         self._segment_painter = SegmentPainter(self.painter_manager, self)
         self._path_painter = PathPainter(self.painter_manager, self)

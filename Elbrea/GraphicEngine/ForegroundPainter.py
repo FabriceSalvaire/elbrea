@@ -5,6 +5,8 @@
 # 
 ####################################################################################################
 
+# Fixme: Purpose ?
+
 ####################################################################################################
 
 import logging
@@ -190,6 +192,10 @@ class TextPainter(RegisteredPainter):
 
 class SketcherPainter(Painter, ObjectWithTimeStamp):
 
+    """ Paint a dynamic image. """
+
+    # Fixme: similar to texture painter
+    
     __painter_name__ = 'sketcher inner-painter'
     
     _logger = _module_logger.getChild('SketcherPainter')

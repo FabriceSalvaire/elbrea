@@ -28,72 +28,64 @@ _module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
 
-class BackgroundPainter(Painter):
+class TexturePainter(Painter):
 
-    _logger = _module_logger.getChild('BackgroundPainter')
-
-    ##############################################
+    __painter_name__ = 'texture'
     
-    def __init__(self, painter_manager):
-
-        super(BackgroundPainter, self).__init__(painter_manager)
-
-        self._texture_painters = {}
-        self._current_painter = None
-
-    ##############################################
-
-    @property
-    def current_painter_name(self):
-        return self._current_painter
-
-    @property
-    def current_painter(self):
-        return self._texture_painters[self._current_painter]
-
-    ##############################################
-
-    def add_painter(self, name):
-
-        painter = TexturePainter(self._painter_manager, name)
-        painter.disable()
-        self._texture_painters[name] = painter
-        return painter
-        
-    ##############################################
-
-    def select_painter(self, name):
-
-        if name in self._texture_painters:
-            self._current_painter = name
-            painter = self._texture_painters[name]
-            painter.enable()
-            # return painter
-        else:
-            raise KeyError(name)
-
-    ##############################################
-
-    def paint(self):
-
-        if self._current_painter is not None:
-            self._logger.info("current painter {}".format(self._current_painter))
-            self._texture_painters[self._current_painter].paint()
-
-####################################################################################################
-
-class TexturePainter(Painter, ObjectWithTimeStamp):
-
     _logger = _module_logger.getChild('TexturePainter')
 
     ##############################################
     
-    def __init__(self, painter_manager, name):
+    def __init__(self, *args, **kwargs):
+
+        super(TexturePainter, self).__init__(*args, **kwargs)
+
+        self._shader_program = self._glwidget.shader_manager.texture_shader_program
+        self._texture_vertex_array = None
+
+    ##############################################
+
+    def upload(self, position, dimension, image):
+
+        position = Point(0, 0)
+        dimension = Offset(500, 500)
+        
+        self._glwidget.makeCurrent() #?
+        with GL.error_checker():
+            self._texture_vertex_array = GlTextureVertexArray(position, dimension, image)
+            shader_program_interface = self._shader_program.interface.attributes
+            self._texture_vertex_array.bind_to_shader(shader_program_interface)
+
+    ##############################################
+
+    def paint_texture(self, texture_vertex_array):
+
+        # Fixme: efficiency, design
+        shader_program = self._shader_program
+        shader_program.bind()
+        texture_vertex_array.draw()
+        shader_program.unbind()
+        
+    ##############################################
+
+    def paint(self):
+
+        # Fixme: status, done in manager ?
+        if (self._status and self._texture_vertex_array is not None):
+            self.paint_texture(self._texture_vertex_array)
+
+####################################################################################################
+
+class DynamicTexturePainter(Painter, ObjectWithTimeStamp):
+
+    _logger = _module_logger.getChild('DynamicTexturePainter')
+    
+    ##############################################
+    
+    def __init__(self, *args, **kwargs):
 
         ObjectWithTimeStamp.__init__(self)
-        Painter.__init__(self, painter_manager)
-
-        self._name = name
+        Painter.__init__(self, *args, **kwargs)
 
         self._glwidget = self._painter_manager.glwidget
         self._source = None
@@ -102,13 +94,6 @@ class TexturePainter(Painter, ObjectWithTimeStamp):
         self._texture_vertex_array = None
         self._uploaded = False
         # self.modified()
-
-    ##############################################
-
-    @property
-    def name(self):
-        # return self.__painter_name__
-        return self._name
 
     ##############################################
 
@@ -169,10 +154,10 @@ class TexturePainter(Painter, ObjectWithTimeStamp):
             and self._texture_vertex_array is not None
             and self._shader_program is not None):
 
-            self._logger.info("uploaded {}".format(self._uploaded))
+            # self._logger.info("uploaded {}".format(self._uploaded))
 
             # if self.source > self: # timestamp
-            print(self._uploaded, self.source._modified_time, self._modified_time)
+            # print(self._uploaded, self.source._modified_time, self._modified_time)
             if not self._uploaded or self.source._modified_time > self._modified_time:
                 self.upload_data()
 

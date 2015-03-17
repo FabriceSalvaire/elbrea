@@ -33,19 +33,25 @@ class Painter(object):
 
     ##############################################
     
-    def __init__(self, painter_manager, z_value=0, status=True):
+    def __init__(self, painter_manager, z_value=0, status=True, name=None):
 
         self._painter_manager = painter_manager
-        
+        self._glwidget = painter_manager.glwidget # Fixme: for makeCurrent
+        # self._shader_manager = self._glwidget.shader_manager
+
         self._z_value = z_value
         self._status = status
+        if name is None:
+            self._name = self.__painter_name__ # Fixme: purpose
+        else:
+            self._name = name
 
         self._painter_manager.register_painter(self)
 
     ##############################################
 
     def __repr__(self):
-        return "Painter {} z={} s={}".format(self.__painter_name__, self._z_value, self._status)
+        return "Painter {} z={} s={}".format(self._name, self._z_value, self._status)
     
     ##############################################
 
@@ -67,7 +73,7 @@ class Painter(object):
 
     @property
     def name(self):
-        return self.__painter_name__
+        return self._name
 
     @property
     def z_value(self):
@@ -124,7 +130,7 @@ class PainterMetaClass(type):
 
         type.__init__(cls, class_name, super_classes, class_attribute_dict)
         if class_name != 'RegisteredPainter':
-            # PainterMetaClass._logger.debug("Register painter class %s", cls.__painter_name__)
+            # PainterMetaClass._logger.debug("Register painter class %s", cls._name)
             PainterMetaClass.classes[cls.__painter_name__] = cls
     
 ####################################################################################################

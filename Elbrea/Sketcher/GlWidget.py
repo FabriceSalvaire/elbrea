@@ -175,8 +175,9 @@ class GlWidget(GlWidgetBase):
     ##############################################
 
     def set_current_tool(self):
-
+        
         # Fixme: design, tool_bar.xxx ?
+        # implement receiver
         tool_bar = self._application.main_window.sketcher_tool_bar
         current_tool = tool_bar.current_tool()
         page_manager = self._application.page_manager
@@ -234,7 +235,8 @@ class GlWidget(GlWidgetBase):
             elif self._current_tool == tool_enum.roi:
                 scene_match = self.scene.mousePressEvent(event)
                 if not scene_match:
-                    self.cropper.begin(event) # Fixme: call mousePressEvent
+                    # Fixme: call mousePressEvent
+                    self.cropper.begin(event)
                 
     ##############################################
         
@@ -253,10 +255,8 @@ class GlWidget(GlWidgetBase):
                 if self._sketcher.on_tablet_event(tablet_event):
                     self.update()
             elif self._current_tool == tool_enum.roi:
-                self.cropper.end(event) # Fixme: call mouseReleaseEvent
-                self._logger.info(str(self.cropper.interval))
-                text_painter = self._painter_manager['text']
-                text_painter.set_text(self.cropper.interval)
+                 # Fixme: call mouseReleaseEvent
+                self.cropper.end(event)
 
     ##############################################
 
@@ -282,7 +282,8 @@ class GlWidget(GlWidgetBase):
             self._set_previous_position(position, position_screen)
             # self.show_coordinate(position)
         elif self._current_tool == tool_enum.roi:
-            self.cropper.update(event) # Fixme: call mouseMoveEvent
+            # Fixme: call mouseMoveEvent
+            self.cropper.update(event)
 
     ##############################################
 

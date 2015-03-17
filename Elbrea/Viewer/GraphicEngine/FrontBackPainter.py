@@ -5,6 +5,8 @@
 # 
 ####################################################################################################
 
+# Fixme: place ?
+
 ####################################################################################################
 
 import logging
@@ -13,7 +15,7 @@ import logging
 
 from .Painter import Painter
 from .PainterManager import PainterManager
-from .TexturePainter import  BackgroundPainter
+from .TexturePainter import BackgroundPainter
 
 ####################################################################################################
 
