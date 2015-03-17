@@ -130,9 +130,16 @@ class SketcherToolBar(ToolBar):
                           triggered=self.clear_tool,
                           )
 
-        self.position_tool_action = \
+        self.pan_tool_action = \
             QtWidgets.QAction(icon_loader.get_icon('position-tool', self.icon_size),
                           'Position Tool',
+                          self._application,
+                          checkable=True,
+                          )
+
+        self.crop_tool_action = \
+            QtWidgets.QAction(icon_loader.get_icon('crop-tool', self.icon_size),
+                          'Crop Tool',
                           self._application,
                           checkable=True,
                           )
@@ -159,7 +166,9 @@ class SketcherToolBar(ToolBar):
                           )
         
         self._sketcher_action_group = QtWidgets.QActionGroup(self._application)
-        for action in (self.pen_tool_action,
+        for action in (self.pan_tool_action,
+                       self.crop_tool_action,
+                       self.pen_tool_action,
                        self.segment_tool_action,
                        self.eraser_tool_action,
                        ):
@@ -169,7 +178,8 @@ class SketcherToolBar(ToolBar):
 
     def _init_tool_bar(self):
 
-        self.position_tool_action.setChecked(True)
+        self.pan_tool_action.setChecked(True)
+        self._sketcher_action_group.triggered.connect(self._main_window.glwidget.set_current_tool)
         
         self._pencil_size_combobox = QtWidgets.QComboBox(self._main_window)
         for pencil_size in (1, 2, 3, 6, 12):
@@ -196,7 +206,8 @@ class SketcherToolBar(ToolBar):
         self._eraser_size_combobox.currentIndexChanged.connect(self._on_eraser_size_changed)
        
         items = (self.clear_tool_action,
-                 self.position_tool_action,
+                 self.pan_tool_action,
+                 self.crop_tool_action,
                  self.pen_tool_action,
                  self.segment_tool_action,
                  self._pencil_size_combobox,
@@ -205,8 +216,6 @@ class SketcherToolBar(ToolBar):
                  self._eraser_size_combobox,
                 )
         self._add_items(items)
-
-        self._sketcher_action_group.triggered.connect(self._main_window.glwidget.set_current_tool)
         
     ##############################################
 
@@ -218,12 +227,10 @@ class SketcherToolBar(ToolBar):
 
     def clear_tool(self):
 
-        pass
+        current_tool = self.current_tool()
 
-        # current_tool = self.current_tool()
-
-        # if current_tool is self.crop_tool_action:
-        #     self._application.main_window.glwidget.cropper.reset()
+        if current_tool is self.crop_tool_action:
+            self._main_window.glwidget.cropper.reset()
 
     ##############################################
 

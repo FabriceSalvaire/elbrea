@@ -122,7 +122,7 @@ class RoiPainter(RegisteredPainter):
         if self._paint_box and self._segment_vertex_array is not None:
             self._logger.debug('Paint ROI Box')
             self._shader_program.bind()
-            #!# self._shader_program.uniforms.colour = (1., 1., 1.)
+            self._shader_program.uniforms.colour = (0., 0., 0.) # Fixme:
             self._shader_program.uniforms.margin = self._margin
             #!# Fixme: self._shader_program.uniforms.paint_grips = self._paint_grips # Fixme: always on, check Cropper
             self._segment_vertex_array.draw()

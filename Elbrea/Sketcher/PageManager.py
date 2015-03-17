@@ -69,7 +69,7 @@ class PageManager(object):
     def _init_painters(self):
     
         # Load registered painters
-        # from Elbrea.GraphicEngine import ForegroundPainter 
+        from Elbrea.GraphicEngine import ForegroundPainter 
 
         main_window = self._application.main_window
         glwidget = main_window.glwidget

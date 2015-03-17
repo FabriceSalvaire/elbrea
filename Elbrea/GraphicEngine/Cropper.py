@@ -13,7 +13,7 @@ from PyQt5 import QtWidgets
 
 ####################################################################################################
 
-from Elbrea.GraphicEngine.GraphicScene import GraphicSceneItem
+from .GraphicScene import GraphicSceneItem
 from Elbrea.Math.Interval import IntervalInt2D
 from Elbrea.Tools.ConstrainedBox import ConstrainedBox
 from Elbrea.Tools.EnumFactory import EnumFactory
@@ -120,7 +120,7 @@ class Cropper(object):
     def __init__(self, glwidget):
 
         self._glwidget = glwidget
-        self._roi_painter = glwidget._painter_manager.foreground_painter('roi')
+        self._roi_painter = glwidget._painter_manager['roi']
 
         self._locked = False
         self._updating = False
