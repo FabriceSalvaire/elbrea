@@ -70,6 +70,8 @@ class PrimitivePainter(Painter):
 
     def add_path(self, path):
 
+        # Fixme: upload_path ?
+        
         self._logger.debug('Add path {}'.format(path.id))
         # Fixme: move to glwidget
         self._glwidget.makeCurrent()

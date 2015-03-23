@@ -32,7 +32,7 @@ _module_logger = logging.getLogger(__name__)
 ####################################################################################################
 
 from Elbrea.Tools.EnumFactory import EnumFactory
-tool_enum = EnumFactory('ToolEnum', ('pan', 'roi'))
+tool_enum = EnumFactory('ToolEnum', ('pan', 'roi', 'text', 'image'))
 
 ####################################################################################################
 
@@ -61,6 +61,8 @@ class GlWidget(GlWidgetBase):
         self._current_tool = None
         self._sketcher = None
         self._pointer_type = None
+
+        self._contextual_menu = QtWidgets.QMenu()
         
     ##############################################
 
@@ -105,6 +107,22 @@ class GlWidget(GlWidgetBase):
         from Elbrea.GraphicEngine.Cropper import Cropper
         self.cropper = Cropper(self)
         self.set_current_tool()
+
+    ##############################################
+
+    def register_menu(self, menu):
+      
+        """ Register a sub-menu in the contextual menu """
+ 
+        self._contextual_menu.addMenu(menu)
+
+    ##############################################
+
+    def register_action(self, action):
+       
+        """ Register an action in the contextual menu """
+
+        self._contextual_menu.addAction(action)
         
     ##############################################
 
@@ -196,9 +214,13 @@ class GlWidget(GlWidgetBase):
             self._pointer_type = None
             if current_tool is tool_bar.pan_tool_action:
                 self._current_tool = tool_enum.pan
-            elif current_tool is tool_bar.crop_tool_action:
+            elif current_tool is tool_bar.roi_tool_action:
                 self._current_tool = tool_enum.roi
-            
+            elif current_tool is tool_bar.text_tool_action:
+                self._current_tool = tool_enum.text
+            elif current_tool is tool_bar.image_tool_action:
+                self._current_tool = tool_enum.image
+                
     ##############################################
 
     def event_position(self, event):
@@ -224,20 +246,23 @@ class GlWidget(GlWidgetBase):
 
         button = event.button()
         if button & QtCore.Qt.LeftButton:
+            position = self.window_to_gl_coordinate(event, round_to_integer=False)
             if self._sketcher is not None:
-                position = self.window_to_gl_coordinate(event, round_to_integer=False)
                 tablet_event = TabletEvent(TabletEventType.press, self._pointer_type, position)
                 if self._sketcher.on_tablet_event(tablet_event):
                     self.update()
             elif self._current_tool == tool_enum.pan:
-                position = self.window_to_gl_coordinate(event, round_to_integer=False)
                 self._set_previous_position(position, self.event_position(event))
             elif self._current_tool == tool_enum.roi:
                 scene_match = self.scene.mousePressEvent(event)
                 if not scene_match:
                     # Fixme: call mousePressEvent
                     self.cropper.begin(event)
-                
+            elif self._current_tool == tool_enum.image:
+                from .ImagePropertiesForm import ImagePropertiesForm
+                dialog = ImagePropertiesForm(position)
+                dialog.exec_()
+                    
     ##############################################
         
     def mouseReleaseEvent(self, event):
@@ -246,8 +271,7 @@ class GlWidget(GlWidgetBase):
         
         button = event.button()
         if button & QtCore.Qt.RightButton:
-            pass
-            # self.contextual_menu.exec_(event.globalPos())
+            self._contextual_menu.exec_(event.globalPos())
         elif button & QtCore.Qt.LeftButton:
             if self._sketcher is not None:
                 position = self.window_to_gl_coordinate(event, round_to_integer=False)
@@ -264,6 +288,9 @@ class GlWidget(GlWidgetBase):
 
         # self._logger.info("")
 
+        if not (event.buttons() & QtCore.Qt.LeftButton):
+            return
+        
         if self._sketcher is not None:
             position = self.window_to_gl_coordinate(event, round_to_integer=False)
             tablet_event = TabletEvent(TabletEventType.move, self._pointer_type, position)

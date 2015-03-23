@@ -29,6 +29,7 @@ class ToolBar(object):
 
         self._application = QtWidgets.QApplication.instance()
         self._main_window = main_window # self._application.main_window
+        self._glwidget  = main_window.glwidget
         self._tool_bar = main_window.addToolBar(self.__name__)
 
         self._create_actions()
@@ -67,7 +68,7 @@ class MainToolBar(ToolBar):
     def _create_actions(self):
 
         self._save_action = \
-                QtWidgets.QAction(# icon_loader[''],
+                QtWidgets.QAction(icon_loader['document-save'],
                     'Save',
                     self._application,
                     toolTip='Save',
@@ -77,7 +78,7 @@ class MainToolBar(ToolBar):
                 )
 
         self._fit_width_action = \
-                QtWidgets.QAction(# icon_loader[''],
+                QtWidgets.QAction(icon_loader['zoom-fit-width'],
                     'Fit width',
                     self._application,
                     toolTip='Fit width',
@@ -87,7 +88,7 @@ class MainToolBar(ToolBar):
                 )
         
         self._display_all_action = \
-                QtWidgets.QAction(# icon_loader[''],
+                QtWidgets.QAction(icon_loader['zoom-fit-best'],
                     'Display All',
                     self._application,
                     toolTip='Display All',
@@ -137,22 +138,22 @@ class SketcherToolBar(ToolBar):
                           checkable=True,
                           )
 
-        self.crop_tool_action = \
+        self.roi_tool_action = \
             QtWidgets.QAction(icon_loader.get_icon('crop-tool', self.icon_size),
-                          'Crop Tool',
+                          'Roi Tool',
                           self._application,
                           checkable=True,
                           )
         
         self.pen_tool_action = \
-            QtWidgets.QAction(icon_loader.get_icon('pencil', self.icon_size),
+            QtWidgets.QAction(icon_loader.get_icon('draw-freehand', self.icon_size),
                           'Pen Tool',
                           self._application,
                           checkable=True,
                           )
 
         self.segment_tool_action = \
-            QtWidgets.QAction(icon_loader.get_icon('pencil', self.icon_size), # Fixme:
+            QtWidgets.QAction(icon_loader.get_icon('draw-path', self.icon_size),
                           'Segment Tool',
                           self._application,
                           checkable=True,
@@ -164,16 +165,33 @@ class SketcherToolBar(ToolBar):
                           self._application,
                           checkable=True,
                           )
+
+        self.text_tool_action = \
+            QtWidgets.QAction(icon_loader.get_icon('text-tool', self.icon_size),
+                          'Text Tool',
+                          self._application,
+                          checkable=True,
+                          )
+        
+        self.image_tool_action = \
+            QtWidgets.QAction(icon_loader.get_icon('insert-image', self.icon_size),
+                          'Image Tool',
+                          self._application,
+                          checkable=True,
+                          )
         
         self._sketcher_action_group = QtWidgets.QActionGroup(self._application)
         for action in (self.pan_tool_action,
-                       self.crop_tool_action,
+                       self.roi_tool_action,
                        self.pen_tool_action,
                        self.segment_tool_action,
                        self.eraser_tool_action,
+                       self.text_tool_action,
+                       self.image_tool_action,
                        ):
             self._sketcher_action_group.addAction(action)
-
+            self._glwidget.register_action(action)
+            
     ##############################################
 
     def _init_tool_bar(self):
@@ -207,13 +225,15 @@ class SketcherToolBar(ToolBar):
        
         items = (self.clear_tool_action,
                  self.pan_tool_action,
-                 self.crop_tool_action,
+                 self.roi_tool_action,
                  self.pen_tool_action,
                  self.segment_tool_action,
                  self._pencil_size_combobox,
                  self._pencil_colour_combobox,
                  self.eraser_tool_action,
                  self._eraser_size_combobox,
+                 self.text_tool_action,
+                 self.image_tool_action,
                 )
         self._add_items(items)
         
@@ -229,7 +249,7 @@ class SketcherToolBar(ToolBar):
 
         current_tool = self.current_tool()
 
-        if current_tool is self.crop_tool_action:
+        if current_tool is self.roi_tool_action:
             self._main_window.glwidget.cropper.reset()
 
     ##############################################

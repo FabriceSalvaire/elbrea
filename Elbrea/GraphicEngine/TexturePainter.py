@@ -19,7 +19,7 @@ from PyOpenGLng.Math.Geometry import Point, Offset
 
 # from .ShaderProgrames import shader_manager
 from .Painter import Painter
-from Elbrea.Tools.TimeStamp import TimeStamp, ObjectWithTimeStamp
+from Elbrea.Tools.TimeStamp import ObjectWithTimeStamp
 from Elbrea.Image.Image import ImageFormat
 
 ####################################################################################################
@@ -47,9 +47,6 @@ class TexturePainter(Painter):
 
     def upload(self, position, dimension, image):
 
-        position = Point(0, 0)
-        dimension = Offset(500, 500)
-        
         self._glwidget.makeCurrent() #?
         with GL.error_checker():
             self._texture_vertex_array = GlTextureVertexArray(position, dimension, image)

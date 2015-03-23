@@ -96,8 +96,10 @@ class PageManager(object):
         texture_painter = TexturePainter(self.painter_manager)
         from Elbrea.Image import ImageLoader
         image = ImageLoader.load_image('flower.jpg')
-        texture_painter.upload(None, None, image)
-        
+        image_format = image.image_format
+        from PyOpenGLng.Math.Geometry import Point, Offset
+        texture_painter.upload(Point(10, 10), Offset(image_format.width, image_format.height), image)
+
         from Elbrea.GraphicEngine.PathPainter import SegmentPainter, PathPainter
         self._segment_painter = SegmentPainter(self.painter_manager, self)
         self._path_painter = PathPainter(self.painter_manager, self)
