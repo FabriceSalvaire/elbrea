@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>image_properties_form</class>
+ <widget class="QWidget" name="image_properties_form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>536</width>
+    <height>540</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>image_properties_form</string>
+  </property>
+  <layout class="QFormLayout" name="formLayout">
+   <property name="fieldGrowthPolicy">
+    <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+   </property>
+   <item row="0" column="0" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="path_text_label">
+       <property name="text">
+        <string>Path</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="path_label">
+       <property name="text">
+        <string>file.jpg</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="open_button">
+       <property name="text">
+        <string>Open</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="orignal_height_text_label">
+     <property name="text">
+      <string>Original Height</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QLabel" name="original_height_label">
+     <property name="text">
+      <string>100</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="original_width_text_label">
+     <property name="text">
+      <string>Original Width</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QLabel" name="original_width_label">
+     <property name="text">
+      <string>100</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="QLabel" name="x_label">
+     <property name="text">
+      <string>X</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="1">
+    <widget class="QSpinBox" name="x_spinbox"/>
+   </item>
+   <item row="10" column="0">
+    <widget class="QLabel" name="y_label">
+     <property name="text">
+      <string>Y</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="1">
+    <widget class="QSpinBox" name="y_spinbox"/>
+   </item>
+   <item row="12" column="0">
+    <widget class="QLabel" name="width_label">
+     <property name="text">
+      <string>Width</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="1">
+    <widget class="QSpinBox" name="width_spinbox"/>
+   </item>
+   <item row="13" column="0">
+    <widget class="QLabel" name="height_label">
+     <property name="text">
+      <string>Height</string>
+     </property>
+    </widget>
+   </item>
+   <item row="13" column="1">
+    <widget class="QSpinBox" name="height_spinbox"/>
+   </item>
+   <item row="14" column="0">
+    <widget class="QCheckBox" name="keep_aspect_ratio_checkbox">
+     <property name="text">
+      <string>Keep Aspect Ratio</string>
+     </property>
+    </widget>
+   </item>
+   <item row="15" column="0">
+    <widget class="QLabel" name="scale_label">
+     <property name="text">
+      <string>Scale</string>
+     </property>
+    </widget>
+   </item>
+   <item row="15" column="1">
+    <widget class="QSpinBox" name="scale_spinbox"/>
+   </item>
+   <item row="16" column="0">
+    <widget class="QCheckBox" name="rotate_checkbox">
+     <property name="text">
+      <string>Rotate</string>
+     </property>
+    </widget>
+   </item>
+   <item row="17" column="0">
+    <widget class="QCheckBox" name="horizontal_flip_checkbox">
+     <property name="text">
+      <string>Horizontal Flip</string>
+     </property>
+    </widget>
+   </item>
+   <item row="18" column="0">
+    <widget class="QCheckBox" name="vertical_flip_checkbox">
+     <property name="text">
+      <string>Vertical Flip</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
