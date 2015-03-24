@@ -1,8 +1,8 @@
 ********************
- :mod:`GraphicItem`
+ :mod:`TabletEvent`
 ********************
 
-.. automodule:: Elbrea.Sketcher.GraphicItem
+.. automodule:: Elbrea.Sketcher.TabletEvent
    :members:
    :show-inheritance:
 

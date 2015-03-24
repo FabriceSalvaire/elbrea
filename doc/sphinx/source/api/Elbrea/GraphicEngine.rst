@@ -5,7 +5,6 @@
 .. toctree::
   GraphicEngine/Cropper
   GraphicEngine/ForegroundPainter
-  GraphicEngine/FrontBackPainter
   GraphicEngine/GraphicScene
   GraphicEngine/Painter
   GraphicEngine/PainterManager

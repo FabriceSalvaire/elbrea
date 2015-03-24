@@ -1,8 +1,8 @@
 **********************
- :mod:`HdfAnnotation`
+ :mod:`ImageSketcher`
 **********************
 
-.. automodule:: Elbrea.Viewer.HdfAnnotation
+.. automodule:: Elbrea.Sketcher.ImageSketcher
    :members:
    :show-inheritance:
 

@@ -5,6 +5,7 @@
 .. toctree::
   Viewer/BoardData
   Viewer/GlWidget
+  Viewer/GraphicEngine
   Viewer/ImageProcessingPipeline
   Viewer/IntensityProfile
   Viewer/IntensityProfileForm

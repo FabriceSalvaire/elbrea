@@ -1,8 +1,8 @@
 *************************
- :mod:`ViewerMainWindow`
+ :mod:`FrontBackPainter`
 *************************
 
-.. automodule:: Elbrea.GUI.Viewer.ViewerMainWindow
+.. automodule:: Elbrea.Viewer.GraphicEngine.FrontBackPainter
    :members:
    :show-inheritance:
 
