@@ -54,7 +54,7 @@ class PrimitivePainter(Painter):
         
     ##############################################
 
-    def update_current_path(self, path):
+    def update_current_item(self, path):
 
         self._logger.debug('Update current path')
         # Fixme: move to glwidget
@@ -68,7 +68,7 @@ class PrimitivePainter(Painter):
 
     ##############################################
 
-    def add_path(self, path):
+    def add_item(self, path):
 
         # Fixme: upload_path ?
         
@@ -87,7 +87,7 @@ class PrimitivePainter(Painter):
 
     ##############################################
 
-    def remove_path(self, path):
+    def remove_item(self, path):
 
         del self._paths[path.id]
         # del self._path_vaos[path_vao.id]

@@ -8,11 +8,13 @@
 ####################################################################################################
 
 import logging
+import math
 
 import numpy as np
 
 ####################################################################################################
 
+from .GraphicScene import GraphicItem
 from Elbrea.Math.Interval import IntervalInt2D, Interval2D
 
 ####################################################################################################
@@ -21,34 +23,52 @@ _module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
 
-class PathBase(object):
+def segment_intersection(point0, vector10, point2, point3):
+
+    """ Return the intersection between two segments. """
+    
+    # p + t*r = q + u*s    x s
+    #   t * (r x s) = (q - p) x s
+    #   t = (q − p) × s / (r × s)
+    # p + t*r = q + u*s    x r
+    #   u = (q − p) × r / (r × s)
+    
+    vector32 = point3 - point2
+    denominator = np.cross(vector10, vector32)
+    if denominator == 0: # parallel
+        # if np.cross(vector20, vector10) == 0:
+        # check if overlapping
+        #  0 ≤ (q − p) · r ≤ r · r or 0 ≤ (p − q) · s ≤ s · s
+        return None
+    else:
+        vector20 = point2 - point0
+        t = np.cross(vector20, vector32) / denominator
+        u = np.cross(vector20, vector10) / denominator
+        if 0 <= t <= 1 and 0 <= u <= 1:
+            return point0 + vector10 * t
+        else:
+            return None
+
+####################################################################################################
+
+class PathGraphicItem(GraphicItem):
 
     __path_id__ = 0
     
     ##############################################
 
-    def __init__(self, colour, pencil_size, path_id=None):
+    def __init__(self, colour, pencil_size):
 
-        if path_id is None:
-            self._path_id = self.__path_id__
-            PathBase.__path_id__ += 1
-        else:
-            self._path_id = path_id
-        
+        super(PathGraphicItem, self).__init__()
         self._colour = colour
         self._pencil_size = pencil_size
-        self._interval = None
 
     ##############################################
 
     def __repr__(self):
-        return "Path {}".format(self._path_id)    
+        return "Path {}".format(self._id)
     
     ##############################################
-
-    @property
-    def id(self):
-        return self._path_id
     
     @property
     def colour(self):
@@ -60,38 +80,39 @@ class PathBase(object):
 
 ####################################################################################################
 
-class Path(PathBase):
+class Path(PathGraphicItem):
 
     _logger = _module_logger.getChild('Path')
     
     ##############################################
 
-    def __init__(self, colour, pencil_size, points, path_id=None, index_interval=None):
+    def __init__(self, colour, pencil_size, points):
 
-        super(Path, self).__init__(colour, pencil_size, path_id)
+        super(Path, self).__init__(colour, pencil_size)
 
         if points.shape[1] <= 1:
             raise ValueError("Require at least two points")
         
-        self._points = points
-        # self._interval = self._compute_interval()
+        self._points = points # Fixme: share ?
+        self._interval = self._compute_interval()
         self._number_of_points = self._points.shape[0]
-        
-        self.index_interval = None
-        # if index_interval is None:
-        #     self.index_interval = IntervalInt(0, self.number_of_points -1)
-        # else:
-        #     self.index_interval = index_interval
 
     ##############################################
+        
+    def subpath(self, lower=0, upper=None):
 
-    def _compute_interval(self):
-
-        lower = np.min(self._points, axis=1)
-        upper = np.max(self._points, axis=1)
-        # Fixme: int or float
-        return Interval2D((lower[0], upper[0]), (lower[1], upper[1]))
+        if upper is None:
+            stop = None
+        else:
+            stop = upper + 1
+        points = self._points[lower:stop]
             
+        if points.shape[1] > 1:
+            return self.__class__(self._colour, self._pencil_size, points)
+        else:
+            # raise
+            return None
+        
     ##############################################
 
     @property
@@ -125,148 +146,32 @@ class Path(PathBase):
     @property
     def p10(self):
         return self.p1 - self.p0
+
+    @property
+    def p10_norm(self):
+        p10 = self.p10
+        return np.sqrt(p10[0]**2 + p10[1]**2) # srqt(x.x) # np.sum(p10**2, axis=1)
     
     @property
     def u10(self):
         p10 = self.p10
-        # print(self.p0, self.p1, str(self.index_interval))
-        u10 = p10 / np.sqrt(p10[0]**2 + p10[1]**2) # srqt(x.x) # np.sum(p10**2, axis=1)
+        u10 = p10 / self.p10_norm # Fixme: recompute p10
         return u10
-
-    @property
-    def interval(self):
-        return self._interval
-
+           
     ##############################################
 
-    def farthest_point(self, tolerance=1):
+    def _compute_interval(self):
 
-        # distance to chord
-        # A x B = sin * |A| * |B|
-        # A x u = sin * |A|
-        # sin = d / |A|
-        # d = (P - P0) x u 
-        delta = self._points - self.p0
-        distance = np.abs(np.cross(delta, self.u10))
-        i_max = np.argmax(distance)
-        distance_max = distance[i_max]
-        if distance_max > tolerance:
-            return i_max
-        else:
-            return None
-
-    ##############################################
-
-    def nearest_point(self, point):
-
-        p0 = self._points[:-1]
-        p1 = self._points[1:]
-        p10 = p1 - p0
-        u10 = p10 / np.sqrt(np.sum(p10**2, axis=0))
-
-        delta = point - p0
-        # projection = np.dot(delta, u10)
-        projection = delta[:,0]*u10[:,0] + delta[:,1]*u10[:,1]
-        indexes = np.where(np.logical_and(0 <= projection, projection < 1))[0]
-        # print(indexes)
-        if indexes.shape[0]:
-            distance = np.abs(np.cross(delta[indexes], u10[indexes]))
-            i_min = np.argmin(distance)
-            # print(indexes, projection[indexes], distance)
-            # print(i_min, indexes[i_min], distance[i_min])
-            return indexes[i_min], distance[i_min]
-        else:
-            return None, None
-        
-        # distance = np.sum((self._points - point)**2, axis=1)
-        # i_min = np.argmin(distance)
-        # return i_min, distance[i_min]
-        
-    ##############################################
-        
-    def subpath(self, lower=0, upper=None):
-
-        # global_lower = self.index_interval.inf + lower
-        # if upper is None:
-        #     stop = None
-        #     global_upper = self.index_interval.inf + self._number_of_points -1
-        # else:
-        #     stop = upper + 1
-        #     global_upper = self.index_interval.inf + upper
-
-        # return self.__class__(self._colour, self._pencil_size,
-        #                       self._points[lower:stop],
-        #                       index_interval=IntervalInt(global_lower, global_upper))
-
-        if upper is None:
-            stop = None
-        else:
-            stop = upper + 1
-        points = self._points[lower:stop]
-            
-        if points.shape[1] > 1:
-            return self.__class__(self._colour, self._pencil_size, points)
-        else:
-            # raise
-            return None
-        
-    ##############################################
-
-    def simplify(self, tolerance=1):
-
-        # Fixme: check interval
-        
-        queue = [self]
-        farthest_points = [0]
-        while queue:
-            path = queue.pop()
-            # print('\nsubpath', str(path.index_interval))
-            farthest_point = path.farthest_point(tolerance)
-            if farthest_point is not None:
-                global_farthest_point = path.index_interval.inf + farthest_point
-                # print('farthest point in', str(path.index_interval), global_farthest_point, path._points[farthest_point])
-                farthest_points.append(global_farthest_point)
-                queue.append(path.subpath(lower=farthest_point))
-                queue.append(path.subpath(upper=farthest_point))
-        farthest_points.append(self._number_of_points -1)
-        farthest_points.sort()
-        points = self._points[farthest_points]
-        
-        return self.__class__(self._colour, self._pencil_size, points)
-
+        lower = np.min(self._points, axis=1)
+        upper = np.max(self._points, axis=1)
+        return Interval2D((lower[0], upper[0]), (lower[1], upper[1]))
+    
     ##############################################
 
     def pair_iterator(self):
 
         for i in range(self._number_of_points -1):
             yield self._points[i], self._points[i+1]
-
-    ##############################################
-            
-    @staticmethod
-    def segment_intersection(point0, vector10, point2, point3):
-
-        # p + t*r = q + u*s    x s
-        #   t * (r x s) = (q - p) x s
-        #   t = (q − p) × s / (r × s)
-        # p + t*r = q + u*s    x r
-        #   u = (q − p) × r / (r × s)
-        
-        vector32 = point3 - point2
-        denominator = np.cross(vector10, vector32)
-        if denominator == 0: # parallel
-            # if np.cross(vector20, vector10) == 0:
-            # check if overlapping
-            #  0 ≤ (q − p) · r ≤ r · r or 0 ≤ (p − q) · s ≤ s · s
-            return None
-        else:
-            vector20 = point2 - point0
-            t = np.cross(vector20, vector32) / denominator
-            u = np.cross(vector20, vector10) / denominator
-            if 0 <= t <= 1 and 0 <= u <= 1:
-                return point0 + vector10 * t
-            else:
-                return None
 
     ##############################################
 
@@ -279,11 +184,54 @@ class Path(PathBase):
                     point0, point1 = points01
                     point2, point3 = points23
                     vector10 = point1 - point0
-                    intersection = self.segment_intersection(point0, vector10, point2, point3)
+                    intersection = segment_intersection(point0, vector10, point2, point3)
                     if intersection is not None:
                         # print(i, j, intersection)
                         intersections.append((i, j, intersection))
         return intersections
+   
+    ##############################################
+
+    def _farthest_point(self, slice_=None, tolerance=1):
+
+        """ Return the farthest point to the chord P0 - P1. """
+        
+        # distance to chord
+        # A x B = sin * |A| * |B|
+        # A x u = sin * |A|
+        # sin = d / |A|
+        # d = (P - P0) x u
+        delta = self._points[slice_] - self.p0
+        distance = np.abs(np.cross(delta, self.u10))
+        i_max = np.argmax(distance)
+        distance_max = distance[i_max]
+        if distance_max > tolerance:
+            if slice_ is not None:
+                i_max += slice_.start
+            return i_max
+        else:
+            return None
+    
+    ##############################################
+
+    def simplify(self, tolerance=1):
+
+        # Fixme: check interval
+        
+        queue = [None]
+        farthest_points = [0] # First point index
+        while queue:
+            slice_ = queue.pop()
+            farthest_point = self._farthest_point(slice_, tolerance)
+            if farthest_point is not None:
+                farthest_points.append(farthest_point)
+                queue.append(slice(slice_.start, farthest_point))
+                queue.append(slice(farthest_point, slice_.stop))
+        farthest_points.append(self._number_of_points -1) # last point index
+        farthest_points.sort() # due to algorithm
+        points = self._points[farthest_points]
+        
+        return self.__class__(self._colour, self._pencil_size, points)
 
     ##############################################
 
@@ -294,7 +242,7 @@ class Path(PathBase):
             raise ValueError()
 
         if radius > 0:
-            points = np.array(self._points, dtype=np.float) # int64
+            points = np.array(self._points, dtype=np.float)
             view = points[radius:-radius]
             for i in range(1, radius +1):
                 upper = -radius + i
@@ -328,7 +276,7 @@ class Path(PathBase):
             raise ValueError()
 
         if radius > 0:
-            points = np.array(self._points, dtype=np.float) # int64
+            points = np.array(self._points, dtype=np.float)
             view = points[radius:]
             for i in range(1, radius +1):
                 view += self._points[radius-i:-i]
@@ -341,23 +289,64 @@ class Path(PathBase):
 
     ##############################################
 
+    def nearest_point(self, point):
+
+        """ Return the nearest point and the distance to the given point. """
+        
+        p0 = self._points[:-1]
+        p1 = self._points[1:]
+        p10 = p1 - p0
+        u10 = p10 / np.sqrt(np.sum(p10**2, axis=0))
+
+        delta = point - p0
+        # projection = np.dot(delta, u10)
+        projection = delta[:,0]*u10[:,0] + delta[:,1]*u10[:,1]
+        # Fixme: [0, 1] ok?
+        indexes = np.where(np.logical_and(0 <= projection, projection < 1))[0]
+        # print(indexes)
+        if indexes.shape[0]:
+            distance = np.abs(np.cross(delta[indexes], u10[indexes]))
+            i_min = np.argmin(distance)
+            # print(indexes, projection[indexes], distance)
+            # print(i_min, indexes[i_min], distance[i_min])
+            return indexes[i_min], distance[i_min]
+        else:
+            return None, None
+        
+        # distance = np.sum((self._points - point)**2, axis=1)
+        # i_min = np.argmin(distance)
+        # return i_min, distance[i_min]
+
+    ##############################################
+
+    def distance(self, point):
+
+        return self.nearest_point(point)[0]
+        
+    ##############################################
+
     def erase(self, point, radius):
 
-        i_min, distance = self.nearest_point(point)
+        # Fixme: should erase segments
+        #  - compute distances to point and get points within the eraser area |Pi - P| <= r
+        #  - erase segments corresponding to these points
+        #  - cut the previous and next segment
+        
+        point_index, distance = self.nearest_point(point)
         # print(distance)
         # Fixme: check distance, path removed (only a point)
-        if i_min is not None and distance <= radius:
-            if i_min == 0:
+        if point_index is not None and distance <= radius:
+            if point_index == 0:
                 return (self.subpath(lower=1),)
-            elif i_min == self._number_of_points -1:
-                return (self.subpath(upper=i_min -1),)
+            elif point_index == self._number_of_points -1:
+                return (self.subpath(upper=point_index -1),)
             else:
                 # Fixme: check before
-                return [subpath for subpath in (self.subpath(upper=i_min-1),
-                                                self.subpath(lower=i_min+1))
+                return [subpath for subpath in (self.subpath(upper=point_index-1),
+                                                self.subpath(lower=point_index+1))
                         if subpath is not None]
         else:
-            return None
+            return self
 
 ####################################################################################################
 
@@ -367,27 +356,78 @@ class Segment(Path):
     
     ##############################################
 
-    def __init__(self, colour, pencil_size, first_point=None, points=None):
+    def __init__(self, colour, pencil_size, first_point=None, second_point=None, points=None):
 
         # Fixme: make_array
-        points_ = np.zeros((2, 2), dtype=np.int)
+        points_ = np.zeros((2, 2), dtype=np.float)
         if points is None:
             points_[0] = first_point
+            if second_point is not None:
+                points_[1] = second_point
         else:
             points_[...] = points
             
         super(Segment, self).__init__(colour, pencil_size, points_)
-        
+
+    ##############################################
+
+    def __repr__(self):
+        return "Segment {}".format(self._id)
+
     ##############################################
 
     def update_second_point(self, point):
 
         self._points[1] = point
         # self._compute_interval()
+
+    ##############################################
+
+    def distance(self, point):
+
+        u10 = self.u10
+        delta = point - self.p0
+        projection = np.dot(delta, u10)
+        distance = np.abs(np.cross(delta, u10))
+        return projection, distance
+
+    ##############################################
+
+    def point_at_abscissa(self, t):
+        return (1 - t)*self.p0 + t * self.p1
+        
+    ##############################################
+
+    def erase(self, point, radius):
+
+        # self._logger.info(str(self))
+        projection, distance = self.distance(point)
+        if distance <= radius:
+            # compute line - circle intersection
+            r = math.sqrt(radius**2 - distance**2)
+            lower_projection = (projection - r) / self.p10_norm # Fixme: recompute
+            upper_projection = (projection + r) / self.p10_norm
+            if lower_projection <= 0 and upper_projection >= 1:
+                return None # segment is deleted
+            elif lower_projection > 0 and upper_projection < 1:
+                # middle is deleted
+                return (Segment(self._colour, self._pencil_size,
+                                self.p0, self.point_at_abscissa(lower_projection)),
+                        Segment(self._colour, self._pencil_size,
+                                self.point_at_abscissa(upper_projection), self.p1))
+            elif lower_projection <= 0 and upper_projection >= 0:
+                # head is deleted
+                return (Segment(self._colour, self._pencil_size,
+                                self.point_at_abscissa(upper_projection), self.p1),)
+            elif lower_projection <= 1 and upper_projection >= 1:
+                # tail is deleted
+                return (Segment(self._colour, self._pencil_size,
+                                self.p0, self.point_at_abscissa(lower_projection)),)
+        return self
         
 ####################################################################################################
 
-class DynamicPath(PathBase):
+class DynamicPath(PathGraphicItem):
 
     ##############################################
 
@@ -405,7 +445,7 @@ class DynamicPath(PathBase):
 
     def _make_array(self, size):
 
-        return np.zeros((size, 2), dtype=np.int)
+        return np.zeros((size, 2), dtype=np.float)
         
     ##############################################    
 
@@ -451,8 +491,8 @@ class DynamicPath(PathBase):
 
     def to_path(self):
 
-        # Fixme: self._interval
-        return Path(self._colour, self._pencil_size, self.flatten(), self._path_id)
+        # Fixme: will recompute interval
+        return Path(self._colour, self._pencil_size, self.flatten())
     
 ####################################################################################################
 # 

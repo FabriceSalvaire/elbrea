@@ -28,6 +28,8 @@ _module_logger = logging.getLogger(__name__)
 
 class PagePainter(Painter):
 
+    """ Paint the layout of the page. """
+    
     __painter_name__ = 'page'
 
     _logger = _module_logger.getChild('PagePainter')

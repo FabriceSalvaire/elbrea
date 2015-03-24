@@ -9,43 +9,17 @@
 
 import logging
 
-import cv2
 import numpy as np
 
 ####################################################################################################
 
-from Elbrea.Image.Image import Image
+from .Path import Segment, Path, DynamicPath
+from .TabletEvent import TabletEventType
 from Elbrea.Math.Interval import IntervalInt2D, Interval2D
-from Elbrea.Tools.EnumFactory import EnumFactory
-from Elbrea.Tools.TimeStamp import ObjectWithTimeStamp
-from .Path import Segment, DynamicPath
 
 ####################################################################################################
 
 _module_logger = logging.getLogger(__name__)
-
-####################################################################################################
-
-TabletPointerType = EnumFactory('TabletPointerType', ('pen', 'eraser'))
-TabletEventType = EnumFactory('TabletEventType', ('press', 'move', 'release'))
-
-class TabletEvent(object):
-
-    ##############################################
-
-    def __init__(self, event_type, pointer_type, position, pressure=0):
-
-        self.type = event_type # subclass ?
-        self.pointer_type = pointer_type
-        self.position = position
-        self.pressure = pressure
-
-    ##############################################
-
-    def __repr__(self):
-
-        return "type {} pointer type {}".format(self.type, self.pointer_type)
-
 
 ####################################################################################################
 
@@ -96,18 +70,10 @@ class SegmentSketcher(object):
     def _end_segment(self, position):
 
         self._current_segment.update_second_point(position)
-        self._page_provider.page.add_path(self._current_segment)
+        self._page_provider.page.add_item(self._current_segment)
         self._first_point = None
 
         return self._current_segment
-        
-    ##############################################
-
-    def on_tablet_event(self, tablet_event):
-
-        # Fixme: eraser make no sense ???
-        if tablet_event.pointer_type == TabletPointerType.pen:
-            return self.on_pen_event(tablet_event)
         
     ##############################################
 
@@ -122,7 +88,7 @@ class SegmentSketcher(object):
             distance = np.sum((position - previous_position)**2) # _square
             if distance > 1:
                 self._update_segment(position)
-                self._painter.update_current_path(self._current_segment)
+                self._painter.update_current_item(self._current_segment)
                 modified = True # Fixme: modified signal ?
                 self._sketcher_state.previous_position = position
         else:
@@ -131,7 +97,7 @@ class SegmentSketcher(object):
             else: # tablet_event.type == TabletEventType.release
                 path = self._end_segment(position)
                 self._painter.reset_current_path()
-                self._painter.add_path(path)
+                self._painter.add_item(path)
                 modified = True
             self._sketcher_state.previous_position = position
             
@@ -221,19 +187,10 @@ class PathSketcher(object):
         path = self._current_path.to_path()
         path = path.backward_smooth_window(radius=3)
         # path = path.simplify(tolerance=1)
-        self._page.add_path(path)
+        self._page.add_item(path)
         self._current_path = None
 
         return path
-        
-    ##############################################
-
-    def on_tablet_event(self, tablet_event):
-
-        if tablet_event.pointer_type == TabletPointerType.pen:
-            return self.on_pen_event(tablet_event)
-        elif tablet_event.pointer_type == TabletPointerType.eraser:
-            return self.on_eraser_event(tablet_event)
         
     ##############################################
 
@@ -253,7 +210,7 @@ class PathSketcher(object):
                 distance = np.sum((position - previous_position)**2) # _square
                 if distance > 1:
                     self._current_path.add_point(position)
-                    self._painter.update_current_path(self._current_path.to_path())
+                    self._painter.update_current_item(self._current_path.to_path())
                     modified = True # Fixme: modified signal ?
                     self._sketcher_state.previous_position = position
         else:
@@ -266,7 +223,7 @@ class PathSketcher(object):
                 # add point ?
                 path = self._end_path()
                 self._painter.reset_current_path()
-                self._painter.add_path(path)
+                self._painter.add_item(path)
                 modified = True
             self._sketcher_state.previous_position = position
 
@@ -274,75 +231,46 @@ class PathSketcher(object):
             
         return modified
 
+####################################################################################################
+
+class Eraser(object):
+
+    _logger = _module_logger.getChild('Eraser')
+    
+    ##############################################
+    
+    def __init__(self, sketcher_state, page_provider):
+
+        self._sketcher_state = sketcher_state
+        self._page_provider = page_provider
+
     ##############################################
 
-    def on_eraser_event(self, tablet_event):
+    def on_pen_event(self, tablet_event):
 
         self._logger.info("")
 
-        modified = False
-
+        # Fixme: design, self._page, painter access
+        
         radius = self._sketcher_state.eraser_size
         position = tablet_event.position
-        erased_paths = []
-        for path in self._page.paths:
-        #for path in hits:
-            subpaths = path.erase(position, radius)
-            if subpaths is not None:
-                self._logger.info("Erase path {}".format(path.id))
-                erased_paths.append((path, subpaths))
-        for path, subpaths in erased_paths:
-            self._page.remove_path(path)
-            self._painter.remove_path(path)
-            self._page.add_paths(subpaths)
-            for subpath in subpaths:
-                # subpath._colour = (255, 0, 0)
-                self._painter.add_path(subpath)
-                
-        modified = bool(erased_paths)
+        page = self._page_provider.page
+        removed_items, new_items = page.erase(position, radius)
+        path_painter = self._page_provider.path_painter
+        segment_painter = self._page_provider.segment_painter
+        for item in removed_items:
+            if isinstance(item, Segment):
+                segment_painter.remove_item(item)
+            elif isinstance(item, Path):
+                path_painter.remove_item(item)
+        for item in new_items:
+            if isinstance(item, Segment):
+                segment_painter.add_item(item)
+            elif isinstance(item, Path):
+                path_painter.add_item(item)
             
-        return modified
-    
-####################################################################################################
+        return bool(removed_items)
 
-class ImageSketcher(ObjectWithTimeStamp):
-
-    _logger = _module_logger.getChild('ImageSketcher')
-    
-    ##############################################
-    
-    def __init__(self, image_format, sketcher_state, painter):
-
-        ObjectWithTimeStamp.__init__(self)
-
-        self._image = Image(image_format)
-        self._image.clear()
-        
-    ##############################################
-
-    @property
-    def image(self):
-        return self._image
-    
-    ##############################################
-
-    def to_cv_point(self, point):
-
-        return (int(point[0]), int(point[1]))
-        
-    ##############################################
-
-    def draw_line(self, point1, point2, colour=None, pencil_size=None):
-
-        if colour is None:
-            colour = self._sketcher_state.pencil_colour
-        if pencil_size is None:
-            pencil_size = self._sketcher_state.pencil_size
-        
-        cv2.line(self._image, self.to_cv_point(point1), self.to_cv_point(point2),
-                 colour, pencil_size, 16)
-        self.modified()
-    
 ####################################################################################################
 #
 # End

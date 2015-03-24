@@ -14,7 +14,7 @@ import h5py
 
 from Elbrea.Sketcher.Page import Pages, Page
 from Elbrea.Sketcher.PageFormat import PageFormat
-from Elbrea.Sketcher.Path import Path
+from Elbrea.Sketcher.Path import Path, Segment
 
 ####################################################################################################
 
@@ -74,7 +74,7 @@ class HdfImporter(HdfFile):
 
     ##############################################
 
-    def read_path(self, group, name):
+    def read_path(self, group, name, path_class=Path):
 
         dataset = group[name]
         attributes = dataset.attrs
@@ -83,8 +83,14 @@ class HdfImporter(HdfFile):
         pencil_size = int(attributes['pencil_size'])
         points = np.array(dataset)
 
-        return Path(colour, pencil_size, points)
-   
+        return path_class(colour, pencil_size, points=points)
+
+    ##############################################
+
+    def read_segment(self, *args):
+
+        return self.read_path(*args, path_class=Segment)
+    
     ##############################################
 
     def read_page(self, page_index):
@@ -92,8 +98,12 @@ class HdfImporter(HdfFile):
         group = self._pages_group[str(page_index)]
         page = Page()
         for name in group:
-            path = self.read_path(group, name)
-            page.add_path(path)
+            if name.startswith('segment-'):
+                reader = self.read_segment
+            elif name.startswith('path-'):
+                reader = self.read_path
+            item = reader(group, name)
+            page.add_item(item)
 
         return page
 
@@ -127,9 +137,9 @@ class HdfWriter(HdfFile):
 
     ##############################################
 
-    def save_path(self, group, path):
+    def save_path(self, group, path, prefix='path'):
 
-        name = 'path-{}'.format(path.id)
+        name = '{}-{}'.format(prefix, path.id)
         dataset = group.create_dataset(name, data=path.points,
                                        shuffle=True, compression='lzf')
         attributes = dataset.attrs
@@ -138,11 +148,20 @@ class HdfWriter(HdfFile):
 
     ##############################################
 
+    def save_segment(self, *args):
+
+        self.save_path(*args, prefix='segment')
+        
+    ##############################################
+
     def save_page(self, page_index, page):
 
         group = self._pages_group.create_group(str(page_index))
-        for path in page.paths:
-            self.save_path(group, path)
+        for item in page:
+            if isinstance(item, Segment):
+                self.save_segment(group, item)
+            elif isinstance(item, Path):
+                self.save_path(group, item)
             
     ##############################################
 

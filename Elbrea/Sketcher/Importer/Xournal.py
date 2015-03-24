@@ -18,9 +18,9 @@ from lxml import etree
 
 ####################################################################################################
 
-from Elbrea.Sketcher.Page import Pages, Page
+from Elbrea.Sketcher.Page import Pages
 from Elbrea.Sketcher.PageFormat import PageFormat
-from Elbrea.Sketcher.Path import Path
+from Elbrea.Sketcher.Path import Path, Segment
 from Elbrea.Sketcher.Unit import mm2pt
 
 ####################################################################################################
@@ -223,7 +223,7 @@ class XournalImporter(object):
         points *= 131. / 72. # Fixme:
 
         path = Path(colour, pencil_size, points)
-        self._page.add_path(path)
+        self._page.add_item(path)
         
     ##############################################
 
@@ -322,8 +322,9 @@ class XournalWriter(object):
         self.write_line('<background type="solid" color="white" style="lined" />')
         self.write_line('<layer>')
         
-        for path in page.paths:
-            self.save_path(path, height_pt)
+        for item in page:
+            if isinstance(item, (Segment, Path)):
+                self.save_path(item, height_pt)
         
         self.write_line('</layer>')
         self.write_line('</page>')

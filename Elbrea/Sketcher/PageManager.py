@@ -12,7 +12,7 @@ import logging
 ####################################################################################################
 
 from .Page import Pages
-from .PageFormat import page_format_database
+from .Path import Path, Segment
 
 ####################################################################################################
 
@@ -104,21 +104,26 @@ class PageManager(object):
         self._segment_painter = SegmentPainter(self.painter_manager, self)
         self._path_painter = PathPainter(self.painter_manager, self)
 
-        from .Sketcher import SketcherState, SegmentSketcher, PathSketcher
+        from .Sketcher import SketcherState, SegmentSketcher, PathSketcher, Eraser
         self.sketcher_state = SketcherState()
         self.segment_sketcher = SegmentSketcher(self.sketcher_state, self, self._segment_painter)
         self.path_sketcher = PathSketcher(self.sketcher_state, self, self._path_painter)
-       
+        self.eraser = Eraser(self.sketcher_state, self)
+        
     ##############################################
 
     def _load_page_data(self):
 
         # use lazy allocation instead ?
         path_painter = self._path_painter
+        segment_painter = self._segment_painter
         for page in self._pages:
             self._update_page_data(page)
-            for path in page.paths:
-                path_painter.add_path(path)
+            for item in page:
+                if isinstance(item, Segment):
+                    segment_painter.add_item(item)
+                elif isinstance(item, Path):
+                    path_painter.add_item(item)
 
     ##############################################
 
@@ -138,6 +143,10 @@ class PageManager(object):
     @property
     def last_page_index(self):
         return self._pages.last_page_index
+
+    @property
+    def pages(self):
+        return self._pages
     
     @property
     def page(self):
@@ -148,8 +157,12 @@ class PageManager(object):
         return self._current_page_data
 
     @property
-    def pages(self):
-        return self._pages
+    def segment_painter(self):
+        return self._segment_painter
+    
+    @property
+    def path_painter(self):
+        return self._path_painter
     
     ##############################################
 

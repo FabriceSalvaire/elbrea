@@ -22,7 +22,7 @@ from PyOpenGLng.HighLevelApi.Buffer import GlUniformBuffer
 from PyOpenGLng.HighLevelApi.GlWidgetBase import GlWidgetBase, XAXIS
 from PyOpenGLng.Math.Interval import IntervalInt2D # duplicated
 
-from .Sketcher import TabletEvent, TabletPointerType, TabletEventType
+from .TabletEvent import TabletEvent, TabletPointerType, TabletEventType
 from Elbrea.GraphicEngine.GraphicScene import GraphicScene
 
 ####################################################################################################
@@ -207,7 +207,7 @@ class GlWidget(GlWidgetBase):
             self._sketcher = page_manager.segment_sketcher
             self._pointer_type = TabletPointerType.pen
         elif current_tool is tool_bar.eraser_tool_action:
-            self._sketcher = page_manager.path_sketcher
+            self._sketcher = page_manager.eraser
             self._pointer_type = TabletPointerType.eraser
         else:
             self._sketcher = None
@@ -249,7 +249,7 @@ class GlWidget(GlWidgetBase):
             position = self.window_to_gl_coordinate(event, round_to_integer=False)
             if self._sketcher is not None:
                 tablet_event = TabletEvent(TabletEventType.press, self._pointer_type, position)
-                if self._sketcher.on_tablet_event(tablet_event):
+                if self._sketcher.on_pen_event(tablet_event):
                     self.update()
             elif self._current_tool == tool_enum.pan:
                 self._set_previous_position(position, self.event_position(event))
@@ -276,7 +276,7 @@ class GlWidget(GlWidgetBase):
             if self._sketcher is not None:
                 position = self.window_to_gl_coordinate(event, round_to_integer=False)
                 tablet_event = TabletEvent(TabletEventType.release, self._pointer_type, position)
-                if self._sketcher.on_tablet_event(tablet_event):
+                if self._sketcher.on_pen_event(tablet_event):
                     self.update()
             elif self._current_tool == tool_enum.roi:
                  # Fixme: call mouseReleaseEvent
@@ -294,7 +294,7 @@ class GlWidget(GlWidgetBase):
         if self._sketcher is not None:
             position = self.window_to_gl_coordinate(event, round_to_integer=False)
             tablet_event = TabletEvent(TabletEventType.move, self._pointer_type, position)
-            if self._sketcher.on_tablet_event(tablet_event):
+            if self._sketcher.on_pen_event(tablet_event):
                 self.update()
         elif self._current_tool == tool_enum.pan:
             position_screen = self.event_position(event)
@@ -352,7 +352,7 @@ class GlWidget(GlWidgetBase):
                     pointer_type = TabletPointerType.eraser
                 position = self.window_to_gl_coordinate(event, round_to_integer=False)
                 tablet_event = TabletEvent(tablet_event_type, pointer_type, position)
-                if self._sketcher.on_tablet_event(tablet_event):
+                if self._sketcher.on_pen_event(tablet_event):
                     self.update()
         except Exception as exception:
             self._logger.error(str(exception))
