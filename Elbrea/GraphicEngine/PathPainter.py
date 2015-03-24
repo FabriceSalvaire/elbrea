@@ -80,18 +80,26 @@ class PrimitivePainter(Painter):
         path_vao.colour = path.colour
         path_vao.line_width = path.pencil_size
         path_vao.bind_to_shader(self._shader_program.interface.attributes.position)
-        self._paths[path_vao.id] = path_vao
+        self._items[path_vao.id] = path_vao
         # self._path_vaos[path_vao.id] = path_vao
-        # self._paths.append(path_vao.id)
+        # self._items.append(path_vao.id)
         self._glwidget.doneCurrent()
 
     ##############################################
 
+    def update_item(self, path):
+
+        path_vao = self._items[path.id]
+        path_vao.colour = path.colour
+        path_vao.line_width = path.pencil_size
+        
+    ##############################################
+
     def remove_item(self, path):
 
-        del self._paths[path.id]
+        del self._items[path.id]
         # del self._path_vaos[path_vao.id]
-        # self._paths.remove(path_vao.id)
+        # self._items.remove(path_vao.id)
         
     ##############################################
 
@@ -105,8 +113,8 @@ class PrimitivePainter(Painter):
 
         self._shader_program.bind()
         self._shader_program.uniforms.antialias_diameter = 1.
-        for vao in self._paths.values():
-        # for vao_id in self._paths:
+        for vao in self._items.values():
+        # for vao_id in self._items:
         #     vao = self._path_vaos[vao_id]
             self._paint_vao(vao)
         if self._current_path is not None:
@@ -139,7 +147,7 @@ class SegmentPainter(PrimitivePainter):
     ##############################################
 
     @property
-    def _paths(self,):
+    def _items(self,):
         return self._page_provider.page_data.segments
 
 ####################################################################################################
@@ -159,7 +167,7 @@ class PathPainter(PrimitivePainter):
     ##############################################
 
     @property
-    def _paths(self,):
+    def _items(self,):
         return self._page_provider.page_data.paths
 
 ####################################################################################################

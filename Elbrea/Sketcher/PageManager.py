@@ -73,7 +73,8 @@ class PageManager(object):
 
         main_window = self._application.main_window
         glwidget = main_window.glwidget
-
+        glwidget.page_manager = self
+        
         # for screen in self.platform.screens:
         #     print(screen)
         dpi_x, dpi_y = self._application.platform.screens[0].dpi
@@ -179,6 +180,34 @@ class PageManager(object):
         self._update_page_data(self._current_page)
         self._application.refresh()
 
+    ##############################################
+
+    def painter_for_item(self, item):
+
+        # Action: add, update, remove item
+        
+        if isinstance(item, Segment):
+            return self._segment_painter
+        elif isinstance(item, Path):
+            return self._path_painter
+        else:
+            return None
+        
+    ##############################################
+
+    def select_around(self, position, radius=10):
+
+        items = self._current_page.items_around(position.x, position.y, radius)
+        self._logger.info(str(position) + ' ' + str(items))
+        if items:
+            item = items[0]
+            item.select()
+            item.colour = (255, 0, 0) # Fixme: palette
+            painter = self.painter_for_item(item)
+            if painter is not None:
+                painter.update_item(item)
+            self._application.refresh()
+        
 ####################################################################################################
 #
 # End

@@ -144,6 +144,13 @@ class SketcherToolBar(ToolBar):
                           self._application,
                           checkable=True,
                           )
+
+        self.select_tool_action = \
+            QtWidgets.QAction(icon_loader.get_icon('edit-select', self.icon_size),
+                          'Selection Tool',
+                          self._application,
+                          checkable=True,
+                          )
         
         self.pen_tool_action = \
             QtWidgets.QAction(icon_loader.get_icon('draw-freehand', self.icon_size),
@@ -183,6 +190,7 @@ class SketcherToolBar(ToolBar):
         self._sketcher_action_group = QtWidgets.QActionGroup(self._application)
         for action in (self.pan_tool_action,
                        self.roi_tool_action,
+                       self.select_tool_action,
                        self.pen_tool_action,
                        self.segment_tool_action,
                        self.eraser_tool_action,
@@ -226,6 +234,7 @@ class SketcherToolBar(ToolBar):
         items = (self.clear_tool_action,
                  self.pan_tool_action,
                  self.roi_tool_action,
+                 self.select_tool_action,
                  self.pen_tool_action,
                  self.segment_tool_action,
                  self._pencil_size_combobox,

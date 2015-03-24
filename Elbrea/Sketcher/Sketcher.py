@@ -256,18 +256,16 @@ class Eraser(object):
         position = tablet_event.position
         page = self._page_provider.page
         removed_items, new_items = page.erase(position, radius)
-        path_painter = self._page_provider.path_painter
-        segment_painter = self._page_provider.segment_painter
+
+        page_provider = self._page_provider.page_provider
         for item in removed_items:
-            if isinstance(item, Segment):
-                segment_painter.remove_item(item)
-            elif isinstance(item, Path):
-                path_painter.remove_item(item)
+            painter = page_provider.painter_for_item(item)
+            if painter is not None:
+                painter.remove_item(item)
         for item in new_items:
-            if isinstance(item, Segment):
-                segment_painter.add_item(item)
-            elif isinstance(item, Path):
-                path_painter.add_item(item)
+            painter = page_provider.painter_for_item(item)
+            if painter is not None:
+                painter.add_item(item)
             
         return bool(removed_items)
 

@@ -74,10 +74,18 @@ class PathGraphicItem(GraphicItem):
     def colour(self):
         return self._colour
 
+    @colour.setter
+    def colour(self, colour):
+        self._colour = colour
+    
     @property
     def pencil_size(self):
         return self._pencil_size
 
+    @pencil_size.setter
+    def pencil_size(self, pencil_size):
+        self._pencil_size = pencil_size
+    
 ####################################################################################################
 
 class Path(PathGraphicItem):
@@ -162,9 +170,13 @@ class Path(PathGraphicItem):
 
     def _compute_interval(self):
 
-        lower = np.min(self._points, axis=1)
-        upper = np.max(self._points, axis=1)
-        return Interval2D((lower[0], upper[0]), (lower[1], upper[1]))
+        x = self.x
+        lower_x = np.min(x)
+        upper_x = np.max(x)
+        y = self.y
+        lower_y = np.min(y)
+        upper_y = np.max(y)
+        return Interval2D((lower_x, upper_x), (lower_y, upper_y))
     
     ##############################################
 
@@ -379,7 +391,7 @@ class Segment(Path):
     def update_second_point(self, point):
 
         self._points[1] = point
-        # self._compute_interval()
+        self._compute_interval()
 
     ##############################################
 

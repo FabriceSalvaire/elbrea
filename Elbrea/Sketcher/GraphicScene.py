@@ -126,7 +126,7 @@ class GraphicItem(object):
 
         if self._scene is not None:
             self._is_selected = True
-            self._scene._selected_item(self)
+            self._scene._select_item(self)
 
     ##############################################
     
@@ -217,6 +217,7 @@ class GraphicScene(object):
     
     def items_at(self, x, y):
 
+        # Fixme: vector or x, y
         return self.items_in(point_interval(x, y))
 
     ##############################################
@@ -245,7 +246,7 @@ class GraphicScene(object):
         
     ##############################################
 
-    def iter_on_selected_itemss(self):
+    def iter_on_selected_items(self):
 
         return self._selected_items.values()
 

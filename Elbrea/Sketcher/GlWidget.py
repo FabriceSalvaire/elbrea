@@ -32,7 +32,10 @@ _module_logger = logging.getLogger(__name__)
 ####################################################################################################
 
 from Elbrea.Tools.EnumFactory import EnumFactory
-tool_enum = EnumFactory('ToolEnum', ('pan', 'roi', 'text', 'image'))
+tool_enum = EnumFactory('ToolEnum', ('pan', 'roi', 'select',
+                                     'path', 'segment',
+                                     'eraser',
+                                     'text', 'image'))
 
 ####################################################################################################
 
@@ -47,22 +50,28 @@ class GlWidget(GlWidgetBase):
         self._logger.debug('Initialise GlWidget')
 
         super(GlWidget, self).__init__(parent)
-        self.clear_colour = (1, 1, 1, 0)
-        self.zoom_step = 1.25
-        
+
         self._application = QtWidgets.QApplication.instance()
+
+        # Setup OpenGL 
+        self.clear_colour = (1, 1, 1, 0)
+
+        # Setup navigation
+        self.zoom_step = 1.25
+
+        self._painter_manager = None
+
+        self._contextual_menu = QtWidgets.QMenu()
+
+        self._page_manager = None
+        self._page_interval = None
 
         self._previous_position = None
         self._previous_position_screen = None
-
-        self._painter_manager = None
-        self._page_interval = None
-
+        
         self._current_tool = None
         self._sketcher = None
         self._pointer_type = None
-
-        self._contextual_menu = QtWidgets.QMenu()
         
     ##############################################
 
@@ -91,6 +100,14 @@ class GlWidget(GlWidgetBase):
 
     ##############################################
 
+    @property
+    def page_manager(self):
+        return self._page_manager
+
+    @page_manager.setter
+    def page_manager(self, page_manager):
+        self._page_manager = page_manager
+    
     @property
     def page_interval(self):
         return self._page_interval
@@ -201,12 +218,15 @@ class GlWidget(GlWidgetBase):
         page_manager = self._application.page_manager
         self._current_tool = None
         if current_tool is tool_bar.pen_tool_action:
+            self._current_tool = tool_enum.path
             self._sketcher = page_manager.path_sketcher
             self._pointer_type = TabletPointerType.pen
         elif current_tool is tool_bar.segment_tool_action:
+            self._current_tool = tool_enum.segment
             self._sketcher = page_manager.segment_sketcher
             self._pointer_type = TabletPointerType.pen
         elif current_tool is tool_bar.eraser_tool_action:
+            self._current_tool = tool_enum.eraser
             self._sketcher = page_manager.eraser
             self._pointer_type = TabletPointerType.eraser
         else:
@@ -216,6 +236,8 @@ class GlWidget(GlWidgetBase):
                 self._current_tool = tool_enum.pan
             elif current_tool is tool_bar.roi_tool_action:
                 self._current_tool = tool_enum.roi
+            elif current_tool is tool_bar.select_tool_action:
+                self._current_tool = tool_enum.select
             elif current_tool is tool_bar.text_tool_action:
                 self._current_tool = tool_enum.text
             elif current_tool is tool_bar.image_tool_action:
@@ -240,6 +262,14 @@ class GlWidget(GlWidgetBase):
 
     ##############################################
 
+    def _show_coordinate(self, position):
+
+        x, y = position
+        self._application.main_window.status_bar.update_coordinate_status(x, y)
+        # self._set_previous_position(position)
+        
+    ##############################################
+
     def mousePressEvent(self, event):
 
         self._logger.info("")
@@ -261,8 +291,11 @@ class GlWidget(GlWidgetBase):
             elif self._current_tool == tool_enum.image:
                 from .ImagePropertiesForm import ImagePropertiesForm
                 dialog = ImagePropertiesForm(position)
-                dialog.exec_()
-                    
+                dialog.exec_() 
+            elif self._current_tool == tool_enum.select:
+                self._page_manager.select_around(position)
+            self._show_coordinate(position)
+
     ##############################################
         
     def mouseReleaseEvent(self, event):
@@ -273,14 +306,15 @@ class GlWidget(GlWidgetBase):
         if button & QtCore.Qt.RightButton:
             self._contextual_menu.exec_(event.globalPos())
         elif button & QtCore.Qt.LeftButton:
+            position = self.window_to_gl_coordinate(event, round_to_integer=False)
             if self._sketcher is not None:
-                position = self.window_to_gl_coordinate(event, round_to_integer=False)
                 tablet_event = TabletEvent(TabletEventType.release, self._pointer_type, position)
                 if self._sketcher.on_pen_event(tablet_event):
                     self.update()
             elif self._current_tool == tool_enum.roi:
                  # Fixme: call mouseReleaseEvent
                 self.cropper.end(event)
+            self._show_coordinate(position)
 
     ##############################################
 
@@ -290,9 +324,9 @@ class GlWidget(GlWidgetBase):
 
         if not (event.buttons() & QtCore.Qt.LeftButton):
             return
-        
+
+        position = self.window_to_gl_coordinate(event, round_to_integer=False)
         if self._sketcher is not None:
-            position = self.window_to_gl_coordinate(event, round_to_integer=False)
             tablet_event = TabletEvent(TabletEventType.move, self._pointer_type, position)
             if self._sketcher.on_pen_event(tablet_event):
                 self.update()
@@ -307,10 +341,11 @@ class GlWidget(GlWidgetBase):
             dxy_screen *= self.glortho2d.parity_display_scale
             self.translate_xy(dxy_screen)
             self._set_previous_position(position, position_screen)
-            # self.show_coordinate(position)
+            self._show_coordinate(position)
         elif self._current_tool == tool_enum.roi:
             # Fixme: call mouseMoveEvent
             self.cropper.update(event)
+        self._show_coordinate(position)
 
     ##############################################
 
