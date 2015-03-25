@@ -13,6 +13,7 @@ import logging
 
 from .Page import Pages
 from .Path import Path, Segment
+from .Unit import mm2in
 
 ####################################################################################################
 
@@ -78,12 +79,17 @@ class PageManager(object):
         # for screen in self.platform.screens:
         #     print(screen)
         dpi_x, dpi_y = self._application.platform.screens[0].dpi
-        self.dpi = min(dpi_x, dpi_y)
-        self._logger.info('dpi {}'.format(self.dpi))
+        self._dpi = min(dpi_x, dpi_y)
+        self._logger.info('dpi {}'.format(self._dpi))
+        self._mm2px = mm2in(1)*self._dpi
+        self._px2mm = 1 / self._mm2px
         from Elbrea.Math.Interval import IntervalInt2D
         page_format = self._pages.page_format
-        glwidget.page_interval = IntervalInt2D((0, page_format.width_px(self.dpi)),
-                                               (0, page_format.height_px(self.dpi)))
+        # Anti-aliasing looks bad
+        # glwidget.page_interval = IntervalInt2D((0, page_format.width),
+        #                                        (0, page_format.height))
+        glwidget.page_interval = IntervalInt2D((0, page_format.width_px(self._dpi)),
+                                               (0, page_format.height_px(self._dpi)))
         
         # Fixme: Basic...
         from Elbrea.GraphicEngine.PainterManager import BasicPainterManager
@@ -91,15 +97,15 @@ class PageManager(object):
         
         # steered by page size and type
         from .PagePainter import PagePainter
-        page_painter = PagePainter(self.painter_manager)
+        page_painter = PagePainter(self.painter_manager, step=self.mm2px(10))
 
         from Elbrea.GraphicEngine.TexturePainter import TexturePainter
         texture_painter = TexturePainter(self.painter_manager)
-        from Elbrea.Image import ImageLoader
-        image = ImageLoader.load_image('flower.jpg')
-        image_format = image.image_format
-        from PyOpenGLng.Math.Geometry import Point, Offset
-        texture_painter.upload(Point(10, 10), Offset(image_format.width, image_format.height), image)
+        # from Elbrea.Image import ImageLoader
+        # image = ImageLoader.load_image('flower.jpg')
+        # image_format = image.image_format
+        # from PyOpenGLng.Math.Geometry import Point, Offset
+        # texture_painter.upload(Point(10, 10), Offset(image_format.width, image_format.height), image)
 
         from Elbrea.GraphicEngine.PathPainter import SegmentPainter, PathPainter
         self._segment_painter = SegmentPainter(self.painter_manager, self)
@@ -180,6 +186,18 @@ class PageManager(object):
         self._update_page_data(self._current_page)
         self._application.refresh()
 
+    ##############################################
+
+    def mm2px(self, x):
+
+        return x * self._mm2px
+
+    ##############################################
+
+    def px2mm(self, x):
+
+        return x * self._px2mm
+    
     ##############################################
 
     def painter_for_item(self, item):

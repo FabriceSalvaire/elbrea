@@ -67,7 +67,7 @@ class PageFormat(object):
 
     def width_px(self, dpi):
         return mm2in(self.width)*dpi
-
+    
 ####################################################################################################
 
 def page_format_database(name, portrait=True):

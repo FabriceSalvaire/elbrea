@@ -43,29 +43,60 @@ class PagePainter(Painter):
         self._shader_program = self._glwidget.shader_manager.segment_shader_program
         self.reset()
 
+        self._page_interval = None
         self.set_page(step)
+
+    ##############################################
+
+    def _add_segment(self, colour, pencil_size, points):
+
+        path = Segment(colour, pencil_size, points=points)
+        self.add_path(path)
+        
+    ##############################################
+
+    def _add_vertical_segment(self, colour, pencil_size, x):
+
+        interval =  self._page_interval
+        points = np.array(((x, interval.y.inf),
+                           (x, interval.y.sup)),
+                          dtype=np.int)
+        self._add_segment(colour, pencil_size, points)
+        
+    ##############################################
+
+    def _add_horizontal_segment(self, colour, pencil_size, y):
+
+        interval =  self._page_interval
+        points = np.array(((interval.x.inf, y),
+                           (interval.x.sup, y)),
+                          dtype=np.int)
+        self._add_segment(colour, pencil_size, points)
         
     ##############################################
 
     def set_page(self, step=10):
 
+        self._page_interval = self._glwidget.page_interval
+
         self._glwidget.makeCurrent()
 
-        interval =  self._glwidget.page_interval
+        interval =  self._page_interval
+
+        # Paint grid
         colour = RgbIntColour(64, 160, 255).normalise() # xournal
-        pencil_size = 1. # > 1
-        for y in range(interval.y.inf, interval.y.sup, step):
-            points = np.array(((interval.x.inf, y),
-                               (interval.x.sup, y)),
-                              dtype=np.int)
-            path = Segment(colour, pencil_size, points=points)
-            self.add_path(path)
-        for x in range(interval.x.inf, interval.x.sup, step):
-            points = np.array(((x, interval.y.inf),
-                               (x, interval.y.sup)),
-                              dtype=np.int)
-            path = Segment(colour, pencil_size, points=points)
-            self.add_path(path)
+        pencil_size = 1 # > 1
+        for y in np.arange(interval.y.inf + step, interval.y.sup, step):
+            self._add_horizontal_segment(colour, pencil_size, y)
+        for x in np.arange(interval.x.inf + step, interval.x.sup, step):
+            self._add_vertical_segment(colour, pencil_size, x)
+
+        # Paint page border
+        pencil_size = 3 # > 1
+        for y in (interval.y.inf, interval.y.sup):
+            self._add_horizontal_segment(colour, pencil_size, y)
+        for x in (interval.x.inf, interval.x.sup):
+            self._add_vertical_segment(colour, pencil_size, x)
             
         self._glwidget.doneCurrent()
 

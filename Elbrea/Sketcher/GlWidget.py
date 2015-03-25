@@ -11,8 +11,6 @@ import logging
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-import numpy as np
-
 ####################################################################################################
 
 #!# from PyOpenGLng.HighLevelApi.GlOrtho2D import ZoomManagerAbc
@@ -20,6 +18,7 @@ import numpy as np
 from PyOpenGLng.HighLevelApi import GL
 from PyOpenGLng.HighLevelApi.Buffer import GlUniformBuffer
 from PyOpenGLng.HighLevelApi.GlWidgetBase import GlWidgetBase, XAXIS
+from PyOpenGLng.HighLevelApi.Ortho2D import ZoomManagerAbc
 from PyOpenGLng.Math.Geometry import Vector
 from PyOpenGLng.Math.Interval import IntervalInt2D # duplicated
 
@@ -37,6 +36,38 @@ tool_enum = EnumFactory('ToolEnum', ('pan', 'roi', 'select',
                                      'path', 'segment',
                                      'eraser',
                                      'text', 'image'))
+
+####################################################################################################
+
+class ZoomManager(ZoomManagerAbc):
+
+    _logger = _module_logger.getChild('ZoomManager')
+
+    ##############################################
+    
+    def __init__(self):
+
+        super(ZoomManager, self).__init__()
+
+        self._fit_zoom_factor = 1
+
+    ##############################################
+
+    def update_fit_zoom_factor(self, zoom_factor):
+
+        self._fit_zoom_factor = zoom_factor * .9
+        
+    ##############################################
+    
+    def check_zoom(self, zoom_factor):
+
+        self._logger.info(str(zoom_factor))
+
+        if self._fit_zoom_factor < zoom_factor < 5:
+            self.zoom_factor = zoom_factor
+            return True, zoom_factor
+        else:
+            return False, self.zoom_factor
 
 ####################################################################################################
 
@@ -116,6 +147,7 @@ class GlWidget(GlWidgetBase):
     @page_interval.setter
     def page_interval(self, interval):
         self._page_interval = interval
+        self._update_zoom_manager() # Fixme: check
     
     ##############################################
 
@@ -150,7 +182,7 @@ class GlWidget(GlWidgetBase):
         area_size = 10**5
         max_area = IntervalInt2D([-area_size, area_size], [-area_size, area_size])
 
-        super(GlWidget, self).init_glortho2d(max_area, zoom_manager=None)
+        super(GlWidget, self).init_glortho2d(max_area, zoom_manager=ZoomManager())
 
         self.scene = GraphicScene(self.glortho2d)
 
@@ -163,6 +195,25 @@ class GlWidget(GlWidgetBase):
         self._init_shader()
         self._ready = False
 
+    ##############################################
+
+    def _update_zoom_manager(self):
+
+        # Fixme:
+        #   axis_scale = self.window.size() / np.array(interval.size(), dtype=np.float)
+        #   AttributeError: 'NoneType' object has no attribute 'size' 
+        if self._page_interval is not None:
+            glortho2d = self.glortho2d
+            axis, zoom_factor = glortho2d._compute_zoom_to_fit_interval(self._page_interval)
+            glortho2d.zoom_manager.update_fit_zoom_factor(zoom_factor)
+    
+    ##############################################
+
+    def resizeGL(self, width, height):
+
+        super(GlWidget, self).resizeGL(width, height)
+        self._update_zoom_manager()
+            
     ##############################################
 
     def _init_shader(self):
@@ -251,8 +302,8 @@ class GlWidget(GlWidgetBase):
         """ Convert mouse coordinate
         """
 
-        self._logger.info("{} {}".format(event.x(), event.y()))
-        return Vector((event.x(), event.y())) # dtype=np.int for subtraction
+        # self._logger.info("{} {}".format(event.x(), event.y()))
+        return Vector(event.x(), event.y()) # dtype=np.int for subtraction
         
     ##############################################
 
@@ -265,7 +316,7 @@ class GlWidget(GlWidgetBase):
 
     def _show_coordinate(self, position):
 
-        x, y = position
+        x, y = self._page_manager.px2mm(position)
         self._application.main_window.status_bar.update_coordinate_status(x, y)
         # self._set_previous_position(position)
         

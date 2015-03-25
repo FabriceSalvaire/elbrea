@@ -61,7 +61,7 @@ class StatusBar(object):
 
     def update_coordinate_status(self, x, y):
 
-        text = '(%6u, %6u) px' % (x, y)
+        text = '(%6u, %6u) mm' % (x, y)
         self.coordinate_label.setText(text)
         
 ####################################################################################################
