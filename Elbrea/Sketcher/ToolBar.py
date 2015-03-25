@@ -7,7 +7,7 @@
 
 ####################################################################################################
 
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import Qt
 
 ####################################################################################################
@@ -77,6 +77,16 @@ class MainToolBar(ToolBar):
                     shortcutContext=Qt.ApplicationShortcut,
                 )
 
+        self._zoom_one_action = \
+                QtWidgets.QAction(icon_loader['zoom-original'],
+                    'Zoom 1:1',
+                    self._application,
+                    toolTip='Zoom 1:`',
+                    triggered=self._main_window.glwidget.zoom_one,
+                    # shortcut='Ctrl+',
+                    shortcutContext=Qt.ApplicationShortcut,
+                )
+        
         self._fit_width_action = \
                 QtWidgets.QAction(icon_loader['zoom-fit-width'],
                     'Fit width',
@@ -102,6 +112,7 @@ class MainToolBar(ToolBar):
     def _init_tool_bar(self):
         
         items = (self._save_action,
+                 self._zoom_one_action,
                  self._fit_width_action,
                  self._display_all_action,
                 )
