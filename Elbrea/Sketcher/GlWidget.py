@@ -20,6 +20,7 @@ import numpy as np
 from PyOpenGLng.HighLevelApi import GL
 from PyOpenGLng.HighLevelApi.Buffer import GlUniformBuffer
 from PyOpenGLng.HighLevelApi.GlWidgetBase import GlWidgetBase, XAXIS
+from PyOpenGLng.Math.Geometry import Vector
 from PyOpenGLng.Math.Interval import IntervalInt2D # duplicated
 
 from .TabletEvent import TabletEvent, TabletPointerType, TabletEventType
@@ -251,7 +252,7 @@ class GlWidget(GlWidgetBase):
         """
 
         self._logger.info("{} {}".format(event.x(), event.y()))
-        return np.array((event.x(), event.y()), dtype=np.int) # int for subtraction
+        return Vector((event.x(), event.y())) # dtype=np.int for subtraction
         
     ##############################################
 

@@ -144,7 +144,7 @@ class PointFilter(object):
     def value(self):
 
         if bool(self):
-            return np.rint(np.mean(self._window_points, axis=0))
+            return np.mean(self._window_points, axis=0)
         else:
             return None
         
@@ -257,7 +257,7 @@ class Eraser(object):
         page = self._page_provider.page
         removed_items, new_items = page.erase(position, radius)
 
-        page_provider = self._page_provider.page_provider
+        page_provider = self._page_provider
         for item in removed_items:
             painter = page_provider.painter_for_item(item)
             if painter is not None:

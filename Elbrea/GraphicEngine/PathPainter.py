@@ -149,7 +149,7 @@ class SegmentPainter(PrimitivePainter):
     @property
     def _items(self,):
         return self._page_provider.page_data.segments
-
+    
 ####################################################################################################
 
 class PathPainter(PrimitivePainter):
