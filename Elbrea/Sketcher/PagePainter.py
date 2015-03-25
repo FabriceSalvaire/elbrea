@@ -124,18 +124,18 @@ class PagePainter(Painter):
 
     def paint(self):
 
-        GL.glEnable(GL.GL_BLEND)
-        # Blending: O = Sf*S + Df*D
-        # alpha: 0: complete transparency, 1: complete opacity
-        # Set (Sf, Df) for transparency: O = Sa*S + (1-Sa)*D 
-        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+        # GL.glEnable(GL.GL_BLEND)
+        # # Blending: O = Sf*S + Df*D
+        # # alpha: 0: complete transparency, 1: complete opacity
+        # # Set (Sf, Df) for transparency: O = Sa*S + (1-Sa)*D 
+        # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
         self._shader_program.bind()
-        self._shader_program.uniforms.antialias_diameter = 1.
+        self._shader_program.uniforms.antialias_diameter = 1
         for vao in self._paths:
             self._paint_vao(vao)
             
-        GL.glDisable(GL.GL_BLEND)
+        # GL.glDisable(GL.GL_BLEND)
 
     ##############################################
 
@@ -143,6 +143,7 @@ class PagePainter(Painter):
 
         self._shader_program.uniforms.colour = vao.colour
         self._shader_program.uniforms.line_width = vao.line_width
+        # self._shader_program.uniforms.z_value = 0
         vao.draw()
                
 ####################################################################################################

@@ -47,7 +47,7 @@ class GraphicItem(object):
 
         self._interval = None
 
-        self._z_value = 0
+        self._z_value = - self._id / 2**16 # 65535 objects
         
         self._scene = None
         self._is_selected = False

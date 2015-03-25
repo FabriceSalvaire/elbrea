@@ -36,7 +36,6 @@ class PrimitivePainter(Painter):
 
         self._page_provider = page_provider
         self._glwidget = self._painter_manager.glwidget
-        # self._path_vaos = {}
         self.reset()
 
     ##############################################
@@ -63,6 +62,7 @@ class PrimitivePainter(Painter):
         self._current_path = self.__primitive_class__(path)
         self._current_path.colour = path.colour
         self._current_path.line_width = path.pencil_size
+        self._current_path.z_value = -1
         self._current_path.bind_to_shader(self._shader_program.interface.attributes.position)
         self._glwidget.doneCurrent()
 
@@ -75,52 +75,48 @@ class PrimitivePainter(Painter):
         self._logger.debug('Add path {}'.format(path.id))
         # Fixme: move to glwidget
         self._glwidget.makeCurrent()
-        path_vao = self.__primitive_class__(path)
-        path_vao.id = path.id
-        path_vao.colour = path.colour
-        path_vao.line_width = path.pencil_size
-        path_vao.bind_to_shader(self._shader_program.interface.attributes.position)
-        self._items[path_vao.id] = path_vao
-        # self._path_vaos[path_vao.id] = path_vao
-        # self._items.append(path_vao.id)
+        vao = self.__primitive_class__(path)
+        # Fimme: add attributes
+        vao.id = path.id
+        vao.colour = path.colour
+        vao.line_width = path.pencil_size
+        vao.z_value = path.z_value
+        vao.bind_to_shader(self._shader_program.interface.attributes.position)
+        self._items[vao.id] = vao
         self._glwidget.doneCurrent()
 
     ##############################################
 
     def update_item(self, path):
 
-        path_vao = self._items[path.id]
-        path_vao.colour = path.colour
-        path_vao.line_width = path.pencil_size
+        vao = self._items[path.id]
+        vao.colour = path.colour
+        vao.line_width = path.pencil_size
         
     ##############################################
 
     def remove_item(self, path):
 
         del self._items[path.id]
-        # del self._path_vaos[path_vao.id]
-        # self._items.remove(path_vao.id)
         
     ##############################################
 
     def paint(self):
 
-        GL.glEnable(GL.GL_BLEND)
-        # Blending: O = Sf*S + Df*D
-        # alpha: 0: complete transparency, 1: complete opacity
-        # Set (Sf, Df) for transparency: O = Sa*S + (1-Sa)*D 
-        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+        # GL.glEnable(GL.GL_BLEND)
+        # # Blending: O = Sf*S + Df*D
+        # # alpha: 0: complete transparency, 1: complete opacity
+        # # Set (Sf, Df) for transparency: O = Sa*S + (1-Sa)*D 
+        # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
         self._shader_program.bind()
-        self._shader_program.uniforms.antialias_diameter = 1.
+        # self._shader_program.uniforms.antialias_diameter = 1
         for vao in self._items.values():
-        # for vao_id in self._items:
-        #     vao = self._path_vaos[vao_id]
             self._paint_vao(vao)
         if self._current_path is not None:
             self._paint_vao(self._current_path)
             
-        GL.glDisable(GL.GL_BLEND)
+        # GL.glDisable(GL.GL_BLEND)
 
     ##############################################
 
@@ -128,6 +124,7 @@ class PrimitivePainter(Painter):
 
         self._shader_program.uniforms.colour = vao.colour
         self._shader_program.uniforms.line_width = vao.line_width
+        self._shader_program.uniforms.z_value = vao.z_value
         vao.draw()
 
 ####################################################################################################

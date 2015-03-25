@@ -87,6 +87,7 @@ class GlWidget(GlWidgetBase):
 
         # Setup OpenGL 
         self.clear_colour = (1, 1, 1, 0)
+        self.clear_bit = GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT
 
         # Setup navigation
         self.zoom_step = 1.25
@@ -192,6 +193,15 @@ class GlWidget(GlWidgetBase):
 
         self._logger.debug('Initialise GL')
         super(GlWidget, self).initializeGL()
+
+        GL.glEnable(GL.GL_DEPTH_TEST) # Fixme: cf. clear_bit
+
+        GL.glEnable(GL.GL_BLEND)
+        # Blending: O = Sf*S + Df*D
+        # alpha: 0: complete transparency, 1: complete opacity
+        # Set (Sf, Df) for transparency: O = Sa*S + (1-Sa)*D 
+        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+
         self._init_shader()
         self._ready = False
 
