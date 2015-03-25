@@ -165,7 +165,11 @@ class Path(PathGraphicItem):
         p10 = self.p10
         u10 = p10 / self.p10_norm # Fixme: recompute p10
         return u10
-           
+
+    @property
+    def barycenter(self):
+        return np.mean(self._points, axis=0)
+    
     ##############################################
 
     def _compute_interval(self):
@@ -177,7 +181,48 @@ class Path(PathGraphicItem):
         lower_y = np.min(y)
         upper_y = np.max(y)
         return Interval2D((lower_x, upper_x), (lower_y, upper_y))
-    
+
+    ##############################################
+
+    def translate(self, vector):
+
+        self._points += vector
+
+    ##############################################
+
+    def scale(self, vector):
+
+        self._points *= vector
+
+    ##############################################
+
+    def rotate(self, angle):
+
+        t = math.radians(angle)
+        c = math.cos(t)
+        s = math.sin(t)
+        x = self.x
+        y = self.y
+        x = c*x - s*y
+        y = s*x + c*y
+
+    ##############################################
+
+    def transform(self, matrix):
+
+        # Fixme: Faster implementation?
+        
+        # pi_0 = m_00 * pi_0 + m_01 * pi_1 + m_02
+        # pi_1 = m_10 * pi_0 + m_11 * pi_1 + m_12
+        x = self.x
+        y = self.y
+        x *= matrix[0, 0]
+        x += matrix[0, 1] * y
+        x += matrix[0, 2]
+        y *= matrix[1, 0]
+        y += matrix[1, 1] * y
+        y += matrix[2, 2]
+        
     ##############################################
 
     def pair_iterator(self):

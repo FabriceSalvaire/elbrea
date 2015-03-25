@@ -72,11 +72,11 @@ class GraphicItem(object):
         self._position = value
     
     @property
-    def scale(self):
+    def scale_factor(self):
         return self._scale
 
-    @scale.setter
-    def scale(self, value):
+    @scale_factor.setter
+    def scale_factor(self, value):
         self._scale = value
     
     @property
