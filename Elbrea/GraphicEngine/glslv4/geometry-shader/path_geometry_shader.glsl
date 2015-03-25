@@ -9,10 +9,18 @@
 
 #include(../include/model_view_projection_matrix.glsl)
 
+#include(../include/vector.glsl)
+
 /* *********************************************************************************************** */
 
-uniform float line_width = 5.;
-uniform float antialias_diameter = 1.;
+uniform float line_width = 5;
+uniform float antialias_diameter = 1;
+
+uniform float z_value = 0;
+
+uniform vec2 scale = vec2(1);
+uniform vec2 translation = vec2(0);
+uniform float rotation = 0;
 
 /* *********************************************************************************************** */
 
@@ -44,11 +52,9 @@ void
 compute_offsets(in vec2 dir1, in vec2 dir2, in float w,
 		out vec2 offset, out float u_offset)
 {
-  float angle = atan(dir1.x*dir2.y - dir1.y*dir2.x,
-		     dir1.x*dir2.x + dir1.y*dir2.y);
-  angle /= 2.;
-  vec2 t = normalize(dir1 + dir2);
-  vec2 n = vec2(-t.y, t.x);
+  float angle = angle_between(dir1, dir2) / 2;
+  // bissector
+  vec2 n = normalize(normal(dir1 + dir2));
   offset = w / cos(angle) * n;
   u_offset = w * tan(angle);
 }
@@ -60,7 +66,10 @@ emit_vertex(in vec2 position, in vec2 uv, in float cap)
 {
   vertex.cap = cap;
   vertex.uv = uv;
-  gl_Position =  model_view_projection_matrix * vec4(position, 0, 1);
+  position *= scale;
+  position = rotate(position, rotation);
+  position += translation;
+  gl_Position =  model_view_projection_matrix * vec4(position, z_value, 1);
   EmitVertex();
 }
 
@@ -79,29 +88,29 @@ void main()
   vec2 pos2 = vertexIn[2].position;
   vec2 pos3 = vertexIn[3].position;
 
-  float line_length = length(pos2 - pos1);
+  float line_length = distance(pos1, pos2);
   vertex.line_length = line_length;
   
   // Thickness below 1 pixel are represented using a 1 pixel thickness
   // and a modified alpha
   vertex.colour.a = min(line_width, vertex.colour.a);
-  vertex.line_width = max(line_width, 1.);
+  vertex.line_width = max(line_width, 1);
 
   // This is the actual half width of the line
-  float w = ceil(1.25*antialias_diameter + line_width) / 2.;
+  float w = ceil(1.25*antialias_diameter + line_width) / 2;
 
-  vec2 dir0 = normalize(pos1 - pos0);
+  vec2 dir0 = direction(pos0, pos1);
   
-  vec2 dir1 = normalize(pos2 - pos1);
-  vec2 normal1 = vec2(-dir1.y, dir1.x);
+  vec2 dir1 = direction(pos1, pos2);
+  vec2 normal1 = normal(dir1);
   vec2 tangential_offset1 = dir1 * w;
   vec2 normal_offset1 = normal1 * w;
 
-  vec2 dir2 = normalize(pos3 - pos2);
+  vec2 dir2 = direction(pos2, pos3);
 
-  float cap1 = .0;
+  float cap1 = 0;
   if (pos0 == pos1) {
-    cap1 = -1.;
+    cap1 = -1;
     pos1 -= tangential_offset1;
 
     emit_vertex(pos1 - normal_offset1, vec2(-w, -w), cap1);
@@ -115,9 +124,9 @@ void main()
     emit_vertex(pos1 + o1, vec2(u1, w), cap1);
   }
 
-  float cap2 = .0;
+  float cap2 = 0;
   if (pos2 == pos3) {
-    cap2 = 1.;
+    cap2 = 1;
     pos2 += tangential_offset1;
     float u = line_length + w;
 
