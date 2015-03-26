@@ -47,6 +47,19 @@ class LineVertexArray(GlVertexArrayObject):
             self.set(path)
 
     ##############################################
+
+    @property
+    def number_of_points(self):
+        return self._number_of_objects
+
+    ##############################################
+
+    def reset(self):
+
+        self._number_of_objects = 0
+        # Fixme: only for dynamic ?
+        
+    ##############################################
     
     def bind_to_shader(self, shader_program_interface_attribute):
 
@@ -77,10 +90,10 @@ class LineVertexArray(GlVertexArrayObject):
         # Fixme: make no sense, must be a list of paths
         
         self._number_of_objects = path.number_of_points # Right ?
-        vertex = np.zeros((self._number_of_objects, 2), dtype=np.float32)
-        vertex[...] = path.points
-        vertex += .5
-        self._vertex_array_buffer.set(vertex)
+        vertexes = np.zeros((self._number_of_objects, 2), dtype=np.float32)
+        vertexes[...] = path.points
+        # vertexes += .5 # Fixme: to shader
+        self._vertex_array_buffer.set(vertexes)
 
 ####################################################################################################
 
@@ -108,12 +121,12 @@ class LineStripVertexArray(LineVertexArray):
         """ Set the vertex array from an iterable of segments. """
 
         self._number_of_objects = path.number_of_points # Right ?
-        vertex = np.zeros((self._number_of_objects + 2, 2), dtype=np.float32)
-        vertex[1:-1] = path.points
-        vertex[0] = vertex[1]
-        vertex[-1] = vertex[-2]
-        vertex += .5
-        self._vertex_array_buffer.set(vertex)
+        vertexes = np.zeros((self._number_of_objects + 2, 2), dtype=np.float32)
+        vertexes[1:-1] = path.points
+        vertexes[0] = vertexes[1]
+        vertexes[-1] = vertexes[-2]
+        # vertex += .5
+        self._vertex_array_buffer.set(vertexes)
 
 ####################################################################################################
 
@@ -131,12 +144,6 @@ class DynamicLineStripVertexArray(LineStripVertexArray):
         self._allocate(size)
         
         self._update_vertex = np.zeros((2, 2), dtype=np.float32)
-
-    ##############################################
-
-    @property
-    def number_of_points(self):
-        return self._number_of_objects
     
     ##############################################
 
@@ -144,14 +151,8 @@ class DynamicLineStripVertexArray(LineStripVertexArray):
 
         self._size = size
         self._number_of_objects_max = self._size / 2 -2
-        vertex = np.zeros((size, 2), dtype=np.float32)
-        self._vertex_array_buffer.set(vertex, usage=GL.GL_DYNAMIC_DRAW)
-
-    ##############################################
-
-    def reset(self):
-
-        self._number_of_objects = 0
+        array = np.zeros((size, 2), dtype=np.float32)
+        self._vertex_array_buffer.set(array, usage=GL.GL_DYNAMIC_DRAW)
     
     ##############################################
     
@@ -172,7 +173,7 @@ class DynamicLineStripVertexArray(LineStripVertexArray):
                 
         vertex = self._update_vertex
         vertex[:] = point
-        vertex += .5 # Fixme: to shader
+        # vertex += .5
         if self._number_of_objects > 1:
             offset = self._number_of_objects
         else:
@@ -191,44 +192,34 @@ class DynamicLineVertexArray(LineVertexArray):
 
         super(DynamicLineVertexArray, self).__init__()
 
-        vertex = np.zeros((2, 2), dtype=np.float32)
-        self._vertex_array_buffer.set(vertex)
+        array = np.zeros((2, 2), dtype=np.float32)
+        self._vertex_array_buffer.set(array)
 
         self._update_vertex = np.zeros((2,), dtype=np.float32)
 
     ##############################################
-
-    @property
-    def number_of_points(self):
-        return self._number_of_objects
-        
-    ##############################################
-
-    def reset(self):
-
-        self._number_of_objects = 0
     
+    def _set_vertex(self, point, offset):
+
+        # Fixme: to ensure compatible type ?
+        vertex = self._update_vertex
+        vertex[:] = point
+        # vertex += .5
+        self._vertex_array_buffer.set_sub_data(vertex, offset)
+
     ##############################################
     
     def set_first_vertex(self, point):
 
         self._number_of_objects = 1
-
-        vertex = self._update_vertex
-        vertex[:] = point
-        vertex += .5 # Fixme: to shader
-        self._vertex_array_buffer.set_sub_data(vertex, 0)
+        self._set_vertex(point, 0)
 
     ##############################################
     
     def set_second_vertex(self, point):
 
         self._number_of_objects = 2
-
-        vertex = self._update_vertex
-        vertex[:] = point
-        vertex += .5 # Fixme: to shader
-        self._vertex_array_buffer.set_sub_data(vertex, 2)
+        self._set_vertex(point, 2)
         
 ####################################################################################################
 #
