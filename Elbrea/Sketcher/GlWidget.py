@@ -87,8 +87,8 @@ class GlWidget(GlWidgetBase):
 
         # Setup OpenGL 
         self.clear_colour = (1, 1, 1, 0)
-        self.clear_bit = GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT
-
+        # self.clear_bit = GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT
+        
         # Setup navigation
         self.zoom_step = 1.25
 
@@ -140,7 +140,7 @@ class GlWidget(GlWidgetBase):
     @page_manager.setter
     def page_manager(self, page_manager):
         self._page_manager = page_manager
-    
+        
     @property
     def page_interval(self):
         return self._page_interval
@@ -149,7 +149,7 @@ class GlWidget(GlWidgetBase):
     def page_interval(self, interval):
         self._page_interval = interval
         self._update_zoom_manager() # Fixme: check
-    
+        
     ##############################################
 
     def init_tools(self):
@@ -162,15 +162,15 @@ class GlWidget(GlWidgetBase):
     ##############################################
 
     def register_menu(self, menu):
-      
+        
         """ Register a sub-menu in the contextual menu """
- 
+        
         self._contextual_menu.addMenu(menu)
 
     ##############################################
 
     def register_action(self, action):
-       
+        
         """ Register an action in the contextual menu """
 
         self._contextual_menu.addAction(action)
@@ -194,7 +194,7 @@ class GlWidget(GlWidgetBase):
         self._logger.debug('Initialise GL')
         super(GlWidget, self).initializeGL()
 
-        GL.glEnable(GL.GL_DEPTH_TEST) # Fixme: cf. clear_bit
+        # GL.glEnable(GL.GL_DEPTH_TEST) # Fixme: cf. clear_bit
 
         GL.glEnable(GL.GL_BLEND)
         # Blending: O = Sf*S + Df*D
