@@ -7,6 +7,7 @@
 
 ####################################################################################################
 
+from collections import OrderedDict
 import logging
 
 from rtree import Rtree
@@ -165,9 +166,9 @@ class GraphicScene(object):
     
     def __init__(self):
 
-        self._items = {}
+        self._items = OrderedDict()
         self._rtree = Rtree()
-        self._selected_items = {}
+        self._selected_items = OrderedDict()
 
     ##############################################
     

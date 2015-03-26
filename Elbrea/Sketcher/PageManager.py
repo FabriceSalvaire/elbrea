@@ -7,6 +7,7 @@
 
 ####################################################################################################
 
+from collections import OrderedDict
 import logging
 
 ####################################################################################################
@@ -27,8 +28,8 @@ class PageData(object):
 
     def __init__(self):
 
-        self.paths = {} # VAO
-        self.segments = {} # VAO
+        self.paths = OrderedDict() # VAO
+        self.segments = OrderedDict() # VAO
 
         # self.paths = [] # vao id
         # self.segments = [] # vao id
