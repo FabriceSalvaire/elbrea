@@ -14,7 +14,7 @@ import logging
 from PyOpenGLng.HighLevelApi import GL
 
 from .Painter import Painter
-from .PrimitiveVertexArray import LineVertexArray, LineStripVertexArray
+from .PrimitiveVertexArray import LineVertexArray, LineStripVertexArray, DynamicLineStripVertexArray
 
 ####################################################################################################
 
@@ -161,6 +161,38 @@ class PathPainter(PrimitivePainter):
         super(PathPainter, self).__init__(painter_manager, page_provider, **kwargs)
         self._shader_program = self._glwidget.shader_manager.path_shader_program
 
+        self._glwidget.makeCurrent()
+        self._current_path = DynamicLineStripVertexArray(size=100, upscale_factor=3)
+        self._current_path.bind_to_shader(self._shader_program.interface.attributes.position)
+        self._current_path.colour = (1, 1, 1) # Fixme:
+        self._current_path.line_width = 1
+        self._current_path.z_value = 0
+        # self._glwidget.doneCurrent()
+
+    ##############################################
+
+    def reset_current_path(self):
+
+        self._current_path.reset()
+        
+    ##############################################
+
+    def update_current_item(self, path):
+
+        self._logger.debug('Update current path')
+
+        # Fixme: move to glwidget
+        self._glwidget.makeCurrent()
+
+        current_path = self._current_path
+        if not current_path.number_of_points:
+            self._current_path.colour = path.colour
+            self._current_path.line_width = path.pencil_size
+
+        self._current_path.add_vertex(path.p1)
+        
+        # self._glwidget.doneCurrent()
+        
     ##############################################
 
     @property
