@@ -63,9 +63,10 @@ class LineVertexArray(GlVertexArrayObject):
 
         """ Draw the vertex array as lines. """
 
-        self.bind()
-        GL.glDrawArrays(GL.GL_LINES, 0, self._number_of_objects)
-        self.unbind()
+        if self._number_of_objects >= 2:
+            self.bind()
+            GL.glDrawArrays(GL.GL_LINES, 0, self._number_of_objects)
+            self.unbind()
 
     ##############################################
     
@@ -177,6 +178,57 @@ class DynamicLineStripVertexArray(LineStripVertexArray):
         else:
             offset = 0
         self._vertex_array_buffer.set_sub_data(vertex, 2*offset)
+
+####################################################################################################
+
+class DynamicLineVertexArray(LineVertexArray):
+
+    _logger = _module_logger.getChild('DynamicLineVertexArray')
+
+    ##############################################
+    
+    def __init__(self):
+
+        super(DynamicLineVertexArray, self).__init__()
+
+        vertex = np.zeros((2, 2), dtype=np.float32)
+        self._vertex_array_buffer.set(vertex)
+
+        self._update_vertex = np.zeros((2,), dtype=np.float32)
+
+    ##############################################
+
+    @property
+    def number_of_points(self):
+        return self._number_of_objects
+        
+    ##############################################
+
+    def reset(self):
+
+        self._number_of_objects = 0
+    
+    ##############################################
+    
+    def set_first_vertex(self, point):
+
+        self._number_of_objects = 1
+
+        vertex = self._update_vertex
+        vertex[:] = point
+        vertex += .5 # Fixme: to shader
+        self._vertex_array_buffer.set_sub_data(vertex, 0)
+
+    ##############################################
+    
+    def set_second_vertex(self, point):
+
+        self._number_of_objects = 2
+
+        vertex = self._update_vertex
+        vertex[:] = point
+        vertex += .5 # Fixme: to shader
+        self._vertex_array_buffer.set_sub_data(vertex, 2)
         
 ####################################################################################################
 #
