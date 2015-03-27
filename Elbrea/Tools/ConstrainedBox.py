@@ -57,35 +57,37 @@ class ConstrainedPoint(object):
 
     ##############################################
 
+    @property
     def number_of_constrains(self):
 
         return self._number_of_constrains
         
     ##############################################
 
+    @property
     def number_of_free_parameters(self):
 
         return 2 - self._number_of_constrains
 
     ##############################################
 
-    def _get_x(self):
+    @property
+    def x(self):
         return self._x.value
-    
-    def _set_x(self, value):
-        self._x.value = value
 
-    x = property(_get_x, _set_x)
+    @x.setter
+    def x(self, value):
+        self._x.value = value
 
     ##############################################
 
-    def _get_y(self):
+    @property
+    def y(self):
         return self._y.value
-    
-    def _set_y(self, value):
-        self._y.value = value
 
-    y = property(_get_y, _set_y)
+    @y.setter
+    def y(self, value):
+        self._y.value = value
 
     ##############################################
 
@@ -106,16 +108,18 @@ class ConstrainedBox(object):
 
         self._p1 = ConstrainedPoint(x1, y1)
         self._p2 = ConstrainedPoint(x2, y2)
-        self._number_of_constrains = self._p1.number_of_constrains() + self._p2.number_of_constrains()
+        self._number_of_constrains = self._p1.number_of_constrains + self._p2.number_of_constrains
 
     ##############################################
 
+    @property
     def number_of_constrains(self):
 
         return self._number_of_constrains
 
     ##############################################
 
+    @property
     def number_of_free_parameters(self):
 
         return 4 - self._number_of_constrains
@@ -134,11 +138,19 @@ class ConstrainedBox(object):
 
     ##############################################
 
+    @property
     def interval(self):
 
         return IntervalInt2D(sorted((self._p1.x, self._p2.x)),
                              sorted((self._p1.y, self._p2.y)))
 
+    ##############################################
+
+    @property
+    def size(self):
+
+        return self.interval.size()
+        
 ####################################################################################################
 #
 #

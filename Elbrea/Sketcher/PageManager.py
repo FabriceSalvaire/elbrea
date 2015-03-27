@@ -225,6 +225,9 @@ class PageManager(object):
             painter = self.painter_for_item(item)
             if painter is not None:
                 painter.update_item(item)
+            cropper = self._application.main_window.glwidget.cropper
+            cropper.interval = item.interval
+            cropper.enable()
             self._application.refresh()
         
 ####################################################################################################
