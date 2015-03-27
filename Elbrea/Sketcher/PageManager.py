@@ -108,6 +108,10 @@ class PageManager(object):
         # from PyOpenGLng.Math.Geometry import Point, Offset
         # texture_painter.upload(Point(10, 10), Offset(image_format.width, image_format.height), image)
 
+        object_painter = self.painter_manager['object']
+        object_painter.update(IntervalInt2D((100, 200), (300, 400)))
+        object_painter.enable()
+        
         from Elbrea.GraphicEngine.PathPainter import SegmentPainter, PathPainter
         self._segment_painter = SegmentPainter(self.painter_manager, self)
         self._path_painter = PathPainter(self.painter_manager, self)

@@ -40,7 +40,7 @@ class Grip(GraphicSceneItem):
     _logger = logging.getLogger(__name__)
 
     # Fixme: shader rescale the margin in px, thus this code only works fo zoom 1:1 !
-    #   we could test (point + margin) & inner_box
+    #   we could test (point + rescaled margin) & inner_box
     margin = 20
 
     ##############################################

@@ -2,6 +2,8 @@
 
 // #shader_type geometry
 
+/* *********************************************************************************************** */
+
 #version 330
 #extension GL_EXT_geometry_shader4 : enable
 
@@ -9,15 +11,21 @@
 
 #include(../include/model_view_projection_matrix.glsl)
 
-/* *********************************************************************************************** */
-
-uniform float line_width = .1;
-uniform float stipple_factor = .1;
+#include(../include/vector.glsl)
 
 /* *********************************************************************************************** */
+	      
+uniform float line_width = 5;
+uniform float antialias_diameter = 1;
 
-layout(lines) in;
-layout(triangle_strip, max_vertices=4) out;
+uniform vec2 scale = vec2(1);
+uniform vec2 translation = vec2(0);
+uniform float rotation = 0;
+
+/* *********************************************************************************************** */
+
+layout(lines) in; // P.inf -> P.sup
+layout(triangle_strip, max_vertices=4) out;	      
 
 /* *********************************************************************************************** */
 
@@ -31,14 +39,19 @@ in VertexAttributesIn
 
 out VertexAttributes
 {
+  vec2 uv;
+  float line_width;
   vec4 colour;
-  float stipple_position;
 } vertex;
 
 /* *********************************************************************************************** */
 
-void emit_vertex(vec2 position)
+void emit_vertex(in vec2 position, in vec2 uv)
 {
+  vertex.uv = uv;
+  position *= scale;
+  position = rotate(position, rotation);
+  position += translation;
   gl_Position =  model_view_projection_matrix * vec4(position, 0, 1);
   EmitVertex();
 }
@@ -49,25 +62,24 @@ void main()
 {
   vertex.colour = vertexIn[0].colour;
 
-  vec2 pos0 = vertexIn[0].position;
-  vec2 pos1 = vertexIn[1].position;
+  /*
+   *  tl--*--tr
+   *  |       |
+   *  *   +   *
+   *  |       |
+   *  bl--*--br
+   *
+   */
 
-  vec2 dir = normalize(pos1 - pos0);
-  vec2 normal = vec2(-dir.y, dir.x);
-  vec2 offset = normal * line_width * viewport_scale;
-
-  float segmentLength = length((pos1 - pos0) * inverse_viewport_scale);
-  float stipple_position0 = 0;
-  float stipple_position1 = segmentLength / (stipple_factor * 16);
-
-  vertex.stipple_position = stipple_position0;
-  emit_vertex(pos0 + offset);
-  vertex.stipple_position = stipple_position1;
-  emit_vertex(pos1 + offset);
-  vertex.stipple_position = stipple_position0;
-  emit_vertex(pos0 - offset);
-  vertex.stipple_position = stipple_position1;
-  emit_vertex(pos1 - offset);
+  vec2 pos_bl = vertexIn[0].position;
+  vec2 pos_tr = vertexIn[1].position;
+  vec2 pos_tl = vec2(pos_bl.x, pos_tr.y);
+  vec2 pos_br = vec2(pos_tr.x, pos_bl.y);
+  
+  emit_vertex(pos_bl, vec2(-1, -1));
+  emit_vertex(pos_tl, vec2(-1,  1));
+  emit_vertex(pos_br, vec2( 1, -1));
+  emit_vertex(pos_tr, vec2( 1,  1));
   EndPrimitive();
 }
 

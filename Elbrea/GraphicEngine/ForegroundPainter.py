@@ -77,7 +77,7 @@ class RoiPainter(RegisteredPainter):
 
     def reset(self):
 
-        self._logger.debug('Reset ROI Box Painter')
+        # self._logger.debug('Reset ROI Box Painter')
         self._bounding_box = None
         self._segment_vertex_array = None
         self._margin = 0
@@ -87,8 +87,8 @@ class RoiPainter(RegisteredPainter):
 
     def disable(self):
 
-        self._logger.debug('Disable ROI Box Painting')
-        # super(RoiPainter, self).disable()
+        # self._logger.debug('Disable ROI Box Painting')
+        super(RoiPainter, self).disable()
         self._paint_box = False
         self._paint_grips = False
 
@@ -96,7 +96,7 @@ class RoiPainter(RegisteredPainter):
 
     def enable(self, paint_grips=False):
 
-        self._logger.debug('Enable ROI Box Painting')
+        # self._logger.debug('Enable ROI Box Painting')
         self._paint_box = True
         self._paint_grips = paint_grips
         # super(RoiPainter, self).enable()
@@ -105,7 +105,7 @@ class RoiPainter(RegisteredPainter):
 
     def update_bounding_box(self, interval):
 
-        self._logger.debug('Update ROI Box')
+        # self._logger.debug('Update ROI Box')
         # Fixme: move to glwidget
         self._glwidget.makeCurrent()
         if interval is not None:
@@ -122,7 +122,7 @@ class RoiPainter(RegisteredPainter):
     def paint(self):
 
         if self._paint_box and self._segment_vertex_array is not None:
-            self._logger.debug('Paint ROI Box')
+            # self._logger.debug('Paint ROI Box')
             self._shader_program.bind()
             self._shader_program.uniforms.colour = (0., 0., 0.) # Fixme:
             self._shader_program.uniforms.margin = self._margin
@@ -180,7 +180,7 @@ class TextPainter(RegisteredPainter):
 
     def paint(self):
 
-        self._logger.debug("")
+        # self._logger.debug("")
         if self._text_vertex_array is not None:
             shader_program = self._text_shader_program
             # shader_program.bind()
@@ -228,7 +228,7 @@ class SketcherPainter(Painter, ObjectWithTimeStamp):
 
     def create_texture(self, sketcher):
 
-        self._logger.info("")
+        # self._logger.info("")
         self._sketcher = sketcher
         image_format = sketcher.image.image_format
         self._glwidget.makeCurrent() #?
@@ -246,7 +246,7 @@ class SketcherPainter(Painter, ObjectWithTimeStamp):
         # self._glwidget.makeCurrent()
         # self._glwidget.doneCurrent()
 
-        self._logger.info("")
+        # self._logger.info("")
         # should check image_format
         self._texture_vertex_array.set(self._sketcher.image)
         self.modified()
@@ -260,7 +260,7 @@ class SketcherPainter(Painter, ObjectWithTimeStamp):
             and self._texture_vertex_array is not None
             and self._shader_program is not None):
 
-            self._logger.info("uploaded {}".format(self._uploaded))
+            # self._logger.info("uploaded {}".format(self._uploaded))
 
             # if self.source > self: # timestamp
             print(self._uploaded, self._sketcher.modified_time, self._modified_time)
@@ -281,7 +281,55 @@ class SketcherPainter(Painter, ObjectWithTimeStamp):
             shader_program.unbind()
 
             GL.glDisable(GL.GL_BLEND)
-        
+
+####################################################################################################
+
+class ObjectPainter(RegisteredPainter):
+
+    __painter_name__ = 'object'
+
+    _logger = _module_logger.getChild('ObjectPainter')
+
+    ##############################################
+    
+    def __init__(self, painter_manager):
+
+        super(ObjectPainter, self).__init__(painter_manager)
+
+        self._glwidget = self._painter_manager.glwidget
+        self._shader_program = self._glwidget.shader_manager.object_shader_program
+        self.reset()
+
+    ##############################################
+
+    def reset(self):
+
+        self._vertex_array = None
+        self.disable()
+
+    ##############################################
+
+    def update(self, interval):
+
+        self._glwidget.makeCurrent()
+        if interval is not None:
+            segments = []
+            x_min, y_min, x_max, y_max = interval.bounding_box()
+            segment = Segment(Point(x_min, y_min), Point(x_max, y_max))
+            segments.append(segment)
+            self._vertex_array = GlSegmentVertexArray(segments)
+            self._vertex_array.bind_to_shader(self._shader_program.interface.attributes.position)
+        self._glwidget.doneCurrent()
+
+    ##############################################
+
+    def paint(self):
+
+        if self._vertex_array is not None:
+            self._shader_program.bind()
+            self._shader_program.uniforms.colour = (0, 0, 0)
+            self._vertex_array.draw()
+            
 ####################################################################################################
 #
 # End

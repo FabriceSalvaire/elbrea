@@ -53,15 +53,15 @@ if shader_manager.has_visual():
         'vertex-shader/fixed_colour_vertex_shader',
         #
         'fragment-shader/simple_fragment_shader',
-        'fragment-shader/stipple_line_fragment_shader',
         'fragment-shader/antialiased_segment_fragment_shader',
+        'fragment-shader/antialiased_object_fragment_shader',
         #
         'geometry-shader/fixed_colour_vertex_shader_in',
         #
         'geometry-shader/centred_rectangle_geometry_shader',
         'geometry-shader/rectangle_geometry_shader',
         'geometry-shader/roi_geometry_shader',
-        'geometry-shader/stipple_line_geometry_shader',
+        'geometry-shader/object_geometry_shader',
         'geometry-shader/segment_geometry_shader',
         'geometry-shader/path_geometry_shader',
         #
@@ -96,6 +96,13 @@ if shader_manager.has_visual():
          'program_interface':position_shader_program_interface,
          },
 
+        {'program_name':'object_shader_program',
+         'shader_list':('fixed_colour_vertex_shader_in',
+                        'object_geometry_shader',
+                        'antialiased_object_fragment_shader'),
+         'program_interface':position_shader_program_interface,
+         },
+            
         {'program_name':'texture_label_shader_program',
          'shader_list':('texture_vertex_shader',
                         'texture_label_fragment_shader'),
@@ -139,13 +146,6 @@ if shader_manager.has_visual():
          'program_interface':position_shader_program_interface,
          },
             
-        # {'program_name':'stipple_line_shader_program',
-        #  'shader_list':('fixed_colour_vertex_shader_in',
-        #                 'stipple_line_geometry_shader',
-        #                 'stipple_line_fragment_shader'),
-        #  'program_interface':position_shader_program_interface,
-        #  },
-    
         ):
         shader_manager.link_program(**args)
 

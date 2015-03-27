@@ -13,15 +13,15 @@
 
 /* *********************************************************************************************** */
 
-uniform bool unscale_margin = false;
-uniform float margin = 0;
-uniform float grip_margin = 20;
+uniform bool unscale_margin = false; // Fixme: name
+uniform float margin = 0; // to add a margin on the ROI
+uniform float grip_margin = 20; // px
 uniform bool paint_grips = true; // false;
 uniform bool paint_inner_box = false;
 
 /* *********************************************************************************************** */
 
-layout(lines) in;
+layout(lines) in; // P.inf -> P.sup
 layout(line_strip, max_vertices=18) out; // 2*5 + 4*2 vertices = 18
 
 /* *********************************************************************************************** */
