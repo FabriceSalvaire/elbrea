@@ -1,11 +1,8 @@
 #! /bin/bash
-mv .git .git-backup
+rm -rf .git
 git init
-# Fix .git
-bzr fast-export --plain --rewrite-tag-names --git-branch=master \
-  | sed -e 's/mendeley-oapi-example\/\.git/mendeley-oapi-example\/git/' \
-  | git fast-import
-git remote add origin git@github.com:FabriceSalvaire/Biblio.git
-git push origin master --force
+bzr fast-export --plain --git-branch=master | git fast-import
+git remote add origin git@github.com:FabriceSalvaire/elbrea.git
+git push origin master # --force
 # git push -f origin HEAD^:master # to revert a commit
 # End
