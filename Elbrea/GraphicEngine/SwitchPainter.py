@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 ####################################################################################################
@@ -22,11 +22,11 @@ _module_logger = logging.getLogger(__name__)
 class SwitchPainter(Painter):
 
     """ Painter acting as a switch between a list of painters. """
-    
+
     _logger = _module_logger.getChild('SwitchPainter')
 
     ##############################################
-    
+
     def __init__(self, painter_manager):
 
         super(SwitchPainter, self).__init__(painter_manager)
@@ -52,7 +52,7 @@ class SwitchPainter(Painter):
         self._painters[painter.name] = painter
         painter.disable()
         # return painter
-        
+
     ##############################################
 
     def select_painter(self, name):

@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 ####################################################################################################
@@ -31,15 +31,15 @@ _module_logger = logging.getLogger(__name__)
 class TexturePainter(Painter):
 
     __painter_name__ = 'texture'
-    
+
     _logger = _module_logger.getChild('TexturePainter')
 
     ##############################################
-    
+
     def __init__(self, *args, **kwargs):
 
         super(TexturePainter, self).__init__(*args, **kwargs)
-
+        
         self._shader_program = self._glwidget.shader_manager.texture_shader_program
         self._texture_vertex_array = None
 
@@ -62,7 +62,7 @@ class TexturePainter(Painter):
         shader_program.bind()
         texture_vertex_array.draw()
         shader_program.unbind()
-        
+
     ##############################################
 
     def paint(self):
@@ -76,14 +76,14 @@ class TexturePainter(Painter):
 class DynamicTexturePainter(Painter, ObjectWithTimeStamp):
 
     _logger = _module_logger.getChild('DynamicTexturePainter')
-    
+
     ##############################################
-    
+
     def __init__(self, *args, **kwargs):
 
         ObjectWithTimeStamp.__init__(self)
         Painter.__init__(self, *args, **kwargs)
-
+        
         self._glwidget = self._painter_manager.glwidget
         self._source = None
         # self._shader_program = shader_manager.texture_shader_program
@@ -97,7 +97,7 @@ class DynamicTexturePainter(Painter, ObjectWithTimeStamp):
     @property
     def shader_program(self):
         return self._shader_program
-    
+
     @shader_program.setter
     def shader_program(self, shader_program):
         self._shader_program = shader_program
@@ -107,7 +107,7 @@ class DynamicTexturePainter(Painter, ObjectWithTimeStamp):
     @property
     def source(self):
         return self._source
-    
+
     @source.setter
     def source(self, source):
         # connect_source
@@ -150,14 +150,14 @@ class DynamicTexturePainter(Painter, ObjectWithTimeStamp):
         if (self._status
             and self._texture_vertex_array is not None
             and self._shader_program is not None):
-
+            
             # self._logger.info("uploaded {}".format(self._uploaded))
-
+            
             # if self.source > self: # timestamp
             # print(self._uploaded, self.source._modified_time, self._modified_time)
             if not self._uploaded or self.source._modified_time > self._modified_time:
                 self.upload_data()
-
+            
             shader_program = self._shader_program
             shader_program.bind()
             self._texture_vertex_array.draw()
