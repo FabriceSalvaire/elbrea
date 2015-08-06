@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 ####################################################################################################
@@ -24,12 +24,12 @@ from PyOpenGLng.HighLevelApi.Buffer import GlUniformBuffer
 from PyOpenGLng.HighLevelApi.GlWidgetBase import GlWidgetBase
 from PyOpenGLng.Math.Interval import IntervalInt2D # duplicated
 
-from .Sketcher import TabletEvent, TabletPointerType, TabletEventType
+#!# from .Sketcher import TabletEvent, TabletPointerType, TabletEventType
 from Elbrea.GraphicEngine.GraphicScene import GraphicScene
 from Elbrea.Image.Colour import RgbIntColour
 
 ####################################################################################################
- 
+
 _module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
@@ -37,9 +37,9 @@ _module_logger = logging.getLogger(__name__)
 class GlWidget(GlWidgetBase):
 
     _logger = _module_logger.getChild('GlWidget')
- 
+
     ##############################################
-    
+
     def __init__(self, parent):
 
         self._logger.debug('Initialise GlWidget')
@@ -57,7 +57,7 @@ class GlWidget(GlWidgetBase):
 
     def init_tools(self):
 
-        from .Cropper import Cropper
+        from Elbrea.GraphicEngine.Cropper import Cropper
         self.cropper = Cropper(self)
 
     ##############################################
@@ -110,7 +110,7 @@ class GlWidget(GlWidgetBase):
         if self._ready:
             with GL.error_checker():
                 self._painter_manager.paint()
-                
+
     ##############################################
 
     def display_all(self):
@@ -127,7 +127,7 @@ class GlWidget(GlWidgetBase):
 
         self._logger.info("{} {}".format(event.x(), event.y()))
         return np.array((event.x(), event.y()), dtype=np.int) # int for subtraction
-        
+
     ##############################################
 
     def _set_previous_position(self, position, position_screen):
@@ -140,10 +140,10 @@ class GlWidget(GlWidgetBase):
     def mousePressEvent(self, event):
 
         self._logger.info("")
-       
+        
         if not (event.buttons() & QtCore.Qt.LeftButton):
             return
-
+        
         tool_bar = self._application.main_window.tool_bar
         current_tool = tool_bar.current_tool()
         if current_tool in (tool_bar.crop_tool_action,):
@@ -171,9 +171,9 @@ class GlWidget(GlWidgetBase):
                 tablet_event = TabletEvent(TabletEventType.press, pointer_type, position)
                 if self._application.sketcher.on_tablet_event(tablet_event):
                     self.update()
-                
+
     ##############################################
-        
+
     def mouseReleaseEvent(self, event):
 
         self._logger.info("")
@@ -203,7 +203,7 @@ class GlWidget(GlWidgetBase):
                 tablet_event = TabletEvent(TabletEventType.release, pointer_type, position)
                 if self._application.sketcher.on_tablet_event(tablet_event):
                     self.update()
-                
+
     ##############################################
 
     def wheelEvent(self, event):
@@ -246,7 +246,7 @@ class GlWidget(GlWidgetBase):
             tablet_event = TabletEvent(TabletEventType.move, pointer_type, position)
             if self._application.sketcher.on_tablet_event(tablet_event):
                 self.update()
-           
+
     ##############################################
 
     def show_coordinate(self, position):
@@ -284,9 +284,9 @@ class GlWidget(GlWidgetBase):
         # self._set_previous_position(position)
 
     ##############################################
-        
+
     def _show_intensity_profile(self, location):
-        
+
         from .IntensityProfileForm import LineIntensityProfileForm
         x_profile, y_profile = self._intensity_line_picker(location, self._current_image())
         self._intensity_profile_form = LineIntensityProfileForm(x_profile, y_profile)
@@ -364,7 +364,7 @@ class GlWidget(GlWidgetBase):
                     self.update()
         except Exception as exception:
             self._logger.error(str(exception))
-            
+
 ####################################################################################################
 #
 # End

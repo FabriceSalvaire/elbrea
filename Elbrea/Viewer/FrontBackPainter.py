@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 # Fixme: place ?
@@ -13,9 +13,9 @@ import logging
 
 ####################################################################################################
 
-from .Painter import Painter
-from .PainterManager import PainterManager
-from .TexturePainter import BackgroundPainter
+from Elbrea.GraphicEngine.Painter import Painter
+from Elbrea.GraphicEngine.PainterManager import BasicPainterManager
+from Elbrea.GraphicEngine.SwitchPainter import SwitchPainter
 
 ####################################################################################################
 
@@ -28,15 +28,13 @@ class FrontBackPainter(Painter):
     _logger = _module_logger.getChild('FrontBackPainter')
 
     ##############################################
-    
+
     def __init__(self, painter_manager, name, painter_class):
 
-        self.__painter_name__ = name
-       
-        super(FrontBackPainter, self).__init__(painter_manager)
-
-        self.front_painter = painter_class(painter_manager)
-        self.back_painter = painter_class(painter_manager)
+        super(FrontBackPainter, self).__init__(painter_manager, name=name)
+        
+        self.front_painter = painter_class(painter_manager, name='Front')
+        self.back_painter = painter_class(painter_manager, name='Back')
         self._is_front = True
 
     ##############################################
@@ -65,27 +63,33 @@ class FrontBackPainter(Painter):
 
 ####################################################################################################
 
-class FrontBackPainterManager(PainterManager):
+class FrontBackPainterManager(BasicPainterManager):
 
     _logger = logging.getLogger(__name__)
 
     ##############################################
 
-    def create_background_painter(self):
+    def __init__(self, glwidget):
 
-        self._background_painter = FrontBackPainter(self, 'background', BackgroundPainter)
+        super(FrontBackPainterManager, self).__init__(glwidget)
+        
+        self._background_painter = FrontBackPainter(self, 'background', SwitchPainter)
+
+    ##############################################
+
+    @property
+    def background_painter(self):
+        return self._background_painter
 
     ##############################################
 
     def switch_face(self):
 
-        self._background_painter.switch_face()
-        # register FrontBackPainter ?
-        for painter in self._foreground_painters.values():
+        for painter in self._painters.values():
             if isinstance(painter, FrontBackPainter):
                 painter.switch_face()
         self.glwidget.update()
-        
+
 ####################################################################################################
 #
 # End

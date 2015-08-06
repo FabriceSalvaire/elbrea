@@ -27,9 +27,9 @@ class SwitchPainter(Painter):
 
     ##############################################
 
-    def __init__(self, painter_manager):
+    def __init__(self, *args, **kwargs):
 
-        super(SwitchPainter, self).__init__(painter_manager)
+        super(SwitchPainter, self).__init__(*args, **kwargs)
 
         self._painters = {}
         self._current_painter = None
@@ -46,12 +46,11 @@ class SwitchPainter(Painter):
 
     ##############################################
 
-    def add_painter(self, painter):
+    def add_painter(self, painter, name):
 
-        # painter = TexturePainter(self._painter_manager, name)
-        self._painters[painter.name] = painter
+        # name != painter.name
+        self._painters[name] = painter
         painter.disable()
-        # return painter
 
     ##############################################
 

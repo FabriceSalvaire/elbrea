@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 ####################################################################################################
@@ -24,7 +24,7 @@ class FrontBackSketcher(object):
     _logger = _module_logger.getChild('FrontBackSketcher')
 
     ##############################################
-    
+
     def __init__(self, image_format, painter):
 
         self.state = SketcherState()
@@ -53,7 +53,7 @@ class FrontBackSketcher(object):
     def on_tablet_event(self, tablet_event):
 
         return self.current_face.on_tablet_event(tablet_event)
-        
+
 ####################################################################################################
 #
 # End
