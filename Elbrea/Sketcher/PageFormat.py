@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 ####################################################################################################
@@ -13,7 +13,7 @@ from .Unit import mm2in
 
 class PageFormat(object):
 
-    ##############################################    
+    ##############################################
 
     def __init__(self, name, largest_length, smallest_length, portrait=True):
 
@@ -35,7 +35,7 @@ class PageFormat(object):
     @property
     def smallest_length(self):
         return self._smallest_length
-    
+
     @property
     def height(self):
         if self._portrait:
@@ -67,7 +67,7 @@ class PageFormat(object):
 
     def width_px(self, dpi):
         return mm2in(self.width)*dpi
-    
+
 ####################################################################################################
 
 def page_format_database(name, portrait=True):
@@ -78,7 +78,7 @@ def page_format_database(name, portrait=True):
         raise ValueError('Unknown page format {}'.format(name))
 
 ####################################################################################################
-# 
+#
 # End
-# 
+#
 ####################################################################################################

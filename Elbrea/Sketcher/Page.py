@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 ####################################################################################################
@@ -28,7 +28,7 @@ class Pages(object):
 
     # We don't store a page number in page instance, since a page remaniment could require to update
     # a lot of page numbers.
-    
+
     ##############################################
 
     def __init__(self, page_format=a4_portrait):
@@ -42,7 +42,7 @@ class Pages(object):
     @property
     def page_format(self):
         return self._page_format
-    
+
     @property
     def number_of_pages(self):
         return len(self._pages)
@@ -50,13 +50,13 @@ class Pages(object):
     @property
     def last_page_index(self):
         return len(self._pages) -1
-    
+
     ##############################################
 
     def __len__(self):
 
         return len(self._pages)
-    
+
     ##############################################
 
     def __iter__(self):
@@ -68,7 +68,7 @@ class Pages(object):
     def __getitem__(self, slice_):
 
         return self._pages[slice_]
-    
+
     ##############################################
 
     def add_page(self, page=None):
@@ -99,7 +99,7 @@ class Pages(object):
         page = self._pages[from_]
         del self._pages[from_]
         self._pages.insert(to, page)
-        
+
 ####################################################################################################
 
 class Page(GraphicScene):

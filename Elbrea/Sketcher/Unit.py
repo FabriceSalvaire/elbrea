@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # @Project@ - @ProjectDescription@.
 # Copyright (C) 2015 Fabrice Salvaire
-# 
+#
 ####################################################################################################
 
 """This module provides functions to convert units used in the TeX world:

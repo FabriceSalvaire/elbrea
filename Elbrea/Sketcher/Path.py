@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 ####################################################################################################
@@ -26,13 +26,13 @@ _module_logger = logging.getLogger(__name__)
 def segment_intersection(point0, vector10, point2, point3):
 
     """ Return the intersection between two segments. """
-    
+
     # p + t*r = q + u*s    x s
     #   t * (r x s) = (q - p) x s
     #   t = (q − p) × s / (r × s)
     # p + t*r = q + u*s    x r
     #   u = (q − p) × r / (r × s)
-    
+
     vector32 = point3 - point2
     denominator = np.cross(vector10, vector32)
     if denominator == 0: # parallel
@@ -54,7 +54,7 @@ def segment_intersection(point0, vector10, point2, point3):
 class PathGraphicItem(GraphicItem):
 
     __path_id__ = 0
-    
+
     ##############################################
 
     def __init__(self, colour, pencil_size):
@@ -67,9 +67,9 @@ class PathGraphicItem(GraphicItem):
 
     def __repr__(self):
         return "Path {}".format(self._id)
-    
+
     ##############################################
-    
+
     @property
     def colour(self):
         return self._colour
@@ -77,7 +77,7 @@ class PathGraphicItem(GraphicItem):
     @colour.setter
     def colour(self, colour):
         self._colour = colour
-    
+
     @property
     def pencil_size(self):
         return self._pencil_size
@@ -85,13 +85,13 @@ class PathGraphicItem(GraphicItem):
     @pencil_size.setter
     def pencil_size(self, pencil_size):
         self._pencil_size = pencil_size
-    
+
 ####################################################################################################
 
 class Path(PathGraphicItem):
 
     _logger = _module_logger.getChild('Path')
-    
+
     ##############################################
 
     def __init__(self, colour, pencil_size, points):
@@ -106,7 +106,7 @@ class Path(PathGraphicItem):
         self._number_of_points = self._points.shape[0]
 
     ##############################################
-        
+
     def subpath(self, lower=0, upper=None):
 
         if upper is None:
@@ -114,13 +114,13 @@ class Path(PathGraphicItem):
         else:
             stop = upper + 1
         points = self._points[lower:stop]
-            
+        
         if points.shape[1] > 1:
             return self.__class__(self._colour, self._pencil_size, points)
         else:
             # raise
             return None
-        
+
     ##############################################
 
     @property
@@ -130,11 +130,11 @@ class Path(PathGraphicItem):
     @property
     def number_of_points(self):
         return self._number_of_points
-    
+
     @property
     def indexes(self):
         return np.arange(self._number_of_points)
-    
+
     @property
     def x(self):
         return self._points[:,0]
@@ -142,7 +142,7 @@ class Path(PathGraphicItem):
     @property
     def y(self):
         return self._points[:,1]
-    
+
     @property
     def p0(self):
         return self._points[0]
@@ -159,7 +159,7 @@ class Path(PathGraphicItem):
     def p10_norm(self):
         p10 = self.p10
         return np.sqrt(p10[0]**2 + p10[1]**2) # srqt(x.x) # np.sum(p10**2, axis=1)
-    
+
     @property
     def u10(self):
         p10 = self.p10
@@ -169,7 +169,7 @@ class Path(PathGraphicItem):
     @property
     def barycenter(self):
         return np.mean(self._points, axis=0)
-    
+
     ##############################################
 
     def _compute_interval(self):
@@ -211,7 +211,7 @@ class Path(PathGraphicItem):
     def transform(self, matrix):
 
         # Fixme: Faster implementation?
-        
+
         # pi_0 = m_00 * pi_0 + m_01 * pi_1 + m_02
         # pi_1 = m_10 * pi_0 + m_11 * pi_1 + m_12
         x = self.x
@@ -222,7 +222,7 @@ class Path(PathGraphicItem):
         y *= matrix[1, 0]
         y += matrix[1, 1] * y
         y += matrix[2, 2]
-        
+
     ##############################################
 
     def pair_iterator(self):
@@ -246,13 +246,13 @@ class Path(PathGraphicItem):
                         # print(i, j, intersection)
                         intersections.append((i, j, intersection))
         return intersections
-   
+
     ##############################################
 
     def _farthest_point(self, slice_=None, tolerance=1):
 
         """ Return the farthest point to the chord P0 - P1. """
-        
+
         # distance to chord
         # A x B = sin * |A| * |B|
         # A x u = sin * |A|
@@ -268,13 +268,13 @@ class Path(PathGraphicItem):
             return i_max
         else:
             return None
-    
+
     ##############################################
 
     def simplify(self, tolerance=1):
 
         # Fixme: check interval
-        
+
         queue = [None]
         farthest_points = [0] # First point index
         while queue:
@@ -327,11 +327,11 @@ class Path(PathGraphicItem):
     def backward_smooth_window(self, radius=2):
 
         # limite the rate of points: average last N points
-        
+
         window_size = radius + 1
         if window_size >= self._number_of_points:
             raise ValueError()
-
+        
         if radius > 0:
             points = np.array(self._points, dtype=np.float)
             view = points[radius:]
@@ -349,12 +349,12 @@ class Path(PathGraphicItem):
     def nearest_point(self, point):
 
         """ Return the nearest point and the distance to the given point. """
-        
+
         p0 = self._points[:-1]
         p1 = self._points[1:]
         p10 = p1 - p0
         u10 = p10 / np.sqrt(np.sum(p10**2, axis=0))
-
+        
         delta = point - p0
         # projection = np.dot(delta, u10)
         projection = delta[:,0]*u10[:,0] + delta[:,1]*u10[:,1]
@@ -369,7 +369,7 @@ class Path(PathGraphicItem):
             return indexes[i_min], distance[i_min]
         else:
             return None, None
-        
+
         # distance = np.sum((self._points - point)**2, axis=1)
         # i_min = np.argmin(distance)
         # return i_min, distance[i_min]
@@ -379,7 +379,7 @@ class Path(PathGraphicItem):
     def distance(self, point):
 
         return self.nearest_point(point)[0]
-        
+
     ##############################################
 
     def erase(self, point, radius):
@@ -388,7 +388,7 @@ class Path(PathGraphicItem):
         #  - compute distances to point and get points within the eraser area |Pi - P| <= r
         #  - erase segments corresponding to these points
         #  - cut the previous and next segment
-        
+
         point_index, distance = self.nearest_point(point)
         # print(distance)
         # Fixme: check distance, path removed (only a point)
@@ -410,7 +410,7 @@ class Path(PathGraphicItem):
 class Segment(Path):
 
     # _logger = _module_logger.getChild('Segment')
-    
+
     ##############################################
 
     def __init__(self, colour, pencil_size, first_point=None, second_point=None, points=None):
@@ -423,7 +423,7 @@ class Segment(Path):
                 points_[1] = second_point
         else:
             points_[...] = points
-            
+        
         super(Segment, self).__init__(colour, pencil_size, points_)
 
     ##############################################
@@ -452,7 +452,7 @@ class Segment(Path):
 
     def point_at_abscissa(self, t):
         return (1 - t)*self.p0 + t * self.p1
-        
+
     ##############################################
 
     def erase(self, point, radius):
@@ -481,7 +481,7 @@ class Segment(Path):
                 return (Segment(self._colour, self._pencil_size,
                                 self.p0, self.point_at_abscissa(lower_projection)),)
         return self
-        
+
 ####################################################################################################
 
 class DynamicPath(PathGraphicItem):
@@ -497,14 +497,14 @@ class DynamicPath(PathGraphicItem):
         self._number_of_points = 0
         self._capacity = 0
         self._index = 0
-   
-    ##############################################    
+
+    ##############################################
 
     def _make_array(self, size):
 
         return np.zeros((size, 2), dtype=np.float)
-        
-    ##############################################    
+
+    ##############################################
 
     def _extend(self):
 
@@ -512,7 +512,7 @@ class DynamicPath(PathGraphicItem):
         self._capacity += self._array_size
         self._index = 0
 
-    ##############################################    
+    ##############################################
 
     def flatten(self):
 
@@ -526,7 +526,7 @@ class DynamicPath(PathGraphicItem):
         last_array = self._arrays[-1]
         points[lower_index:self._number_of_points] = last_array[:self._number_of_points-lower_index]
         return points
-        
+
     ##############################################
 
     def add_point(self, point):
@@ -550,9 +550,9 @@ class DynamicPath(PathGraphicItem):
 
         # Fixme: will recompute interval
         return Path(self._colour, self._pencil_size, self.flatten())
-    
+
 ####################################################################################################
-# 
+#
 # End
-# 
+#
 ####################################################################################################

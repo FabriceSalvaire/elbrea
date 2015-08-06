@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 ####################################################################################################
@@ -33,22 +33,22 @@ class SketcherMainWindow(MainWindowBase):
     def __init__(self, parent=None):
 
         super(SketcherMainWindow, self).__init__(title='Elbrea Sketcher', parent=parent)
-
+        
         self._init_ui()
         self._create_actions()
         self._create_toolbars()
-
+        
         from .StatusBar import StatusBar
         self.status_bar = StatusBar(self)
 
     ##############################################
-    
+
     def _create_actions(self):
 
         pass
-    
+
     ##############################################
-    
+
     def _create_toolbars(self):
 
         from .ToolBar import MainToolBar, SketcherToolBar, PageToolBar
@@ -75,10 +75,10 @@ class SketcherMainWindow(MainWindowBase):
         self.glwidget.setFocusPolicy(QtCore.Qt.ClickFocus)
         # self.glwidget.setMinimumSize(100, 100)
         self._central_widget = self.glwidget
-
+        
         # self._horizontal_layout.addWidget(self.glwidget)
         self.setCentralWidget(self._central_widget)
-
+        
         self._translate_ui()
 
     ##############################################
@@ -86,7 +86,7 @@ class SketcherMainWindow(MainWindowBase):
     def _translate_ui(self):
 
         pass
-    
+
 ####################################################################################################
 #
 # End
