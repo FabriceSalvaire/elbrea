@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 ####################################################################################################
@@ -54,6 +54,7 @@ if shader_manager.has_visual():
         #
         'fragment-shader/simple_fragment_shader',
         'fragment-shader/antialiased_segment_fragment_shader',
+        'fragment-shader/antialiased_path_fragment_shader',
         'fragment-shader/antialiased_object_fragment_shader',
         #
         'geometry-shader/fixed_colour_vertex_shader_in',
@@ -82,27 +83,27 @@ if shader_manager.has_visual():
                         'simple_fragment_shader'),
          'program_interface':texture_shader_program_interface,
          },
-    
+        
         {'program_name':'texture_shader_program',
          'shader_list':('texture_vertex_shader',
                         'texture_fragment_shader'),
          'program_interface':texture_shader_program_interface,
          },
-
+        
         {'program_name':'roi_shader_program',
          'shader_list':('fixed_colour_vertex_shader_in',
                         'roi_geometry_shader',
                         'simple_fragment_shader'),
          'program_interface':position_shader_program_interface,
          },
-
+        
         {'program_name':'object_shader_program',
          'shader_list':('fixed_colour_vertex_shader_in',
                         'object_geometry_shader',
                         'antialiased_object_fragment_shader'),
          'program_interface':position_shader_program_interface,
          },
-            
+        
         {'program_name':'texture_label_shader_program',
          'shader_list':('texture_vertex_shader',
                         'texture_label_fragment_shader'),
@@ -110,47 +111,47 @@ if shader_manager.has_visual():
          'shader_program_class':GlRandomTextureShaderProgram,
          'shader_program_args':(random_texture,),
          },
-
+        
         {'program_name':'text_shader_program',
          'shader_list':('text_vertex_shader',
                         'text_geometry_shader',
                         'text_fragment_shader'),
          'program_interface':text_shader_program_interface,
          },
-    
+        
         # {'program_name':'rectangle_shader_program',
         #  'shader_list':('fixed_colour_vertex_shader_in',
         #                 'rectangle_geometry_shader',
         #                 'simple_fragment_shader'),
         #  'program_interface':position_shader_program_interface,
         #  },
-    
+        
         # {'program_name':'centred_rectangle_shader_program',
         #  'shader_list':('fixed_colour_vertex_shader_in',
         #                 'centred_rectangle_geometry_shader',
         #                 'simple_fragment_shader'),
         #  'program_interface':position_shader_program_interface,
         #  },
-    
+        
         {'program_name':'segment_shader_program',
          'shader_list':('fixed_colour_vertex_shader_in',
                         'segment_geometry_shader',
                         'antialiased_segment_fragment_shader'),
          'program_interface':position_shader_program_interface,
          },
-
+        
         {'program_name':'path_shader_program',
          'shader_list':('fixed_colour_vertex_shader_in',
                         'path_geometry_shader',
-                        'antialiased_segment_fragment_shader'),
+                        'antialiased_path_fragment_shader'),
          'program_interface':position_shader_program_interface,
          },
-            
+        
         ):
         shader_manager.link_program(**args)
 
 ####################################################################################################
-# 
+#
 # End
-# 
+#
 ####################################################################################################
