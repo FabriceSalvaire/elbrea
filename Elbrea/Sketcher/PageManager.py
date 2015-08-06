@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 ####################################################################################################
@@ -33,19 +33,19 @@ class PageData(object):
 
         # self.paths = [] # vao id
         # self.segments = [] # vao id
-        
+
 ####################################################################################################
 
 class PageManager(object):
 
     _logger = _module_logger.getChild('PageManager')
-    
+
     ##############################################
 
     def __init__(self, application, pages=None):
 
         self._application = application
-           
+        
         self._page_data = {}
         
         if pages is None:
@@ -56,23 +56,23 @@ class PageManager(object):
             self._pages = pages
             load_page_data = True
         self._application.main_window.page_tool_bar.update_number_of_pages(self._pages.number_of_pages)
-            
+        
         self._current_page_number = None
         self._current_page = None
         self._current_page_data = None
-
+        
         self._init_painters()
         if load_page_data:
             self._load_page_data()
         self.select_page(0)
-        
+
     ##############################################
 
     def _init_painters(self):
-    
+
         # Load registered painters
         from Elbrea.GraphicEngine import ForegroundPainter 
-
+        
         main_window = self._application.main_window
         glwidget = main_window.glwidget
         glwidget.page_manager = self
@@ -99,7 +99,7 @@ class PageManager(object):
         # steered by page size and type
         from .PagePainter import PagePainter
         page_painter = PagePainter(self.painter_manager, step=self.mm2px(10))
-
+        
         from Elbrea.GraphicEngine.TexturePainter import TexturePainter
         texture_painter = TexturePainter(self.painter_manager)
         # from Elbrea.Image import ImageLoader
@@ -107,7 +107,7 @@ class PageManager(object):
         # image_format = image.image_format
         # from PyOpenGLng.Math.Geometry import Point, Offset
         # texture_painter.upload(Point(10, 10), Offset(image_format.width, image_format.height), image)
-
+        
         object_painter = self.painter_manager['object']
         object_painter.update(IntervalInt2D((100, 200), (300, 400)))
         object_painter.enable()
@@ -115,13 +115,13 @@ class PageManager(object):
         from Elbrea.GraphicEngine.PathPainter import SegmentPainter, PathPainter
         self._segment_painter = SegmentPainter(self.painter_manager, self)
         self._path_painter = PathPainter(self.painter_manager, self)
-
+        
         from .Sketcher import SketcherState, SegmentSketcher, PathSketcher, Eraser
         self.sketcher_state = SketcherState()
         self.segment_sketcher = SegmentSketcher(self.sketcher_state, self, self._segment_painter)
         self.path_sketcher = PathSketcher(self.sketcher_state, self, self._path_painter)
         self.eraser = Eraser(self.sketcher_state, self)
-        
+
     ##############################################
 
     def _load_page_data(self):
@@ -145,7 +145,7 @@ class PageManager(object):
         if page not in self._page_data:
             self._page_data[page] = PageData()
         self._current_page_data = self._page_data[page]
-                
+
     ##############################################
 
     @property
@@ -159,7 +159,7 @@ class PageManager(object):
     @property
     def pages(self):
         return self._pages
-    
+
     @property
     def page(self):
         return self._current_page
@@ -171,11 +171,11 @@ class PageManager(object):
     @property
     def segment_painter(self):
         return self._segment_painter
-    
+
     @property
     def path_painter(self):
         return self._path_painter
-    
+
     ##############################################
 
     def add_page(self):
@@ -202,7 +202,7 @@ class PageManager(object):
     def px2mm(self, x):
 
         return x * self._px2mm
-    
+
     ##############################################
 
     def painter_for_item(self, item):
@@ -215,7 +215,7 @@ class PageManager(object):
             return self._path_painter
         else:
             return None
-        
+
     ##############################################
 
     def select_around(self, position, radius=10):
@@ -233,7 +233,50 @@ class PageManager(object):
             cropper.interval = item.interval
             cropper.enable()
             self._application.refresh()
+
+####################################################################################################
+
+class GraphicItemEditor(object):
+
+    _logger = _module_logger.getChild('GraphicItemEditor')
+
+    ##############################################
+
+    def __init__(self, item):
+
+        self._item = item
+
+    ##############################################
+
+    def mousePressEvent(self, event):
+
+        self._logger.info("")
         
+        button = event.button()
+        if button & QtCore.Qt.LeftButton:
+            pass
+
+    ##############################################
+
+    def mouseReleaseEvent(self, event):
+
+        self._logger.info("")
+
+    ##############################################
+
+    def mouseMoveEvent(self, event):
+
+        # self._logger.info("")
+
+        if not (event.buttons() & QtCore.Qt.LeftButton):
+            return
+
+    ##############################################
+
+    def keyPressEvent(self, event):
+
+        self._logger.debug('Key press event ' + str(event.key()))
+
 ####################################################################################################
 #
 # End

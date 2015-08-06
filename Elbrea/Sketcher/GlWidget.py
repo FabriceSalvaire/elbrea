@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 ####################################################################################################
@@ -44,7 +44,7 @@ class ZoomManager(ZoomManagerAbc):
     _logger = _module_logger.getChild('ZoomManager')
 
     ##############################################
-    
+
     def __init__(self):
 
         super(ZoomManager, self).__init__()
@@ -56,9 +56,9 @@ class ZoomManager(ZoomManagerAbc):
     def update_fit_zoom_factor(self, zoom_factor):
 
         self._fit_zoom_factor = zoom_factor * .9
-        
+
     ##############################################
-    
+
     def check_zoom(self, zoom_factor):
 
         self._logger.info(str(zoom_factor))
@@ -71,41 +71,52 @@ class ZoomManager(ZoomManagerAbc):
 
 ####################################################################################################
 
+class MouseEvent(object):
+
+    ##############################################
+
+    def __init__(self, window_position, scene_position):
+        
+        self._window_position = window_position
+        self._scene_position = scene_position
+
+####################################################################################################
+
 class GlWidget(GlWidgetBase):
 
     _logger = _module_logger.getChild('GlWidget')
- 
+
     ##############################################
-    
+
     def __init__(self, parent):
 
         self._logger.debug('Initialise GlWidget')
-
+        
         super(GlWidget, self).__init__(parent)
-
+        
         self._application = QtWidgets.QApplication.instance()
-
+        
         # Setup OpenGL 
         self.clear_colour = (1, 1, 1, 0)
         # self.clear_bit = GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT
         
         # Setup navigation
         self.zoom_step = 1.25
-
+        
         self._painter_manager = None
-
+        
         self._contextual_menu = QtWidgets.QMenu()
-
+        
         self._page_manager = None
         self._page_interval = None
-
+        
         self._previous_position = None
         self._previous_position_screen = None
         
         self._current_tool = None
         self._sketcher = None
         self._pointer_type = None
-        
+
     ##############################################
 
     def _set_cursor(self):
@@ -140,7 +151,7 @@ class GlWidget(GlWidgetBase):
     @page_manager.setter
     def page_manager(self, page_manager):
         self._page_manager = page_manager
-        
+
     @property
     def page_interval(self):
         return self._page_interval
@@ -149,7 +160,7 @@ class GlWidget(GlWidgetBase):
     def page_interval(self, interval):
         self._page_interval = interval
         self._update_zoom_manager() # Fixme: check
-        
+
     ##############################################
 
     def init_tools(self):
@@ -162,19 +173,19 @@ class GlWidget(GlWidgetBase):
     ##############################################
 
     def register_menu(self, menu):
-        
+
         """ Register a sub-menu in the contextual menu """
-        
+
         self._contextual_menu.addMenu(menu)
 
     ##############################################
 
     def register_action(self, action):
-        
+
         """ Register an action in the contextual menu """
 
         self._contextual_menu.addAction(action)
-        
+
     ##############################################
 
     def init_glortho2d(self):
@@ -182,9 +193,9 @@ class GlWidget(GlWidgetBase):
         # Set max_area so as to correspond to max_binning zoom centered at the origin
         area_size = 10**5
         max_area = IntervalInt2D([-area_size, area_size], [-area_size, area_size])
-
+        
         super(GlWidget, self).init_glortho2d(max_area, zoom_manager=ZoomManager())
-
+        
         self.scene = GraphicScene(self.glortho2d)
 
     ##############################################
@@ -193,15 +204,15 @@ class GlWidget(GlWidgetBase):
 
         self._logger.debug('Initialise GL')
         super(GlWidget, self).initializeGL()
-
+        
         # GL.glEnable(GL.GL_DEPTH_TEST) # Fixme: cf. clear_bit
-
+        
         GL.glEnable(GL.GL_BLEND)
         # Blending: O = Sf*S + Df*D
         # alpha: 0: complete transparency, 1: complete opacity
         # Set (Sf, Df) for transparency: O = Sa*S + (1-Sa)*D 
         GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-
+        
         self._init_shader()
         self._ready = False
 
@@ -216,24 +227,24 @@ class GlWidget(GlWidgetBase):
             glortho2d = self.glortho2d
             axis, zoom_factor = glortho2d._compute_zoom_to_fit_interval(self._page_interval)
             glortho2d.zoom_manager.update_fit_zoom_factor(zoom_factor)
-    
+
     ##############################################
 
     def resizeGL(self, width, height):
 
         super(GlWidget, self).resizeGL(width, height)
         self._update_zoom_manager()
-            
+
     ##############################################
 
     def _init_shader(self):
 
         self._logger.debug('Initialise Shader')
-
+        
         from Elbrea.GraphicEngine import ShaderProgrames as ShaderProgrames
         self.shader_manager = ShaderProgrames.shader_manager
         self.position_shader_interface = ShaderProgrames.position_shader_program_interface
-
+        
         # Fixme: share interface
         self._viewport_uniform_buffer = GlUniformBuffer()
         viewport_uniform_block = self.position_shader_interface.uniform_blocks.viewport
@@ -253,7 +264,7 @@ class GlWidget(GlWidgetBase):
         if self._ready:
             with GL.error_checker():
                 self._painter_manager.paint()
-                
+
     ##############################################
 
     def display_all(self):
@@ -272,7 +283,7 @@ class GlWidget(GlWidgetBase):
     ##############################################
 
     def set_current_tool(self):
-        
+
         # Fixme: design, tool_bar.xxx ?
         # implement receiver
         tool_bar = self._application.main_window.sketcher_tool_bar
@@ -304,7 +315,7 @@ class GlWidget(GlWidgetBase):
                 self._current_tool = tool_enum.text
             elif current_tool is tool_bar.image_tool_action:
                 self._current_tool = tool_enum.image
-                
+
     ##############################################
 
     def event_position(self, event):
@@ -314,7 +325,7 @@ class GlWidget(GlWidgetBase):
 
         # self._logger.info("{} {}".format(event.x(), event.y()))
         return Vector(event.x(), event.y()) # dtype=np.int for subtraction
-        
+
     ##############################################
 
     def _set_previous_position(self, position, position_screen):
@@ -329,12 +340,22 @@ class GlWidget(GlWidgetBase):
         x, y = self._page_manager.px2mm(position)
         self._application.main_window.status_bar.update_coordinate_status(x, y)
         # self._set_previous_position(position)
-        
+
+    ##############################################
+
+    def _to_mouse_event(self, event):
+
+        # event.x()
+        # event.y()
+        # event.buttons()
+        # event.modifiers()
+
+        scene_position = self.window_to_gl_coordinate(event, round_to_integer=False)
+        return MouseEvent(scene_position)
+
     ##############################################
 
     def mousePressEvent(self, event):
-
-        self._logger.info("")
 
         button = event.button()
         if button & QtCore.Qt.LeftButton:
@@ -359,7 +380,7 @@ class GlWidget(GlWidgetBase):
             self._show_coordinate(position)
 
     ##############################################
-        
+
     def mouseReleaseEvent(self, event):
 
         self._logger.info("")
@@ -386,7 +407,7 @@ class GlWidget(GlWidgetBase):
 
         if not (event.buttons() & QtCore.Qt.LeftButton):
             return
-
+        
         position = self.window_to_gl_coordinate(event, round_to_integer=False)
         if self._sketcher is not None:
             tablet_event = TabletEvent(TabletEventType.move, self._pointer_type, position)
@@ -414,13 +435,13 @@ class GlWidget(GlWidgetBase):
     def wheelEvent(self, event):
 
         return self.wheel_zoom(event)
-                
+
     ##############################################
 
     def tabletEvent(self, event):
 
         self._logger.info("")
-
+        
         event.accept()
         # event.ignore()
         
@@ -453,7 +474,7 @@ class GlWidget(GlWidgetBase):
                     self.update()
         except Exception as exception:
             self._logger.error(str(exception))
-            
+
 ####################################################################################################
 #
 # End
