@@ -14,7 +14,7 @@
 /* *********************************************************************************************** */
 
 uniform float line_width = 5;
-uniform float antialias_diameter = 1;
+uniform float antialias_diameter = 1; // Fixme: radius ?
 
 uniform float z_value = 0;
 
@@ -40,8 +40,8 @@ in VertexAttributesIn
 out VertexAttributes
 {
   vec2 uv;
-  float line_width;
   float line_length;
+  float line_width;
   vec4 colour;
   float cap;
 } vertex;
@@ -83,7 +83,7 @@ void main()
   vertex.line_width = max(line_width, 1);
 
   // This is the actual half width of the line
-  float w = ceil(1.25*antialias_diameter + line_width) / 2;
+  float w = ceil(line_width + 1.25*antialias_diameter) / 2;
 
   vec2 dir1 = direction(pos1, pos2);
   vec2 normal1 = normal(dir1);

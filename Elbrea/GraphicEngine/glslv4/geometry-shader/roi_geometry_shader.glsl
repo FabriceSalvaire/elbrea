@@ -79,19 +79,19 @@ void main()
     }
 
   // Enlarge box for margin
-  float scaled_margin = margin; // Fixme: recompute grip
+  vec2 scaled_margin = vec2(margin); // Fixme: recompute grip
   if (unscale_margin)
     scaled_margin *= viewport_scale;
-  vec2 pos_bl = vertexIn[0].position - vec2(scaled_margin);
-  vec2 pos_tr = vertexIn[1].position + vec2(scaled_margin);
+  vec2 pos_bl = vertexIn[0].position - scaled_margin;
+  vec2 pos_tr = vertexIn[1].position + scaled_margin;
 
-  float scaled_grip_margin = 0;
+  vec2 scaled_grip_margin = vec2(0);
   if (paint_grips)
     {
       // Enlarge box for grip margin
       scaled_grip_margin = grip_margin * viewport_scale; // Fixme: recompute grip
-      pos_bl -= vec2(scaled_grip_margin);
-      pos_tr += vec2(scaled_grip_margin);
+      pos_bl -= scaled_grip_margin;
+      pos_tr += scaled_grip_margin;
     }
 
   vec2 pos_tl = vec2(pos_bl.x, pos_tr.y);
@@ -110,7 +110,7 @@ void main()
     {
       vec2 offset;
 
-      offset = vec2(scaled_grip_margin, 0);
+      offset = vec2(scaled_grip_margin.x, 0);
       // tl - bl
       emit_vertex(pos_bl + offset);
       emit_vertex(pos_tl + offset);
@@ -120,7 +120,7 @@ void main()
       emit_vertex(pos_br - offset);
       EndPrimitive();
 
-      offset = vec2(0, scaled_grip_margin);
+      offset = vec2(0, scaled_grip_margin.y);
       // tl - tr
       emit_vertex(pos_tl - offset);
       emit_vertex(pos_tr - offset);
