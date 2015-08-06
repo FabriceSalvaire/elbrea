@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 # Fixme: Purpose ?
@@ -38,7 +38,7 @@ class RoiPainter(RegisteredPainter):
     _logger = _module_logger.getChild('RoiPainter')
 
     ##############################################
-    
+
     def __init__(self, painter_manager):
 
         super(RoiPainter, self).__init__(painter_manager)
@@ -138,25 +138,25 @@ class TextPainter(RegisteredPainter):
     _logger = _module_logger.getChild('TextPainter')
 
     ##############################################
-    
+
     def __init__(self, painter_manager):
 
         super(TextPainter, self).__init__(painter_manager)
-
+        
         self._glwidget = self._painter_manager.glwidget
         self._text_shader_program = self._glwidget.shader_manager.text_shader_program
         # self.reset()
-
+        
         # font_path = os.path.join(ConfigInstall.Path.share_directory, 'fonts', 'Vera.ttf')
         font_path = os.path.join(os.path.dirname(__file__), 'Vera.ttf')
         self._font = TextureFont(font_path)
         self._font_size = self._font[25]
         self._font_size.load_all_glyphs()
-
+        
         self._font_atlas_texture = ImageTexture(self._font.atlas.data)
         
         self._text_vertex_array = None
-        
+
     ##############################################
 
     def set_text(self, interval):
@@ -195,31 +195,31 @@ class SketcherPainter(Painter, ObjectWithTimeStamp):
     """ Paint a dynamic image. """
 
     # Fixme: similar to texture painter
-    
+
     __painter_name__ = 'sketcher inner-painter'
-    
+
     _logger = _module_logger.getChild('SketcherPainter')
 
     ##############################################
-    
+
     def __init__(self, painter_manager):
 
         ObjectWithTimeStamp.__init__(self)
         Painter.__init__(self, painter_manager)
-
+        
         self._glwidget = self._painter_manager.glwidget
         self._sketcher = None
         self._shader_program = self._glwidget.shader_manager.texture_shader_program
         # self._shader_program = None
         self._texture_vertex_array = None
         self._uploaded = False
-        
+
     ##############################################
 
     @property
     def shader_program(self):
         return self._shader_program
-    
+
     @shader_program.setter
     def shader_program(self, shader_program):
         self._shader_program = shader_program
@@ -259,14 +259,14 @@ class SketcherPainter(Painter, ObjectWithTimeStamp):
         if (self._status
             and self._texture_vertex_array is not None
             and self._shader_program is not None):
-
+            
             # self._logger.info("uploaded {}".format(self._uploaded))
-
+            
             # if self.source > self: # timestamp
             print(self._uploaded, self._sketcher.modified_time, self._modified_time)
             if not self._uploaded or self._sketcher._modified_time > self._modified_time:
                 self.upload_data()
-
+            
             GL.glEnable(GL.GL_BLEND)
             # Blending: O = Sf*S + Df*D
             # alpha: 0: complete transparency, 1: complete opacity
@@ -274,12 +274,12 @@ class SketcherPainter(Painter, ObjectWithTimeStamp):
             GL.glBlendEquation(GL.GL_FUNC_ADD)
             GL.glBlendFunc(1, 1)
             # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-                
+            
             shader_program = self._shader_program
             shader_program.bind()
             self._texture_vertex_array.draw()
             shader_program.unbind()
-
+            
             GL.glDisable(GL.GL_BLEND)
 
 ####################################################################################################
@@ -291,7 +291,7 @@ class ObjectPainter(RegisteredPainter):
     _logger = _module_logger.getChild('ObjectPainter')
 
     ##############################################
-    
+
     def __init__(self, painter_manager):
 
         super(ObjectPainter, self).__init__(painter_manager)
@@ -329,7 +329,7 @@ class ObjectPainter(RegisteredPainter):
             self._shader_program.bind()
             self._shader_program.uniforms.colour = (0, 0, 0)
             self._vertex_array.draw()
-            
+
 ####################################################################################################
 #
 # End

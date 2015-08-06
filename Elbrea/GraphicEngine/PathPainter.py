@@ -51,7 +51,7 @@ class PrimitivePainter(Painter):
     def add_item(self, path):
 
         # Fixme: upload_path ?
-        
+
         self._logger.debug('Add path {}'.format(path.id))
         # Fixme: move to glwidget
         self._glwidget.makeCurrent()
@@ -95,7 +95,7 @@ class PrimitivePainter(Painter):
             self._paint_vao(vao)
         if self._current_path is not None:
             self._paint_vao(self._current_path)
-        
+
         # GL.glDisable(GL.GL_BLEND)
 
     ##############################################
@@ -115,7 +115,7 @@ class SegmentPainter(PrimitivePainter):
     __primitive_class__ = LineVertexArray
 
     ##############################################
-    
+
     def __init__(self, painter_manager, page_provider, **kwargs):
 
         super(SegmentPainter, self).__init__(painter_manager, page_provider, **kwargs)
@@ -140,10 +140,10 @@ class SegmentPainter(PrimitivePainter):
     def update_current_item(self, path):
 
         self._logger.debug('Update current path')
-
+        
         # Fixme: move to glwidget
         self._glwidget.makeCurrent()
-
+        
         current_path = self._current_path
         if not current_path.number_of_points:
             self._current_path.colour = path.colour
