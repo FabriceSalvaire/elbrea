@@ -1,15 +1,13 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 ####################################################################################################
 
 import logging
-
-import numpy as np
 
 ####################################################################################################
 
@@ -38,18 +36,18 @@ class ImageFilterOutput(ObjectWithTimeStamp):
     def __init__(self, source, name):
 
         ObjectWithTimeStamp.__init__(self)
-
+        
         # When was this data last generated?
         # This time stamp is an integer number and it is intended to synchronize the activities of
         # the pipeline. It doesn't relates to the clock time of acquiring or processing the data.
         self._update_time = TimeStamp()
-
+        
         # The maximum modification time of all upstream filters and outputs.
         # This does not include the modification time of this output.
         self._pipeline_time = 0
-
+        
         self.connect_source(source, name)
-
+        
         self.image = None
         # self._image_format = None
 
@@ -152,12 +150,12 @@ class ImageFilterOutput(ObjectWithTimeStamp):
         # Methods to update the pipeline. Called internally by the pipeline mechanism. 
 
         self._logger.info(self.name)
-
+        
         # If we need to update due to pipeline modification time, or the fact that our data was
         # released, then propagate the update region to the source if there is one.
         if int(self._update_time) < self._pipeline_time:
             self._source.propagate_requested_region(self)
-
+        
         # Check that the requested region lies within the largest possible region
         # self.verify_requested_region()
 
@@ -218,7 +216,7 @@ class ImageFilter(ObjectWithTimeStamp):
     def _new_filter_id():
 
         ImageFilter._last_filter_id += 1
-
+        
         return ImageFilter._last_filter_id
 
     ##############################################
@@ -226,20 +224,20 @@ class ImageFilter(ObjectWithTimeStamp):
     def __init__(self):
 
         ObjectWithTimeStamp.__init__(self)
-
+        
         self._filter_id = self._new_filter_id()
-
+        
         # Time when generate_output_information was last called.
         self._output_information_time = TimeStamp()
-
+        
         # This flag indicates when the pipeline is executing.
         # It prevents infinite recursion when pipelines have loops.
         self._updating = False
-
+        
         self._inputs = dict()
         self._outputs = {name:ImageFilterOutput(self, name) for name in self.__output_names__}
-
-        self.modified() 
+        
+        self.modified()
 
     ##############################################
 
@@ -294,7 +292,7 @@ class ImageFilter(ObjectWithTimeStamp):
 
     def get_output(self, name):
         return self._outputs[name]
-        
+
     ##############################################
 
     def get_primary_input(self):
@@ -317,7 +315,7 @@ class ImageFilter(ObjectWithTimeStamp):
     def update_output_information(self):
 
         self._logger.info(self.name)
-
+        
         # Watch out for loops in the pipeline
         if self._updating:
             self._logger.info("{} is updating!".format(self.name))
@@ -326,7 +324,7 @@ class ImageFilter(ObjectWithTimeStamp):
             # recent than the modification time of our output.
             self.modified()
             return
-            
+        
         # Verify that the process object has been configured correctly, that all required inputs are
         # set, and needed parameters are set appropriately before we continue the pipeline, i.e. is
         # the filter in a state that it can be run.
@@ -334,25 +332,25 @@ class ImageFilter(ObjectWithTimeStamp):
         for input_name in self.__input_names__:
             if input_name not in self._inputs:
                 raise NameError("Input {} is required".format(input_name))
-
+        
         # We now wish to set the pipeline modification time of each output to the largest of this
         # filter's modification time, all input's pipeline modification time, and all input's
         # modification time.  We begin with the modification time of this filter.
         modified_time = self.modified_time
-
+        
         # Loop through the inputs
         for input_ in self._inputs.values():
             # Propagate the update output information call
             self._updating = True
             input_.update_output_information()
             self._updating = False
-
+            
             # What is the pipeline modification time of this input? Compare this against our current
             # computation to find the largest one.  Pipeline modification time of the input does not
             # include the modification time of the data object itself. Factor these modification
             # times into the next pipeline modification time
             modified_time = max(modified_time, input_.modified_time, input_.pipeline_time)
-
+        
         # Call generate_output_information for subclass specific information.  Since
         # update_output_information propagates all the way up the pipeline, we need to be careful
         # here to call generate_output_information only if necessary. Otherwise, we may cause this
@@ -360,15 +358,15 @@ class ImageFilter(ObjectWithTimeStamp):
         if modified_time > int(self._output_information_time):
             for output in self._outputs.values():
                 output.pipeline_time = modified_time
-
+            
             # Verify that all the inputs are consistent with the requirements of the filter. For
             # example, subclasses might want to ensure all the inputs are in the same coordinate
             # frame.
             # self.verify_input_information()
-
+            
             # Finally, generate the output information.
             self.generate_output_information()
-
+            
             # Keep track of the last time GenerateOutputInformation() was called
             self._output_information_time.modified()
 
@@ -386,12 +384,12 @@ class ImageFilter(ObjectWithTimeStamp):
         # prior to changing the information.
         
         self._logger.info(self.name)
-
+        
         # if self._inputs:
         #     primary_input = self.get_primary_input()
         #     for output in self._outputs.values():
         #         output.copy_information(primary_input)
-
+        
         if self._inputs:
             for output in self._outputs.values():
                 image_format = self.generate_image_format(output)
@@ -410,30 +408,30 @@ class ImageFilter(ObjectWithTimeStamp):
         # Send the requested region information back up the pipeline (to the filters that precede this one).
 
         self._logger.info(self.name)
-
+        
         # check flag to avoid executing forever if there is a loop
         if self._updating:
             self._logger.info("{} is updating!".format(self.name))
             return
-
+        
         # Give the subclass a chance to indicate that it will provide more data then required for
         # the output. This can happen, for example, when a source can only produce the whole output.
         # Although this is being called for a specific output, the source may need to enlarge all
         # outputs.
         # self.enlarge_output_requested_region(output)
-
+        
         # Give the subclass a chance to define how to set the requested regions for each of its
         # outputs, given this output's requested region.  The default implementation is to make all
         # the output requested regions the same.  A subclass may need to override this method if
         # each output is a different resolution.
         # self.generate_output_requested_region(output)
-
+        
         # Give the subclass a chance to request a larger requested region on the inputs. This is
         # necessary when, for example, a filter requires more data at the "internal" boundaries to
         # produce the boundary values - such as an image filter that derives a new pixel value by
         # applying some operation to a neighborhood of surrounding original values.
         # self.generate_input_requested_region()
-
+        
         # Now that we know the input requested region, propagate this through all the inputs.
         self._updating = False
         for input_ in self._inputs.values():
@@ -445,15 +443,15 @@ class ImageFilter(ObjectWithTimeStamp):
     def update_output_data(self):
 
         self._logger.info(self.name)
-
+        
         # prevent chasing our tail
         if self._updating:
             self._logger.info("{} is updating!".format(self.name))
             return
-
+        
         # Prepare all the outputs. This may deallocate previous bulk data.
         # self.prepare_outputs()
-
+        
         # Propagate the update call - make sure everything we might rely on is up-to-date
         # Must call PropagateRequestedRegion before UpdateOutputData if multiple inputs since they
         # may lead back to the same data object.
@@ -464,15 +462,15 @@ class ImageFilter(ObjectWithTimeStamp):
             for input_ in self._inputs.values():
                 input_.propagate_requested_region()
                 input_.update_output_data()
-
+        
         # start
         self.generate_data()
         # stop
-
+        
         # Now we have to mark the data as up to date.
         for output in self._outputs.values():
             output.data_has_been_generated()
-
+        
         self._updating = False
 
     ##############################################

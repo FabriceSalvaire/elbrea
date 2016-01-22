@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 ####################################################################################################
@@ -38,7 +38,7 @@ def ball_structuring_element(horizontal_radius, vertical_radius):
     number_of_columns = 2*horizontal_radius +1
     kernel = np.ones((number_of_rows, number_of_columns))
     anchor = (horizontal_radius, vertical_radius)
-
+    
     return kernel, anchor
 
 ####################################################################################################
@@ -70,7 +70,7 @@ def circular_structuring_element(radius):
                 kernel[radius+i, radius-j] = 0
                 kernel[radius-i, radius-j] = 0
     anchor = (radius, radius)
-
+    
     return kernel, anchor
 
 ####################################################################################################
@@ -80,7 +80,7 @@ def diagonal_structuring_element(radius):
     size = 2*radius +1
     kernel = np.ones((size, size), dtype=np.uint8)
     anchor = (radius, radius)
-
+    
     return kernel, anchor
 
 ####################################################################################################
@@ -136,7 +136,7 @@ def alternate_sequential_filter(image_src, image_dst, radius_max, structuring_el
         image_src = image_dst
 
 ####################################################################################################
-# 
+#
 # End
-# 
+#
 ####################################################################################################

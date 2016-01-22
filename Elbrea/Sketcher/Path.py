@@ -97,7 +97,7 @@ class Path(PathGraphicItem):
     def __init__(self, colour, pencil_size, points):
 
         super(Path, self).__init__(colour, pencil_size)
-
+        
         if points.shape[1] <= 1:
             raise ValueError("Require at least two points")
         

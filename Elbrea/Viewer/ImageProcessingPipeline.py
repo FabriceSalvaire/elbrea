@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 ####################################################################################################
@@ -11,8 +11,6 @@ import logging
 from importlib import reload
 
 import numpy as np
-
-import cv2
 
 ####################################################################################################
 
@@ -57,10 +55,10 @@ class UserFilter(ImageFilter):
     def generate_data(self):
 
         self._logger.info(self.name)
-
+        
         input_ = self.get_primary_input()
         output = self.get_primary_output()
-
+        
         reload(UserFilterFunctions)
         UserFilterFunctions.user_filter(input_.image, output.image)
 
@@ -79,7 +77,7 @@ class ImageProcessingPipeline(object):
         self.float_filter = NormalisedFloatFilter()
         self.hls_filter = HlsFilter()
         self.user_filter = UserFilter()
-
+        
         self.float_filter.connect_input('input', self.input_filter.get_primary_output())
         self.hls_filter.connect_input('input', self.float_filter.get_primary_output())
         self.hls_filter.update()

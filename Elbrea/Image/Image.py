@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 ####################################################################################################
@@ -305,7 +305,7 @@ class Image(np.ndarray):
     # def __repr__(self):
 
     #     return 'Image\n' + repr(self.image_format)
-    
+
     ##############################################
 
     def set(self, value):
@@ -366,7 +366,7 @@ class Image(np.ndarray):
     ##############################################
 
     def swap_channels(self, channels):
-    
+
         image_format = self.image_format
         if ((channels is ImageFormat.BGR and image_format.channels is ImageFormat.RGB) or 
             (channels is ImageFormat.RGB and image_format.channels is ImageFormat.BGR)):
@@ -430,7 +430,7 @@ class Image(np.ndarray):
         return histogram
 
 ####################################################################################################
-# 
+#
 # End
-# 
+#
 ####################################################################################################

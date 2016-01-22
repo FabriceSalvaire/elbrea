@@ -1,8 +1,8 @@
 ####################################################################################################
-# 
+#
 # XXXXX - XXXXX
 # Copyright (C) 2015 - XXXXX
-# 
+#
 ####################################################################################################
 
 ####################################################################################################
@@ -32,7 +32,7 @@ class DataSetMoment(object):
         self.sum_x4 = 0
 
     ##############################################
-        
+
     def fill(self, x):
 
         self.number_of_entries += 1
@@ -42,7 +42,7 @@ class DataSetMoment(object):
         self.sum_x4 += x**4
 
     ##############################################
-        
+
     def __iadd__(self, obj):
 
         self.number_of_entries += obj.number_of_entries
@@ -54,44 +54,44 @@ class DataSetMoment(object):
         return self
 
     ##############################################
-        
+
     @property
     def mean(self):
         return self.sum_x / self.number_of_entries
 
     ##############################################
-        
+
     @property
     def biased_variance(self):
         return self.sum_x2 / self.number_of_entries - self.mean**2
 
     ##############################################
-        
+
     @property
     def unbiased_variance(self):
         return self.number_of_entries / (self.number_of_entries -1) * self.biased_variance
 
     ##############################################
-        
+
     @property
     def biased_standard_deviation(self):
         return math.sqrt(self.biased_variance)
 
     ##############################################
-        
+
     @property
     def standard_deviation(self):
         return math.sqrt(self.unbiased_variance)
 
     ##############################################
-        
+
     @property
     def skew(self):
         return ((self.sum_x3 / self.number_of_entries - 3*self.mean*self.biased_variance - self.mean**3)
                 / (self.biased_variance*self.biased_standard_deviation))
 
     ##############################################
-        
+
     @property
     def kurtosis(self):
         # Need an expansion in terms of sum_x**i
@@ -113,7 +113,7 @@ class WeightedDataSetMoment(object):
         self.sum_weight_x4 = 0
 
     ##############################################
-        
+
     def fill(self, x, weight=1.):
 
         self.sum_weight += weight
@@ -125,13 +125,13 @@ class WeightedDataSetMoment(object):
         self.sum_weight_x4 += weight_x**4
 
     ##############################################
-        
+
     @property
     def number_of_effective_entries(self):
         return self.sum_weight**2 / self.sum_weight2
 
     ##############################################
-        
+
     @property
     def mean(self):
         return self.sum_weight_x / self.number_of_effective_entries
@@ -150,16 +150,16 @@ class Histogram(object):
             self._binning = binning
         else:
             raise ValueError
-
+        
         array_size = self._binning.array_size
         self._accumulator = np.zeros(array_size)
         self._sum_weight_square = np.zeros(array_size)
         self.data_set_moment = DataSetMoment()
-
+        
         self.clear_feature()
 
     ##############################################
-        
+
     def clear(self, value=.0):
 
         self._accumulator[:] = value
@@ -168,7 +168,7 @@ class Histogram(object):
         self.clear_feature()
 
     ##############################################
-        
+
     def clear_feature(self):
 
         self._errors = None
@@ -177,37 +177,37 @@ class Histogram(object):
         self._biased_variance = None
 
     ##############################################
-        
+
     @property
     def binning(self):
         return self._binning
 
     ##############################################
-        
+
     @property
     def accumulator(self):
         return self._accumulator
 
     ##############################################
-        
+
     @property
     def binning_accumulator(self):
         return self._accumulator[1:-1]
 
     ##############################################
-        
+
     @property
     def x_values(self):
         return self._binning.bin_centers
 
     ##############################################
-        
+
     def is_consistent_with(self, obj):
 
         return self._binning == obj._binning
 
     ##############################################
-        
+
     def __iadd__(self, obj):
 
         if self.is_consistent_with(obj):
@@ -220,19 +220,19 @@ class Histogram(object):
         return self
 
     ##############################################
-        
+
     def normalise(self):
 
         self._accumulator /= self.integral
         self.clear_feature()
 
     ##############################################
-        
+
     def fill(self, x, weight=1.):
 
         if weight < 0:
             raise ValueError
-
+        
         i = self._binning.find_bin(x)
         self._accumulator[i] += weight
         # if weight == 1.: weight_square = 1.
@@ -241,18 +241,18 @@ class Histogram(object):
         self.clear_feature()
 
     ##############################################
-       
+
     def compute_errors(self):
 
         if self._errors is None:
             self._errors = np.sqrt(self._sum_weight_square)
 
     ##############################################
-        
+
     def get_bin_error(self, i):
 
         self.compute_errors()
-            
+        
         return self._errors[i]
 
     ##############################################
@@ -278,7 +278,7 @@ class Histogram(object):
         return self._integral
 
     ##############################################
-        
+
     @property
     def number_of_effective_entries(self):
         return self.integral**2 / self._sum_weight_square.sum()
@@ -293,7 +293,7 @@ class Histogram(object):
         return self._mean
 
     ##############################################
-        
+
     @property
     def biased_variance(self):
         if self._biased_variance is None:
@@ -301,19 +301,19 @@ class Histogram(object):
         return self._biased_variance
 
     ##############################################
-        
+
     @property
     def unbiased_variance(self):
         return self.integral / (self.integral -1) * self.biased_variance
 
     ##############################################
-        
+
     @property
     def biased_standard_deviation(self):
         return math.sqrt(self.biased_variance)
 
     ##############################################
-        
+
     @property
     def standard_deviation(self):
         return math.sqrt(self.unbiased_variance)
@@ -335,37 +335,37 @@ class Histogram(object):
                 -3)
 
     ##############################################
-        
+
     def to_graph(self):
 
         self.compute_errors()
-
+        
         binning = self._binning
         bin_slice = binning.bin_slice()
-
+        
         x_values = self.x_values
-
+        
         y_values = np.copy(self._accumulator[bin_slice])
         y_errors = np.copy(self._errors[bin_slice])
-
+        
         x_errors = np.empty(x_values.shape)
         x_errors[:] = .5*binning.bin_width
-
+        
         return x_values, y_values, x_errors, y_errors
 
    ###############################################
-        
+
     def __str__(self):
 
         binning = self._binning
-
+        
         string_format = """
 Histogram 1D
   interval: %s
   number of bins: %u
   bin width: %g
 """
-
+        
         text = string_format % (str(binning._interval), binning._number_of_bins, binning._bin_width)
         for i in binning.bin_iterator(xflow=True):
             text += '%3u %s = %g +- %g\n' % (i,
@@ -373,25 +373,25 @@ Histogram 1D
                                              self._accumulator[i],
                                              self.get_bin_error(i),
                                              )
-
+        
         return text
 
    ###############################################
-        
+
     def find_non_zero_bin_range(self):
 
         inf = 0
         while self._accumulator[inf] == 0:
             inf += 1
-
+        
         sup = len(self._accumulator) -1
         while self._accumulator[sup] == 0:
             sup -= 1
-
+        
         return Interval(inf, sup)
 
    ###############################################
-        
+
     def non_zero_bin_range_histogram(self):
 
         bin_range = self.find_non_zero_bin_range()
@@ -404,11 +404,11 @@ Histogram 1D
         histogram._accumulator[dst_slice] = self._accumulator[src_slice]
         histogram._sum_weight_square[dst_slice] = self._sum_weight_square[src_slice]
         histogram._errors[dst_slice] = self._errors[src_slice]
-
+        
         return histogram
 
 ####################################################################################################
-# 
+#
 # End
-# 
+#
 ####################################################################################################
