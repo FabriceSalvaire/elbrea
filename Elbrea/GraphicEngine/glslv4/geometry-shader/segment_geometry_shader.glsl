@@ -69,13 +69,13 @@ void main()
   // If color is fully transparent we just will discard the fragment later
   /* if (vertex.colour.a <= 0) */
   /*   return; */
-  
+
   vec2 pos1 = vertexIn[0].position;
   vec2 pos2 = vertexIn[1].position;
 
   float line_length = distance(pos1, pos2);
   vertex.line_length = line_length;
-  
+
   // Thickness below 1 pixel are represented using a 1 pixel thickness
   // and a modified alpha
   float line_width = line_width;
@@ -102,7 +102,7 @@ void main()
 
   emit_vertex(pos2 - normal_offset1, vec2(u, -w), cap2);
   emit_vertex(pos2 + normal_offset1, vec2(u, w), cap2);
-  
+
   EndPrimitive();
 }
 

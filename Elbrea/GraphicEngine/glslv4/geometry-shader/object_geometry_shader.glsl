@@ -14,7 +14,7 @@
 #include(../include/vector.glsl)
 
 /* *********************************************************************************************** */
-	      
+
 uniform float line_width = 5;
 uniform float antialias_diameter = 1;
 
@@ -25,7 +25,7 @@ uniform float rotation = 0;
 /* *********************************************************************************************** */
 
 layout(lines) in; // P.inf -> P.sup
-layout(triangle_strip, max_vertices=4) out;	      
+layout(triangle_strip, max_vertices=4) out;
 
 /* *********************************************************************************************** */
 
@@ -75,7 +75,7 @@ void main()
   vec2 pos_tr = vertexIn[1].position;
   vec2 pos_tl = vec2(pos_bl.x, pos_tr.y);
   vec2 pos_br = vec2(pos_tr.x, pos_bl.y);
-  
+
   emit_vertex(pos_bl, vec2(-1, -1));
   emit_vertex(pos_tl, vec2(-1,  1));
   emit_vertex(pos_br, vec2( 1, -1));
