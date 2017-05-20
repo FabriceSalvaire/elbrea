@@ -39,10 +39,10 @@ class LineVertexArray(GlVertexArrayObject):
     def __init__(self, path=None):
 
         super(LineVertexArray, self).__init__()
-        
+
         self._number_of_objects = 0
         self._vertex_array_buffer = GlArrayBuffer()
-        
+
         if path is not None:
             self.set(path)
 
@@ -142,7 +142,7 @@ class DynamicLineStripVertexArray(LineStripVertexArray):
 
         self._upscale_factor = upscale_factor
         self._allocate(size)
-        
+
         self._update_vertex = np.zeros((2, 2), dtype=np.float32)
 
     ##############################################
@@ -161,7 +161,7 @@ class DynamicLineStripVertexArray(LineStripVertexArray):
         """ Set the vertex array from an iterable of segments. """
 
         self._number_of_objects += 1
-        
+
         if self._number_of_objects > self._number_of_objects_max:
             # Reallocate buffer and copy data
             data = self._vertex_array_buffer.read_sub_data(0, size=2*self._size)
@@ -170,7 +170,7 @@ class DynamicLineStripVertexArray(LineStripVertexArray):
             self._logger.debug("upscale buffer to size {}".format(size))
             self._allocate(size)
             self._vertex_array_buffer.set_sub_data(data, 0)
-        
+
         vertex = self._update_vertex
         vertex[:] = point
         # vertex += .5
@@ -191,10 +191,10 @@ class DynamicLineVertexArray(LineVertexArray):
     def __init__(self):
 
         super(DynamicLineVertexArray, self).__init__()
-        
+
         array = np.zeros((2, 2), dtype=np.float32)
         self._vertex_array_buffer.set(array)
-        
+
         self._update_vertex = np.zeros((2,), dtype=np.float32)
 
     ##############################################

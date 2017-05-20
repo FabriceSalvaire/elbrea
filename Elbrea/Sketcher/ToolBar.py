@@ -22,7 +22,7 @@ class ToolBar(object):
     icon_size = 22
 
     __name__= None
-    
+
     ##############################################
     
     def __init__(self, main_window):
@@ -56,13 +56,13 @@ class ToolBar(object):
                 self._tool_bar.addAction(item)
             else:
                 self._tool_bar.addWidget(item)
-    
+
 ####################################################################################################
 
 class MainToolBar(ToolBar):
 
     __name__= 'main'
-   
+
     ##############################################
     
     def _create_actions(self):
@@ -86,7 +86,7 @@ class MainToolBar(ToolBar):
                     # shortcut='Ctrl+',
                     shortcutContext=Qt.ApplicationShortcut,
                 )
-        
+
         self._fit_width_action = \
                 QtWidgets.QAction(icon_loader['zoom-fit-width'],
                     'Fit width',
@@ -96,7 +96,7 @@ class MainToolBar(ToolBar):
                     shortcut='Ctrl+W',
                     shortcutContext=Qt.ApplicationShortcut,
                 )
-        
+
         self._display_all_action = \
                 QtWidgets.QAction(icon_loader['zoom-fit-best'],
                     'Display All',
@@ -110,7 +110,7 @@ class MainToolBar(ToolBar):
     ##############################################
 
     def _init_tool_bar(self):
-        
+
         items = (self._save_action,
                  self._zoom_one_action,
                  self._fit_width_action,
@@ -124,7 +124,7 @@ class MainToolBar(ToolBar):
 
         # triggered -> checked ???
         self._application.save()
-                
+
 ####################################################################################################
 
 class SketcherToolBar(ToolBar):
@@ -162,7 +162,7 @@ class SketcherToolBar(ToolBar):
                           self._application,
                           checkable=True,
                           )
-        
+
         self.pen_tool_action = \
             QtWidgets.QAction(icon_loader.get_icon('draw-freehand', self.icon_size),
                           'Pen Tool',
@@ -176,7 +176,7 @@ class SketcherToolBar(ToolBar):
                           self._application,
                           checkable=True,
                           )
-        
+
         self.eraser_tool_action = \
             QtWidgets.QAction(icon_loader.get_icon('eraser', self.icon_size),
                           'Eraser Tool',
@@ -190,14 +190,14 @@ class SketcherToolBar(ToolBar):
                           self._application,
                           checkable=True,
                           )
-        
+
         self.image_tool_action = \
             QtWidgets.QAction(icon_loader.get_icon('insert-image', self.icon_size),
                           'Image Tool',
                           self._application,
                           checkable=True,
                           )
-        
+
         self._sketcher_action_group = QtWidgets.QActionGroup(self._application)
         for action in (self.pan_tool_action,
                        self.roi_tool_action,
@@ -210,18 +210,18 @@ class SketcherToolBar(ToolBar):
                        ):
             self._sketcher_action_group.addAction(action)
             self._glwidget.register_action(action)
-            
+
     ##############################################
 
     def _init_tool_bar(self):
 
         self.pan_tool_action.setChecked(True)
         self._sketcher_action_group.triggered.connect(self._main_window.glwidget.set_current_tool)
-        
+
         self._pencil_size_combobox = QtWidgets.QComboBox(self._main_window)
         for pencil_size in (1, 2, 3, 6, 12):
             self._pencil_size_combobox.addItem(str(pencil_size), pencil_size)
-            
+
         self._pencil_colour_combobox = QtWidgets.QComboBox(self._main_window)
         self._pencil_colours = (Qt.black,
                                 Qt.red, Qt.blue, Qt.green,
@@ -232,7 +232,7 @@ class SketcherToolBar(ToolBar):
             pixmap.fill(colour)
             icon = QtGui.QIcon(pixmap)
             self._pencil_colour_combobox.addItem(icon, '')
-            
+
         self._eraser_size_combobox = QtWidgets.QComboBox(self._main_window)
         for eraser_size in (3, 6, 12):
             self._eraser_size_combobox.addItem(str(eraser_size), eraser_size)
@@ -241,7 +241,7 @@ class SketcherToolBar(ToolBar):
         self._eraser_size_combobox.currentIndexChanged.connect(self._on_eraser_size_changed)
         self._pencil_colour_combobox.currentIndexChanged.connect(self._on_pencil_colour_changed)
         self._eraser_size_combobox.currentIndexChanged.connect(self._on_eraser_size_changed)
-       
+
         items = (self.clear_tool_action,
                  self.pan_tool_action,
                  self.roi_tool_action,
@@ -256,7 +256,7 @@ class SketcherToolBar(ToolBar):
                  self.image_tool_action,
                 )
         self._add_items(items)
-        
+
     ##############################################
 
     def current_tool(self):
@@ -285,7 +285,7 @@ class SketcherToolBar(ToolBar):
 
         page_manager = self._application.page_manager
         page_manager.sketcher_state.eraser_size = self._eraser_size_combobox.currentData()
-        
+
     ##############################################
 
     def _on_pencil_colour_changed(self, index):
@@ -297,7 +297,7 @@ class SketcherToolBar(ToolBar):
     ##############################################
 
     def init_sketcher_state(self):
-        
+
         self._on_pencil_size_changed(0)
         self._on_eraser_size_changed(0)
         self._on_pencil_colour_changed(0)
@@ -335,9 +335,9 @@ class PageToolBar(ToolBar):
         self._page_spinbox.setMinimum(1)
         self._number_of_pages_label = QtWidgets.QLabel(self._main_window)
         self.update_number_of_pages(1)
-        
+
         self._page_spinbox.valueChanged.connect(self._on_page_changed)
-       
+
         items = (# self.previous_page_action,
                  # self.next_page_action,
                  self._page_spinbox,
@@ -350,7 +350,7 @@ class PageToolBar(ToolBar):
     def update_number_of_pages(self, number_of_pages):
 
         self._number_of_pages_label.setText(' / {}'.format(number_of_pages))
-        
+
     ##############################################
 
     def _on_page_changed(self, index):
@@ -361,7 +361,7 @@ class PageToolBar(ToolBar):
             page_manager.add_page()
             self.update_number_of_pages(page_manager.number_of_pages)
         self._application.page_manager.select_page(page_index)
-        
+
 ####################################################################################################
 #
 # End

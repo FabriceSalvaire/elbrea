@@ -60,7 +60,7 @@
         # input_image[:,:,:] = 0
         for i in xrange(3):
             input_image[:,:,i] = filtered_image[:height,:width]
-            
+
         return input_image
 
 ####################################################################################################

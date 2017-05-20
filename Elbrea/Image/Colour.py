@@ -21,11 +21,11 @@ class Colour(np.ndarray):
             data = args[0]
         elif len(args) == 3:
             data = args
-        
+
         obj = np.asarray(data, dtype=cls.__dtype__).view(cls)
-        
+
         obj.colour_kwargs = kwargs
-        
+
         return obj
 
     ##############################################
@@ -52,7 +52,7 @@ class NormalisedColour(Colour):
 
         if obj is None:
             return
-        
+
         self._normalised = True
         self._dtype_scale = 1.
 
@@ -72,7 +72,7 @@ class IntColour(Colour):
 
         if obj is None:
             return
-        
+
         self._normalised = False
         self._number_of_bits = getattr(obj, 'number_of_bits', 8)
         self._dtype_scale = 2**self._number_of_bits -1
@@ -106,9 +106,9 @@ class RgbColourMixin(object): # object ???
         min_rgb = self.inf()
         max_rgb = self.sup()
         chroma = max_rgb - min_rgb # radius, small for grayscale
-        
+
         red, green, blue = self.tolist()
-        
+
         if chroma == .0:
             hue = .0 # undefined
         elif max_rgb == red:
@@ -121,17 +121,17 @@ class RgbColourMixin(object): # object ???
             hue = (red - green) / chroma + 4. # in [3, 5]
         # hue *= 60.
         hue /= 6.
-        
+
         chroma /= self._dtype_scale
-        
+
         two_lightness = (max_rgb + min_rgb) / self._dtype_scale
         lightness = .5 * two_lightness # 0 means black and 1 means white
-        
+
         if lightness == .0 or lightness == 1.:
             saturation = .0
         else:
             saturation = chroma / (1 - abs(two_lightness - 1))
-        
+
         # if (lightness < .5)
         #   saturation = chroma / two_lightness
         # else if (lightness >= .5)
@@ -182,12 +182,12 @@ class HlsColourMixin:
 
         # assume normalised
         hue, lightness, saturation = self.tolist()
-        
+
         hue *= 6
         chroma = (1 - abs(2 * lightness - 1)) * saturation
         x = chroma * (1 - abs(hue % 2 - 1))
         m = lightness - .5 * chroma
-        
+
         # print(hue, chroma, x, m)
         
         if 0 <= hue < 1:
@@ -202,7 +202,7 @@ class HlsColourMixin:
             r, g, b = x, 0, chroma
         elif 5 <= hue < 6:
             r, g, b = chroma, 0, x
-        
+
         return RgbNormalisedColour(r + m, g + m, b + m)
 
 ####################################################################################################

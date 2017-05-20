@@ -45,9 +45,9 @@ class PageManager(object):
     def __init__(self, application, pages=None):
 
         self._application = application
-        
+
         self._page_data = {}
-        
+
         if pages is None:
             self._pages = Pages()
             self._pages.add_page()
@@ -56,11 +56,11 @@ class PageManager(object):
             self._pages = pages
             load_page_data = True
         self._application.main_window.page_tool_bar.update_number_of_pages(self._pages.number_of_pages)
-        
+
         self._current_page_number = None
         self._current_page = None
         self._current_page_data = None
-        
+
         self._init_painters()
         if load_page_data:
             self._load_page_data()
@@ -72,11 +72,11 @@ class PageManager(object):
 
         # Load registered painters
         from Elbrea.GraphicEngine import ForegroundPainter 
-        
+
         main_window = self._application.main_window
         glwidget = main_window.glwidget
         glwidget.page_manager = self
-        
+
         # for screen in self.platform.screens:
         #     print(screen)
         dpi_x, dpi_y = self._application.platform.screens[0].dpi
@@ -91,15 +91,15 @@ class PageManager(object):
         #                                        (0, page_format.height))
         glwidget.page_interval = IntervalInt2D((0, page_format.width_px(self._dpi)),
                                                (0, page_format.height_px(self._dpi)))
-        
+
         # Fixme: Basic...
         from Elbrea.GraphicEngine.PainterManager import BasicPainterManager
         self.painter_manager = BasicPainterManager(glwidget)
-        
+
         # steered by page size and type
         from .PagePainter import PagePainter
         page_painter = PagePainter(self.painter_manager, step=self.mm2px(10))
-        
+
         from Elbrea.GraphicEngine.TexturePainter import TexturePainter
         texture_painter = TexturePainter(self.painter_manager)
         # from Elbrea.Image import ImageLoader
@@ -111,11 +111,11 @@ class PageManager(object):
         object_painter = self.painter_manager['object']
         object_painter.update(IntervalInt2D((100, 200), (300, 400)))
         object_painter.enable()
-        
+
         from Elbrea.GraphicEngine.PathPainter import SegmentPainter, PathPainter
         self._segment_painter = SegmentPainter(self.painter_manager, self)
         self._path_painter = PathPainter(self.painter_manager, self)
-        
+
         from .Sketcher import SketcherState, SegmentSketcher, PathSketcher, Eraser
         self.sketcher_state = SketcherState()
         self.segment_sketcher = SegmentSketcher(self.sketcher_state, self, self._segment_painter)
@@ -251,7 +251,7 @@ class GraphicItemEditor(object):
     def mousePressEvent(self, event):
 
         self._logger.info("")
-        
+
         button = event.button()
         if button & QtCore.Qt.LeftButton:
             pass

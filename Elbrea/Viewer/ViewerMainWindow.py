@@ -56,7 +56,7 @@ class ViewerMainWindow(MainWindowBase):
                     shortcut='Ctrl+S',
                     shortcutContext=Qt.ApplicationShortcut,
                 )
-        
+
         self._switch_face_action = \
                 QtWidgets.QAction(# icon_loader[''],
                     'Switch Front/Back',
@@ -157,7 +157,7 @@ class ViewerMainWindow(MainWindowBase):
 
         # triggered -> checked ???
         self._application.save()
-    
+
 ####################################################################################################
 #
 # End

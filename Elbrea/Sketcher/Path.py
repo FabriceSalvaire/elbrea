@@ -97,10 +97,10 @@ class Path(PathGraphicItem):
     def __init__(self, colour, pencil_size, points):
 
         super(Path, self).__init__(colour, pencil_size)
-        
+
         if points.shape[1] <= 1:
             raise ValueError("Require at least two points")
-        
+
         self._points = points # Fixme: share ?
         self._interval = self._compute_interval()
         self._number_of_points = self._points.shape[0]
@@ -114,7 +114,7 @@ class Path(PathGraphicItem):
         else:
             stop = upper + 1
         points = self._points[lower:stop]
-        
+
         if points.shape[1] > 1:
             return self.__class__(self._colour, self._pencil_size, points)
         else:
@@ -287,7 +287,7 @@ class Path(PathGraphicItem):
         farthest_points.append(self._number_of_points -1) # last point index
         farthest_points.sort() # due to algorithm
         points = self._points[farthest_points]
-        
+
         return self.__class__(self._colour, self._pencil_size, points)
 
     ##############################################
@@ -331,7 +331,7 @@ class Path(PathGraphicItem):
         window_size = radius + 1
         if window_size >= self._number_of_points:
             raise ValueError()
-        
+
         if radius > 0:
             points = np.array(self._points, dtype=np.float)
             view = points[radius:]
@@ -354,7 +354,7 @@ class Path(PathGraphicItem):
         p1 = self._points[1:]
         p10 = p1 - p0
         u10 = p10 / np.sqrt(np.sum(p10**2, axis=0))
-        
+
         delta = point - p0
         # projection = np.dot(delta, u10)
         projection = delta[:,0]*u10[:,0] + delta[:,1]*u10[:,1]
@@ -423,7 +423,7 @@ class Segment(Path):
                 points_[1] = second_point
         else:
             points_[...] = points
-        
+
         super(Segment, self).__init__(colour, pencil_size, points_)
 
     ##############################################
@@ -491,7 +491,7 @@ class DynamicPath(PathGraphicItem):
     def __init__(self, colour, pencil_size, array_size=500):
 
         super(DynamicPath, self).__init__(colour, pencil_size)
-        
+
         self._arrays = []
         self._array_size = array_size
         self._number_of_points = 0

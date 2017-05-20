@@ -8,7 +8,7 @@
 ####################################################################################################
 
 import hashlib
- 
+
 import numpy as np
 
 ####################################################################################################
@@ -105,7 +105,7 @@ class Image(object):
 
         """ Return format string from *samples_per_pixel* and *bits_per_pixel*.
         """
-        
+
         if samples_per_pixel == 1 and bits_per_pixel == 8:
             return 'gray8'
         elif samples_per_pixel == 1 and bits_per_pixel == 16:
@@ -134,7 +134,7 @@ class Image(object):
             raise NameError('Image format %s is not supported' % (format))
 
         return dtype
-        
+
     #######################################
     
     def __init__(self, format, width, height, is_planar=True):
@@ -143,7 +143,7 @@ class Image(object):
             raise ValueError('Wrong image size %i x %i' % (width, height))
         self.height = height
         self.width = width
-       
+
         dtype = self._init_from_format(format, is_planar)
 
         self.size = self._compute_size()
@@ -216,7 +216,7 @@ class Image(object):
             is_planar = self.is_planar
 
         return self.__class__(format, width, height, is_planar)
-    
+
     #######################################
     
     def copy(self):
@@ -227,7 +227,7 @@ class Image(object):
         image.buffer = self.buffer.copy()
 
         return image
-    
+
     #######################################
 
     def dtype(self):
@@ -258,7 +258,7 @@ is planar        %s
         """ Reshape the buffer to a linear shape. """
 
         self.buffer.shape = self.size
-    
+
     #######################################
 
     def planar_shape(self, array):
@@ -365,19 +365,19 @@ is planar        %s
     def channel(self, channel):
         """ Return an :class:`ImageChannelView` instance for the *channel*. """
         return ImageChannelView(self, channel)
-    
+
     def gray_channel(self):
         """ Return an :class:`ImageChannelView` instance for the gray channel (0). """
         return self.channel(0)
-    
+
     def red_channel(self):
         """ Return an :class:`ImageChannelView` instance for the red channel (0). """
         return self.channel(0)
-    
+
     def green_channel(self):
         """ Return an :class:`ImageChannelView` instance for the green channel (1). """
         return self.channel(1)
-    
+
     def blue_channel(self):
         """ Return an :class:`ImageChannelView` instance for the blue channel (2). """
         return self.channel(2)
@@ -390,11 +390,11 @@ is planar        %s
             raise NameError('extract_channel: format %s is not supported' % (self.format))
         if not self.is_planar:
             raise NameError('extract_channel: image must be planar')
-        
+
         channel_image = self.__class__(format='gray8', width=self.width, height=self.height, is_planar=True)
         channel_view = self.channel(channel)
         channel_view.copy_to(channel_image)
-        
+
         return channel_image
 
     #######################################
@@ -420,13 +420,13 @@ is planar        %s
     def md5(self):
 
         """ Return the MD5 checksum of the image. """
-        
+
         return hashlib.md5(self.buffer.tostring()).hexdigest()
 
     #######################################
 
     def image_to_histogram(self, histogram, protected=True):
-        
+
         # Fixme: histogram check
 
         """ Fill an histogram with the image content. *histogram* must be compatible with a Numpy 1D
@@ -602,9 +602,9 @@ is planar        %s
 
         self.reshape()
         binary_image.reshape()
-        
+
         return binary_image, percent_of_pixels_true
-       
+
 ####################################################################################################
 
 # Fixme: improve
@@ -674,13 +674,13 @@ class ImageChannelView(object):
         """ Set the *interval_dst* region of the channel view with the content from the *interval_src* region
         of *image*.
         """
-        
+
         dst = self.view[interval_dst.y.inf:interval_dst.y.sup +1,
                         interval_dst.x.inf:interval_dst.x.sup +1]
-        
+
         src = image.buffer[interval_src.y.inf:interval_src.y.sup +1,
                            interval_src.x.inf:interval_src.x.sup +1]
-        
+
         dst[...] = src[...]
 
     #######################################

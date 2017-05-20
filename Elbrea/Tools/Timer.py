@@ -146,7 +146,7 @@ class Timer(object):
     ##############################################
 
     def delta_time(self):
-        
+
         if self.t1 == 0:
             self.stop()
 
@@ -154,7 +154,7 @@ class Timer(object):
         s = int(dt)
         ms = int((dt * 1e3) % 1e3)       
         us = int((dt * 1e6) % 1e3)
-        
+
         # print 'Delta time: %u s %u ms %u us' % (s, ms, us)
 
         return (s, ms, us)

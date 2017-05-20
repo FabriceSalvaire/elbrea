@@ -20,7 +20,7 @@ try:
     import tifffile
 except:
     tifffile = None
-    
+
 ####################################################################################################
 
 from .Image import ImageFormat, Image

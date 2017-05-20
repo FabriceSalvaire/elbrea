@@ -78,7 +78,7 @@ class ToolBar(object):
                           self._application,
                           checkable=True,
                           )
-        
+
         self._action_group = QtWidgets.QActionGroup(self._application)
         for action in (self.position_tool_action,
                        self.colour_picker_tool_action,
@@ -91,13 +91,13 @@ class ToolBar(object):
     ##############################################
 
     def _init_tool_bar(self):
-                
+
         self.position_tool_action.setChecked(True)
 
         self._pencil_size_combobox = QtWidgets.QComboBox(self._main_window)
         for pencil_size in (1, 2, 3, 6, 12):
             self._pencil_size_combobox.addItem(str(pencil_size), pencil_size)
-            
+
         self._pencil_colour_combobox = QtWidgets.QComboBox(self._main_window)
         self._pencil_colours = (Qt.white, Qt.black,
                                 Qt.red, Qt.blue, Qt.green,
@@ -108,7 +108,7 @@ class ToolBar(object):
             pixmap.fill(colour)
             icon = QtGui.QIcon(pixmap)
             self._pencil_colour_combobox.addItem(icon, '')
-            
+
         self._eraser_size_combobox = QtWidgets.QComboBox(self._main_window)
         for eraser_size in (3, 6, 12):
             self._eraser_size_combobox.addItem(str(eraser_size), eraser_size)
@@ -133,7 +133,7 @@ class ToolBar(object):
                 self._tool_bar.addAction(item)
             else:
                 self._tool_bar.addWidget(item)
-            
+
     ##############################################
 
     def current_tool(self):
@@ -160,14 +160,14 @@ class ToolBar(object):
     def _on_eraser_size_changed(self, index):
 
         self._application.sketcher.state.eraser_size = self._eraser_size_combobox.currentData()
-        
+
     ##############################################
 
     def _on_pencil_colour_changed(self, index):
 
         colour = QtGui.QColor(self._pencil_colours[index])
         self._application.sketcher.state.pencil_colour = (colour.red(), colour.green(), colour.blue())
-        
+
 ####################################################################################################
 #
 # End

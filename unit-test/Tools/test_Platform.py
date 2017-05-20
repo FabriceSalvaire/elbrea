@@ -35,11 +35,11 @@ class TestPlatform(unittest.TestCase):
     ##############################################
 
     def test_platform(self):
-        
+
         application = QtWidgets.QApplication(sys.argv)
         platform = Platform(application)
         print(platform)
-        
+
 ####################################################################################################
 
 if __name__ == '__main__':

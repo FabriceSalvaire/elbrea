@@ -32,7 +32,7 @@ class FrontBackPainter(Painter):
     def __init__(self, painter_manager, name, painter_class):
 
         super(FrontBackPainter, self).__init__(painter_manager, name=name)
-        
+
         self.front_painter = painter_class(painter_manager, name='Front')
         self.back_painter = painter_class(painter_manager, name='Back')
         self._is_front = True
@@ -72,7 +72,7 @@ class FrontBackPainterManager(BasicPainterManager):
     def __init__(self, glwidget):
 
         super(FrontBackPainterManager, self).__init__(glwidget)
-        
+
         self._background_painter = FrontBackPainter(self, 'background', SwitchPainter)
 
     ##############################################

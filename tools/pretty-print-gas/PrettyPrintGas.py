@@ -170,7 +170,7 @@ class PrettyPrintGas(object):
     ##############################################
 
     def print_opcode(self, opcode):
-        
+
         try:
             description = self._intel_instructions[opcode]
         except KeyError:

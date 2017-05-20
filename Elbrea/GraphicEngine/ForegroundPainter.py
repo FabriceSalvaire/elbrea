@@ -142,7 +142,7 @@ class TextPainter(RegisteredPainter):
     def __init__(self, painter_manager):
 
         super(TextPainter, self).__init__(painter_manager)
-        
+
         self._glwidget = self._painter_manager.glwidget
         self._text_shader_program = self._glwidget.shader_manager.text_shader_program
         # self.reset()
@@ -152,9 +152,9 @@ class TextPainter(RegisteredPainter):
         self._font = TextureFont(font_path)
         self._font_size = self._font[25]
         self._font_size.load_all_glyphs()
-        
+
         self._font_atlas_texture = ImageTexture(self._font.atlas.data)
-        
+
         self._text_vertex_array = None
 
     ##############################################
@@ -206,7 +206,7 @@ class SketcherPainter(Painter, ObjectWithTimeStamp):
 
         ObjectWithTimeStamp.__init__(self)
         Painter.__init__(self, painter_manager)
-        
+
         self._glwidget = self._painter_manager.glwidget
         self._sketcher = None
         self._shader_program = self._glwidget.shader_manager.texture_shader_program
@@ -259,14 +259,14 @@ class SketcherPainter(Painter, ObjectWithTimeStamp):
         if (self._status
             and self._texture_vertex_array is not None
             and self._shader_program is not None):
-            
+
             # self._logger.info("uploaded {}".format(self._uploaded))
             
             # if self.source > self: # timestamp
             print(self._uploaded, self._sketcher.modified_time, self._modified_time)
             if not self._uploaded or self._sketcher._modified_time > self._modified_time:
                 self.upload_data()
-            
+
             GL.glEnable(GL.GL_BLEND)
             # Blending: O = Sf*S + Df*D
             # alpha: 0: complete transparency, 1: complete opacity
@@ -279,7 +279,7 @@ class SketcherPainter(Painter, ObjectWithTimeStamp):
             shader_program.bind()
             self._texture_vertex_array.draw()
             shader_program.unbind()
-            
+
             GL.glDisable(GL.GL_BLEND)
 
 ####################################################################################################

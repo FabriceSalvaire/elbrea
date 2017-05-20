@@ -80,7 +80,7 @@ class GraphicScene(object):
 
         if self._selected_item is item:
             self.deselect_item(item)
-        
+
         item_id = hash(item)
         del self._items[item_id]
         self._rtree.delete(item_id, item.bounding_box)
@@ -106,7 +106,7 @@ class GraphicScene(object):
         self._logger.debug(str( interval))
         items = [self._items[x] for x in self._rtree.intersection(interval.bounding_box())]
         items.sort() # accordind to z value
-        
+
         return items
 
     ##############################################
@@ -127,7 +127,7 @@ class GraphicScene(object):
 
         x, y = self._window_to_scene_coordinate(event)
         radius = self._window_to_scene_distance(GraphicScene.ITEM_SELECTION_RADIUS)
-        
+
         items = self.items_around(x, y, radius)
         if items:
             # return the highest z value
@@ -214,7 +214,7 @@ class GraphicSceneItem(object):
     def _get_new_id():
 
         GraphicSceneItem._last_id += 1
-        
+
         return GraphicSceneItem._last_id
 
     ##############################################

@@ -43,7 +43,7 @@ class Platform(object):
         self.number_of_cores = self._get_number_of_cores()
         self.cpu_khz = self._get_cpu_khz()
         self.cpu_mhz = rint(self._get_cpu_khz()/float(1000))
-        
+
         # RAM
         self.memory_size_kb = self._get_memory_size_kb()
         self.memory_size_mb = rint(self.memory_size_kb/float(1024))
@@ -125,18 +125,18 @@ class Platform(object):
 
         self.qt_version = QtCore.QT_VERSION_STR
         self.pyqt_version = QtCore.PYQT_VERSION_STR
-        
+
         application = QtWidgets.QApplication.instance()
         self.desktop = application.desktop()
         self.number_of_screens = self.desktop.screenCount() 
         self.screens = [Screen(self, i) for i in range(self.number_of_screens)]
-    
+
     ##############################################
 
     def query_opengl(self):
-        
+
         import OpenGL.GL as GL
-        
+
         self.gl_renderer = GL.glGetString(GL.GL_RENDERER)
         self.gl_version = GL.glGetString(GL.GL_VERSION)
         self.gl_vendor = GL.glGetString(GL.GL_VENDOR)
@@ -145,7 +145,7 @@ class Platform(object):
     ##############################################
 
     def __str__(self):
-      
+
         message_template = '''
 Platform %(node)s
   Hardware:
@@ -165,7 +165,7 @@ Platform %(node)s
 
         for screen in self.screens:
             message += str(screen)
-        
+
         message_template = '''
   Software Versions:
     OS: %(os)s
@@ -175,7 +175,7 @@ Platform %(node)s
     PyQt: %(pyqt_version)s
 '''
         message += message_template % self.__dict__
-        
+
         return message
 
 ####################################################################################################
@@ -205,7 +205,7 @@ class Screen(object):
      geometry   %(screen_width)ux%(screen_height)u px
      resolution %(dpi)s dpi
 """
-        
+
         return message_template % self.__dict__
 
 ####################################################################################################

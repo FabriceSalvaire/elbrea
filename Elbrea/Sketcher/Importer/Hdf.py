@@ -39,7 +39,7 @@ class HdfFile(object):
     def __del__(self):
 
         self._hdf_file.close()
-    
+
     ##############################################
 
     @property
@@ -64,7 +64,7 @@ class HdfImporter(HdfFile):
     ##############################################
 
     def __init__(self, file_path):
-    
+
         super(HdfImporter, self).__init__(file_path)
 
         self._pages_group = self['pages']
@@ -90,7 +90,7 @@ class HdfImporter(HdfFile):
     def read_segment(self, *args):
 
         return self.read_path(*args, path_class=Segment)
-    
+
     ##############################################
 
     def read_page(self, page_index):
@@ -116,13 +116,13 @@ class HdfImporter(HdfFile):
         largest_length, smallest_length = attributes['page_format_lengths']
         is_portrait = attributes['page_format_is_portrait']
         page_format = PageFormat(page_format_name, largest_length, smallest_length, is_portrait)
-        
+
         pages = Pages(page_format)
         for i in range(self._number_of_pages):
             pages.add_page(self.read_page(i))
 
         return pages
-        
+
 ####################################################################################################
 
 class HdfWriter(HdfFile):
@@ -130,7 +130,7 @@ class HdfWriter(HdfFile):
     ##############################################
 
     def __init__(self, file_path):
-    
+
         super(HdfWriter, self).__init__(file_path, update=True)
 
         self._pages_group = self.create_group('pages')
@@ -151,7 +151,7 @@ class HdfWriter(HdfFile):
     def save_segment(self, *args):
 
         self.save_path(*args, prefix='segment')
-        
+
     ##############################################
 
     def save_page(self, page_index, page):
@@ -162,7 +162,7 @@ class HdfWriter(HdfFile):
                 self.save_segment(group, item)
             elif isinstance(item, Path):
                 self.save_path(group, item)
-            
+
     ##############################################
 
     def save_pages(self, pages):
@@ -175,7 +175,7 @@ class HdfWriter(HdfFile):
         attributes['page_format_is_portrait'] = page_format.is_portrait
         for i, page in enumerate(pages):
             self.save_page(i, page)
-            
+
 ####################################################################################################
 # 
 # End

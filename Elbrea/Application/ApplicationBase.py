@@ -23,7 +23,7 @@ class ApplicationBase(object):
     _logger = logging.getLogger(__name__)
 
     has_gui = False
-    
+
     ##############################################
     
     def __init__(self, args, **kwargs):
@@ -59,7 +59,7 @@ class ApplicationBase(object):
 
         if self._args.user_script is not None:
             self.execute_user_script(self._args.user_script)
-       
+
     ##############################################
     
     def execute_user_script(self, file_name):
@@ -67,14 +67,14 @@ class ApplicationBase(object):
         """ Execute an user script provided by file *file_name* in a context where is defined a
         variable *application* that is a reference to the application instance.
         """
-        
+
         file_name = to_absolute_path(file_name)
         self.show_message(message='Execute user script: ' + file_name, echo=True)
         source = open(file_name).read()
         bytecode = compile(source, file_name, 'exec')
         exec(bytecode, {'application':self})
         self.show_message(message='User script done', echo=True)
-        
+
     ##############################################
     
     def exit(self):

@@ -150,12 +150,12 @@ class Histogram(object):
             self._binning = binning
         else:
             raise ValueError
-        
+
         array_size = self._binning.array_size
         self._accumulator = np.zeros(array_size)
         self._sum_weight_square = np.zeros(array_size)
         self.data_set_moment = DataSetMoment()
-        
+
         self.clear_feature()
 
     ##############################################
@@ -232,7 +232,7 @@ class Histogram(object):
 
         if weight < 0:
             raise ValueError
-        
+
         i = self._binning.find_bin(x)
         self._accumulator[i] += weight
         # if weight == 1.: weight_square = 1.
@@ -252,7 +252,7 @@ class Histogram(object):
     def get_bin_error(self, i):
 
         self.compute_errors()
-        
+
         return self._errors[i]
 
     ##############################################
@@ -339,18 +339,18 @@ class Histogram(object):
     def to_graph(self):
 
         self.compute_errors()
-        
+
         binning = self._binning
         bin_slice = binning.bin_slice()
-        
+
         x_values = self.x_values
-        
+
         y_values = np.copy(self._accumulator[bin_slice])
         y_errors = np.copy(self._errors[bin_slice])
-        
+
         x_errors = np.empty(x_values.shape)
         x_errors[:] = .5*binning.bin_width
-        
+
         return x_values, y_values, x_errors, y_errors
 
    ###############################################
@@ -358,14 +358,14 @@ class Histogram(object):
     def __str__(self):
 
         binning = self._binning
-        
+
         string_format = """
 Histogram 1D
   interval: %s
   number of bins: %u
   bin width: %g
 """
-        
+
         text = string_format % (str(binning._interval), binning._number_of_bins, binning._bin_width)
         for i in binning.bin_iterator(xflow=True):
             text += '%3u %s = %g +- %g\n' % (i,
@@ -373,7 +373,7 @@ Histogram 1D
                                              self._accumulator[i],
                                              self.get_bin_error(i),
                                              )
-        
+
         return text
 
    ###############################################
@@ -383,11 +383,11 @@ Histogram 1D
         inf = 0
         while self._accumulator[inf] == 0:
             inf += 1
-        
+
         sup = len(self._accumulator) -1
         while self._accumulator[sup] == 0:
             sup -= 1
-        
+
         return Interval(inf, sup)
 
    ###############################################
@@ -404,7 +404,7 @@ Histogram 1D
         histogram._accumulator[dst_slice] = self._accumulator[src_slice]
         histogram._sum_weight_square[dst_slice] = self._sum_weight_square[src_slice]
         histogram._errors[dst_slice] = self._errors[src_slice]
-        
+
         return histogram
 
 ####################################################################################################

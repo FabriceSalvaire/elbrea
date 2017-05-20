@@ -93,10 +93,10 @@ class PutRequest(urllib.request.Request):
 ####################################################################################################
 
 class DeleteRequest(urllib.request.Request):
-    
+
     '''Extend the request to handle DELETE command.
     '''
-    
+
     def get_method(self):
         return 'DELETE'
 
@@ -177,7 +177,7 @@ class RedmineRest:
         print(dom.toxml())
 
         return self.open_page(page, parameters, dom)
- 
+
     ##############################################
  
     def put(self, page, dom, parameters=None):
@@ -186,7 +186,7 @@ class RedmineRest:
         '''
 
         return self.open_page(page, parameters, dom, http_request=self.PutRequest)
- 
+
     ##############################################
  
     def delete(self, page):
@@ -195,7 +195,7 @@ class RedmineRest:
         '''
 
         return self.open_page(page, http_request=self.DeleteRequest)
- 
+
     ##############################################
  
     def dom_to_dict(self, dom, container):
@@ -210,7 +210,7 @@ class RedmineRest:
         for child in element.childNodes:
             if child.hasChildNodes():
                 data[child.nodeName] = child.firstChild.nodeValue
- 
+
         return data
 
     ##############################################
@@ -222,7 +222,7 @@ class RedmineRest:
         '''
 
         return getDOMImplementation().createDocument(None, root_element_name, None)
- 
+
     ##############################################
  
     def add_key_to_xml_document(self, xml_document, xml_node, key, value):
@@ -233,7 +233,7 @@ class RedmineRest:
         element = xml_document.createElement(str(key))
         element.appendChild(xml_document.createTextNode(str(value)))
         xml_node.appendChild(element)
- 
+
     ##############################################
  
     def dict_to_xml(self, root_element_name, data):
@@ -247,9 +247,9 @@ class RedmineRest:
             self.add_key_to_xml_document(xml_document, xml_document.firstChild, key, data[key])
 
         print('XML document:', xml_document.toxml())
- 
+
         return xml_document
- 
+
     ##############################################
  
     def parse_project(self, dom):
@@ -257,9 +257,9 @@ class RedmineRest:
         ''' Parse a project DOM'''
 
         project_dict = self.dom_to_dict(dom, 'project')
- 
+
         return project_dict
- 
+
     ##############################################
  
     def parse_issue(self, dom):
@@ -269,7 +269,7 @@ class RedmineRest:
         issue_dict = self.dom_to_dict(dom, 'issue')
 
         return issue_dict
- 
+
     ##############################################
 
     def get_project(self, project_name):
@@ -287,7 +287,7 @@ class RedmineRest:
         '''
 
         return self.parse_issue(self.open_page('issues/' + str(issue_id) + '.xml'))
- 
+
     ##############################################
  
     def new_issue_from_dict(self, data):
@@ -298,7 +298,7 @@ class RedmineRest:
         xml_document = self.dict_to_xml('issue', data)
 
         return self.parse_issue(self.post('issues.xml', xml_document))
- 
+
     ##############################################
  
     def update_issue_from_dict(self, issue_id, data):
@@ -309,7 +309,7 @@ class RedmineRest:
         xml_document = self.dict_to_xml('issue', data)
 
         return self.put('issues/' + str(issue_id) + '.xml', xml)
- 
+
     ##############################################
  
     def close_issue(self, issue_id):
@@ -319,7 +319,7 @@ class RedmineRest:
 
         return self.update_issue_from_dict(issue_id,
                                            {'status_id':self.ISSUE_STATUS_ID_CLOSED})
- 
+
     ##############################################
  
     def resolve_issue(self, issue_id):
@@ -329,7 +329,7 @@ class RedmineRest:
 
         return self.update_issue_from_dict(issue_id,
                                            {'status_id':self.ISSUE_STATUS_ID_RESOLVED})
- 
+
     ##############################################
  
 #   def delete_issue(self, issue_id):
@@ -366,17 +366,17 @@ class RedmineProject:
                   tracker_id=None,
                   assigned_to_id=None,
                   user_data=None):
-  
+
         # How to set fixed version ?
 
         '''Create a new issue for this project.
         '''
-  
+
         if user_data is not None:
             data = user_data.copy()
         else:
             data = {}
-  
+
         data['project_id'] = self.id
         data['subject'] = subject
         data['description'] = description
@@ -388,7 +388,7 @@ class RedmineProject:
             data['tracker'] = tracker_id
         if assigned_to_id is not None:
             data['assigned_to_id'] = assigned_to_id
-  
+
         return self._redmine_rest.new_issue_from_dict(data)
 
 ####################################################################################################

@@ -140,10 +140,10 @@ class GlWidget(GlWidgetBase):
     def mousePressEvent(self, event):
 
         self._logger.info("")
-        
+
         if not (event.buttons() & QtCore.Qt.LeftButton):
             return
-        
+
         tool_bar = self._application.main_window.tool_bar
         current_tool = tool_bar.current_tool()
         if current_tool in (tool_bar.crop_tool_action,):
@@ -177,7 +177,7 @@ class GlWidget(GlWidgetBase):
     def mouseReleaseEvent(self, event):
 
         self._logger.info("")
-        
+
         button = event.button()
         if button & QtCore.Qt.RightButton:
             self.contextual_menu.exec_(event.globalPos())
@@ -215,7 +215,7 @@ class GlWidget(GlWidgetBase):
     def mouseMoveEvent(self, event):
 
         self._logger.info("")
-        
+
         if not (event.buttons() & QtCore.Qt.LeftButton):
             return
 
@@ -303,7 +303,7 @@ class GlWidget(GlWidgetBase):
 
         x_profile = None # row
         y_profile = None # column
-        
+
         height, width = image.shape[:2]
         if 'x' in axis:
             x_profile = LineIntensityProfile(location, 'x', 3, width)

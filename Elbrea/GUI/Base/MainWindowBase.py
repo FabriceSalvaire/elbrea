@@ -25,7 +25,7 @@ from PyQt5 import QtWidgets, QtCore
 class MainWindowBase(QtWidgets.QMainWindow):
 
     _logger = logging.getLogger(__name__)
-    
+
     ##############################################
     
     def __init__(self, title='', parent=None):
@@ -63,7 +63,7 @@ class MainWindowBase(QtWidgets.QMainWindow):
 
         self._file_menu = file_menu = self.menu_bar.addMenu('File')
         file_menu.addAction(application.exit_action) # Fixme: At the end
-        
+
         self._help_menu = help_menu = self.menu_bar.addMenu('Help')
         help_menu.addAction(application.help_action)
         help_menu.addSeparator()

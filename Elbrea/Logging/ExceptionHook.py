@@ -75,7 +75,7 @@ class DispatcherExceptionHook(object):
     ##############################################
 
     def _exception_hook(self, exception_type, exception_value, exception_traceback):
-     
+
         for observer in self:
             observer.notify(exception_type, exception_value, exception_traceback)
 
@@ -154,7 +154,7 @@ Context:
 
 ---------------------------------------------------------------------------------
 '''   
-        
+
         traceback = format_exception(exception_type, exception_value, exception_traceback)
         now = datetime.utcnow()
         platform = Platform()
@@ -164,7 +164,7 @@ Context:
                                       'platform': str(platform),
                                       'traceback': traceback,
                                       }
-        
+
         email = Email(subject='An exception occurred in Elbrea software',
                       recipients=Config.Email.to_address,
                       message=message,

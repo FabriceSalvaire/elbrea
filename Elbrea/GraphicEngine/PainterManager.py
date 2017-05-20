@@ -25,10 +25,10 @@ class BasicPainterManager(object):
     def __init__(self, glwidget):
 
         self.glwidget = glwidget
-        
+
         # Fixme: register self
         self.glwidget._painter_manager = self
-        
+
         self._painters = {}
         self._sorted_painters = []
         self._create_registered_painters()
@@ -40,7 +40,7 @@ class BasicPainterManager(object):
         # Fixme: useful ?
         if painter_name is None:
             painter_name = painter.name
-        
+
         if painter_name not in self._painters:
             self._painters[painter_name] = painter
             self._sorted_painters.append(painter)

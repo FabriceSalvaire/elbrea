@@ -83,16 +83,16 @@ class ImageProfile(object):
         dc = c2 - c1
         ac = abs(dc) << 1
         sc = sign(dc)
-    
+
         dr = r2 - r1
         ar = abs(dr) << 1
         sr = sign(dr)
-    
+
         c = c1
         r = r1
         cs = []
         rs = []
-    
+
         if ac > ar: # c dominant
             d = ar - (ac >> 1)
             while True:

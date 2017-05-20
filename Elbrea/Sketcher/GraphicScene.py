@@ -41,15 +41,15 @@ class GraphicItem(object):
     def __init__(self, position=None):
 
         self._id = GraphicItem._get_new_id()
-        
+
         self._position = position
         self._scale = 1 # (x, y)
         self._rotation = 0
-        
+
         self._interval = None
-        
+
         self._z_value = - self._id / 2**16 # 65535 objects
-        
+
         self._scene = None
         self._is_selected = False
 
@@ -185,7 +185,7 @@ class GraphicScene(object):
 
         if item in self._selected_items:
             item.deselect()
-        
+
         item_id = item._id
         del self._items[item_id]
         self._rtree.delete(item_id, item.bounding_box)
@@ -268,7 +268,7 @@ class GraphicScene(object):
                     new_items.extend(items)
         self.remove_items(removed_items)
         self.add_items(new_items)
-        
+
         return removed_items, new_items
 
 ####################################################################################################

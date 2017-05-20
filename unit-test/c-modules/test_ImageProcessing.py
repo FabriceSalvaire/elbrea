@@ -87,10 +87,10 @@ class TestImageProcessing2(unittest.TestCase):
         self.assertEqual(image.get(0, 0), 0)
         image.set_constant(4095)
         self.assertEqual(image.get(0, 0), 4095)
-         
+
         image.set(10, 10, 10)
         self.assertEqual(image.get(10, 10), 10)
-        
+
         # image.add_constant(100)
         # self.assertEqual(image.get(10, 10), 110)
          

@@ -58,7 +58,7 @@ def paint_line(x1, y1, x2, y2, paint_pixel):
 
     x = x1
     y = y1
-    
+
     if ax > ay: # x dominant
         d = ay - (ax >> 1)
         while True:
@@ -111,7 +111,7 @@ def paint_simple_ellipse(cx, cy, x_radius, y_radius, paint_pixel):
     while stopping_x >= stopping_y: # 1st set of points, y' > 1
 
         paint_4_ellipse_points(x, y)
-    
+
         y += 1
         stopping_y += two_a_square
         ellipse_error += y_change
@@ -307,7 +307,7 @@ def paint_conic(xs, ys, xe, ye, conic_parameters, paint_pixel):
     gy =   B*x + 2*C*y + E
 
     octant_count = get_conic_octant(gx, gy) - octant
-    
+
     # if octant_count < 0: octant_count += 8
     # 
     # elif octant_count == 0:
@@ -414,7 +414,7 @@ def paint_conic(xs, ys, xe, ye, conic_parameters, paint_pixel):
         print('-- %d (final) -----------------' % (octant))
 
     if odd(octant):
-        
+
         while 2*v <= k2:
 
           paint_pixel(x, y)
@@ -447,7 +447,7 @@ def paint_conic(xs, ys, xe, ye, conic_parameters, paint_pixel):
         while 2*u < k2:
 
           paint_pixel(x, y)
-          
+
           if x == xe and y == ye:
               break
 
@@ -522,7 +522,7 @@ def paint_ellipse(xm, ym, a, b, angle, paint_pixel, fill=False):
             # check it was not treated
             if v[i]:
                 continue
-            
+
             v[i] = True
 
             x = xs[i]

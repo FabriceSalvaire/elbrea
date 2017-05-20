@@ -31,7 +31,7 @@ class ImageSketcher(ObjectWithTimeStamp):
     def __init__(self, image_format, sketcher_state, painter):
 
         ObjectWithTimeStamp.__init__(self)
-        
+
         self._image = Image(image_format)
         self._image.clear()
 
@@ -55,7 +55,7 @@ class ImageSketcher(ObjectWithTimeStamp):
             colour = self._sketcher_state.pencil_colour
         if pencil_size is None:
             pencil_size = self._sketcher_state.pencil_size
-        
+
         cv2.line(self._image, self.to_cv_point(point1), self.to_cv_point(point2),
                  colour, pencil_size, 16)
         self.modified()

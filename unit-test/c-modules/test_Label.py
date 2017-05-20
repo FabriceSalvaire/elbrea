@@ -96,7 +96,7 @@ class TestLabel(unittest.TestCase):
 
         test_image_file_name = os.path.join(os.path.dirname(__file__), 'label-test-perf-image-1.txt')
         number_of_labels_per_template = 7
-        
+
         template = ascii_art_to_image(test_image_file_name).buffer
         template_height, template_width = template.shape
         height_scale_factor, width_scale_factor = 100, 50
@@ -121,7 +121,7 @@ class TestLabel(unittest.TestCase):
             labeler.generate_islands(image.buffer)
         print('Perf Loop Done')
         timer.print_delta_time()
-            
+
         # labelled_image = image.copy_image_format()
         # labeler.make_label_image(labelled_image.buffer)
         # # write_from_image(labelled_image, test_image_file_name.replace('.txt', '-label.tiff'))
@@ -184,7 +184,7 @@ class TestLabel(unittest.TestCase):
                           b=island_parameters['b'],
                           angle=island_parameters['angle'],
                           paint_pixel=paint_pixel, fill=True)
-        
+
         test_image_file_name = 'test-island-image.tiff'
         # write_from_image(image, test_image_file_name)
 
@@ -225,10 +225,10 @@ class TestLabel(unittest.TestCase):
                 print('Check Length: %.3f versus %.3f' % (ref_value, test_value))
                 ref_value, test_value = [.1*x for x in (ref_value, test_value)]
                 self.assertAlmostEqual(ref_value, test_value, places=0)
-                
+
             check_length(cpp_island.major_axis_weighted, 2*island_parameters['a'])
             check_length(cpp_island.minor_axis_weighted, 2*island_parameters['b'])
-        
+
 ####################################################################################################
 
 if __name__ == '__main__':

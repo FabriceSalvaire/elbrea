@@ -45,10 +45,10 @@ class SegmentSketcher(object):
     def __init__(self, sketcher_state, page_provider, painter):
 
         self._sketcher_state = sketcher_state
-        
+
         self._page_provider = page_provider
         self._painter = painter
-        
+
         self._current_segment = None
 
     ##############################################
@@ -72,7 +72,7 @@ class SegmentSketcher(object):
         self._current_segment.update_second_point(position)
         self._page_provider.page.add_item(self._current_segment)
         self._first_point = None
-        
+
         return self._current_segment
 
     ##############################################
@@ -100,7 +100,7 @@ class SegmentSketcher(object):
                 self._painter.add_item(path)
                 modified = True
             self._sketcher_state.previous_position = position
-        
+
         return modified
 
 ####################################################################################################
@@ -159,10 +159,10 @@ class PathSketcher(object):
     def __init__(self, sketcher_state, page_provider, painter):
 
         self._sketcher_state = sketcher_state
-        
+
         self._page_provider = page_provider
         self._painter = painter
-        
+
         self._current_path = None
         self._point_filter = PointFilter(window_size=10)
 
@@ -189,7 +189,7 @@ class PathSketcher(object):
         # path = path.simplify(tolerance=1)
         self._page.add_item(path)
         self._current_path = None
-        
+
         return path
 
     ##############################################
@@ -197,7 +197,7 @@ class PathSketcher(object):
     def on_pen_event(self, tablet_event):
 
         self._logger.info(str(tablet_event))
-        
+
         modified = False
         if tablet_event.type == TabletEventType.move:
             self._point_filter.send(tablet_event.position)
@@ -228,7 +228,7 @@ class PathSketcher(object):
             self._sketcher_state.previous_position = position
 
         self._painter.enable() # Fixme: here ?
-        
+
         return modified
 
 ####################################################################################################
@@ -249,14 +249,14 @@ class Eraser(object):
     def on_pen_event(self, tablet_event):
 
         self._logger.info("")
-        
+
         # Fixme: design, self._page, painter access
         
         radius = self._sketcher_state.eraser_size
         position = tablet_event.position
         page = self._page_provider.page
         removed_items, new_items = page.erase(position, radius)
-        
+
         page_provider = self._page_provider
         for item in removed_items:
             painter = page_provider.painter_for_item(item)
@@ -266,7 +266,7 @@ class Eraser(object):
             painter = page_provider.painter_for_item(item)
             if painter is not None:
                 painter.add_item(item)
-        
+
         return bool(removed_items)
 
 ####################################################################################################

@@ -48,7 +48,7 @@ class RstFactory(object):
     def _process_recursively(self):
 
         """ Process recursively the inner Python files and directories. """
-        
+
         for module_path, sub_directories, files in os.walk(self._root_module_path, followlinks=True):
             for sub_directory in list(sub_directories):
                 if os.path.join(module_path, sub_directory) in self._excluded_directory:
@@ -77,7 +77,7 @@ class RstFactory(object):
 
         if not os.path.exists(dst_directory):
             os.mkdir(dst_directory)
-        
+
         # Generate a RST file per module
         module_names = []
         for file_name in python_files:
@@ -88,7 +88,7 @@ class RstFactory(object):
             rst_file_name = os.path.join(dst_directory, module_name + '.rst')
             with open(rst_file_name, 'w') as f:
                 f.write(rst)
-        
+
         # Generate the TOC RST file
         rst = self._generate_toc(directory_module_name, sorted(module_names + sub_modules))
         rst_file_name = os.path.join(os.path.dirname(dst_directory), directory_module_name + '.rst')
@@ -99,7 +99,7 @@ class RstFactory(object):
 
     @staticmethod
     def is_python_directory_module(path):
-        
+
         return os.path.exists(os.path.join(path, RstFactory.init_file_name))
 
     ##############################################
@@ -154,7 +154,7 @@ class RstFactory(object):
 %(header_line)s
 %(mod)s%(module_name)s`
 %(header_line)s"""
-        
+
         rst = template.lstrip() % dict(
             module_name=module_name,
             mod=mod_rst,
@@ -171,7 +171,7 @@ class RstFactory(object):
 
 .. toctree::
 """
-    
+
         rst = template.lstrip() % dict(
             title=self._generate_title(directory_module_name),
             )
@@ -197,7 +197,7 @@ class RstFactory(object):
 
 .. End
 """
-        
+
         rst = template.lstrip() % dict(
             title=self._generate_title(module_name),
             module_name=module_name,

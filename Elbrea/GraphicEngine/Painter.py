@@ -45,7 +45,7 @@ class Painter(object):
             self._name = self.__painter_name__ # Fixme: purpose
         else:
             self._name = name
-        
+
         self._painter_manager.register_painter(self)
 
     ##############################################

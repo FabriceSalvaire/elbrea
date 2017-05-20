@@ -62,7 +62,7 @@ Bug description:
                                               'platform': str(platform),
                                               'traceback': self._traceback,
                                               }
-        
+
         redmine_rest = RedmineRest(url=Config.RedmineRest.url,
                                    key=Config.RedmineRest.key)
 
@@ -74,7 +74,7 @@ Bug description:
                                 tracker_id=None,
                                 assigned_to_id=None,
                                 user_data=None)
-        
+
         self.accept()
 
 ####################################################################################################

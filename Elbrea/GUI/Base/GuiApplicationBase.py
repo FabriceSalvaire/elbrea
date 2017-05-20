@@ -38,7 +38,7 @@ class GuiApplicationBase(ApplicationBase, QtWidgets.QApplication):
     _logger = logging.getLogger(__name__)
 
     has_gui = True
-    
+
     ##############################################
     
     def __init__(self, args, **kwargs):
@@ -103,7 +103,7 @@ class GuiApplicationBase(ApplicationBase, QtWidgets.QApplication):
             QtWidgets.QAction('System Information',
                           self,
                           triggered=self.show_system_information)
-        
+
         self.send_email_action = \
             QtWidgets.QAction('Send Email',
                           self,
@@ -112,7 +112,7 @@ class GuiApplicationBase(ApplicationBase, QtWidgets.QApplication):
     ##############################################
     
     def post_init(self):
-         
+
         self._splash.finish(self._main_window)
         self.processEvents()
         del self._splash
@@ -123,7 +123,7 @@ class GuiApplicationBase(ApplicationBase, QtWidgets.QApplication):
 
         self._platform.query_qt()
         self._platform.query_opengl()
-        
+
         # return to main and then enter to event loop
         
     ##############################################
@@ -138,9 +138,9 @@ class GuiApplicationBase(ApplicationBase, QtWidgets.QApplication):
     # Fixme: CriticalErrorForm vs critical_error
 
     def critical_error(self, title='Elbrea Critical Error', message=''):
-        
+
         QtWidgets.QMessageBox.critical(None, title, message)
-        
+
         # Fixme: qt close?
         sys.exit(1)
 
@@ -157,7 +157,7 @@ class GuiApplicationBase(ApplicationBase, QtWidgets.QApplication):
     ##############################################
 
     def about(self):
-        
+
         message = Messages.about_elbrea % {'version':str(Version.elbrea)}
         QtWidgets.QMessageBox.about(self.main_window, 'About Elbrea', message)
 
@@ -175,10 +175,10 @@ class GuiApplicationBase(ApplicationBase, QtWidgets.QApplication):
     ###############################################
 
     def send_email(self):
-        
+
         dialog = EmailBugForm()
         dialog.exec_()
-        
+
 ####################################################################################################
 #
 # End

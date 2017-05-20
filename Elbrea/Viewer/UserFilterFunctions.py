@@ -75,7 +75,7 @@ def user_filter_via(image_hls_float, output_image):
     # (note the edge programming)
     mb.copyBitPlane(image8_mb, 0, binary_image_mb)
     mb.computeDistance(binary_image_mb, distance_image32_mb, edge=mb.FILLED)
-    
+
     # We verify (with computeRange) that the distance image is lower than 256
     range = mb.computeRange(distance_image32_mb)
     mb.copyBytePlane(distance_image32_mb, 0, distance_image8_mb)
@@ -86,7 +86,7 @@ def user_filter_via(image_hls_float, output_image):
     # Computing a marker image
     mc.minima(distance_image8_mb, marker_mb)
     mc.dilate(marker_mb, marker_mb, 2)
-    
+
     # Then, we compute the watershed of the inverted distance function controlled by this marker
     # set (note the number of connected components given by the labelling operator; they should
     # correspond to the number of grains)
@@ -101,7 +101,7 @@ def user_filter_via(image_hls_float, output_image):
     mb.negate(watershed_image8_mb, watershed_image8_mb) # black watershed lines
     mb.copyBytePlane(watershed_image32_mb, 0, output_image_mb) # copy labels
     mb.logic(output_image_mb, watershed_image8_mb, output_image_mb, 'inf') # min(labels, black watershed lines)
-    
+
     # Then, we obtain the final (and better) result. Each grain is labelled
     mb.convert(image8_mb, watershed_image8_mb)
     # min(labels, black watershed lines, input mask)

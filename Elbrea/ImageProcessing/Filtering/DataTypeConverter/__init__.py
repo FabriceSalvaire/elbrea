@@ -41,7 +41,7 @@ class NormalisedFloatFilter(ImageFilter):
     def generate_data(self):
 
         self._logger.info(self.name)
-        
+
         input_ = self.get_primary_input()
         output = self.get_primary_output()
         input_.image.to_normalised_float(output.image)

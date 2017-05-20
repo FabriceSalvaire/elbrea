@@ -31,7 +31,7 @@ class Binning1D(object):
 
         if bin_width is None and number_of_bins is None:
             raise ValueError("...")
-        
+
         self._interval = Interval(interval, right_open=True)
         if bin_width is not None:
             # Method to adjust the x range:
@@ -43,13 +43,13 @@ class Binning1D(object):
         else:
             self._number_of_bins = int(number_of_bins)
             self._bin_width = self._interval.length() / self._number_of_bins
-        
+
         self._last_bin = self._number_of_bins
         self._over_flow_bin = self._number_of_bins +1
         self._array_size = self._over_flow_bin +1
-        
+
         self._inverse_bin_width = 1./self._bin_width
-        
+
         self._bin_centers = np.linspace(self.bin_center(self._first_bin),
                                         self.bin_center(self._last_bin),
                                         self._number_of_bins)
@@ -179,7 +179,7 @@ class Binning1D(object):
             np.arange(start=self._interval.inf,
                       stop=self._interval.sup + self._bin_width,
                       step=self._bin_width)
-        
+
         return bins
 
     ##############################################
@@ -222,12 +222,12 @@ Binning 1D
   number of bins: %u
   bin width: %g
 """
-        
+
         text = string_format % (str(self._interval), self._number_of_bins, self._bin_width)
         for i in self.bin_iterator(xflow=True):
             # Fixme: 3u count number of digits
             text += '  %3u ' % i + str(self.bin_interval(i)) + '\n'
-        
+
         return text
 
    ###############################################
@@ -236,7 +236,7 @@ Binning 1D
 
         inf = max(self.first_bin, bin_range.inf)
         sup = min(self.last_bin, bin_range.sup)
-        
+
         return Interval(self.bin_lower_edge(inf),
                         self.bin_upper_edge(sup))
 

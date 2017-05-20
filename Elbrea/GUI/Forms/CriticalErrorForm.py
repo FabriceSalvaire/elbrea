@@ -52,7 +52,7 @@ class CriticalErrorForm(QtWidgets.QDialog, Ui_critical_error_form):
         self._backtrace = format_exception(self._exception_type,
                                            self._exception_value,
                                            self._exception_backtrace)
-        
+
         # Fixme: call critical exit
         self.exit_button.clicked.connect(lambda : sys.exit(1))
         self.show_backtrace_button.clicked.connect(self.show_backtrace)
@@ -80,7 +80,7 @@ class CriticalErrorForm(QtWidgets.QDialog, Ui_critical_error_form):
     ###############################################
 
     def send_email(self):
-        
+
         dialog = EmailBugForm(self._backtrace)
         dialog.exec_()
 

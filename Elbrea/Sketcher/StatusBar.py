@@ -25,9 +25,9 @@ class StatusBar(object):
 
         self._main_window = main_window
         self._status_bar = self._main_window.statusBar()
-        
+
         self._application = QtWidgets.QApplication.instance()
-        
+
         label_definitions = (('message_label', 'Message'),
                              ('coordinate_label', 'Coordinate of the pointer'),
                              )
@@ -35,11 +35,11 @@ class StatusBar(object):
         for attribute_name, tool_tip in label_definitions:
             widget = QtWidgets.QLabel(toolTip=tool_tip)
             setattr(self, attribute_name, widget)
-        
+
         self.update_status_message('W'*30)
         coordinate_max = 10**5
         self.update_coordinate_status(coordinate_max, coordinate_max)
-        
+
         for widget in (self.message_label,
                        self.coordinate_label,
                        ):
@@ -48,7 +48,7 @@ class StatusBar(object):
             self._status_bar.addPermanentWidget(widget)
             widget.setMinimumSize(widget.sizeHint())
             widget.clear()
-        
+
         self.update_coordinate_status(0, 0)
 
     ##############################################

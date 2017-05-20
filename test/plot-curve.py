@@ -27,11 +27,11 @@ class Path(object):
     @property
     def number_of_points(self):
         return self.points.shape[0]
-    
+
     @property
     def indexes(self):
         return np.arange(self.number_of_points)
-    
+
     @property
     def x(self):
         return self.points[:,0]
@@ -39,7 +39,7 @@ class Path(object):
     @property
     def y(self):
         return self.points[:,1]
-    
+
     @property
     def p0(self):
         return self.points[0]
@@ -51,14 +51,14 @@ class Path(object):
     @property
     def p10(self):
         return self.p1 - self.p0
-    
+
     @property
     def u10(self):
         p10 = self.p10
         # print(self.p0, self.p1, str(self.interval))
         u10 = p10 / np.sqrt(p10[0]**2 + p10[1]**2) # srqt(x.x) # np.sum(p10**2, axis=1)
         return u10
-    
+
     ##############################################
 
     def farthest_point(self, tolerance=1):
@@ -99,7 +99,7 @@ class Path(object):
             return indexes[i_min], distance[i_min]
         else:
             return None, None
-        
+
         # distance = np.sum((self.points - point)**2, axis=1)
         # i_min = np.argmin(distance)
         # return i_min, distance[i_min]
@@ -115,14 +115,14 @@ class Path(object):
         else:
             stop = upper + 1
             global_upper = self.interval.inf + upper
-            
+
         return self.__class__(self.points[lower:stop],
                               interval=IntervalInt(global_lower, global_upper))
 
     ##############################################
 
     def simplify(self, tolerance=1):
-    
+
         queue = [self]
         farthest_points = [0]
         while queue:
@@ -138,7 +138,7 @@ class Path(object):
         farthest_points.append(self.number_of_points -1)
         farthest_points.sort()
         points = self.points[farthest_points]
-        
+
         return self.__class__(points)
 
     ##############################################
@@ -245,7 +245,7 @@ class Path(object):
             raise ValueError()
         else:
             return self
-        
+
 ####################################################################################################
 
 # filename = 'curve-sample-loop.hdf5'

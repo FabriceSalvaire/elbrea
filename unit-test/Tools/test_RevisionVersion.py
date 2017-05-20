@@ -25,7 +25,7 @@ import unittest
 ####################################################################################################
 
 from Elbrea.Tools.RevisionVersion import RevisionVersion
-            
+
 ####################################################################################################
 
 class TestRevisionVersion(unittest.TestCase):

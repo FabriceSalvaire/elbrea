@@ -76,7 +76,7 @@ class MouseEvent(object):
     ##############################################
 
     def __init__(self, window_position, scene_position):
-        
+
         self._window_position = window_position
         self._scene_position = scene_position
 
@@ -91,28 +91,28 @@ class GlWidget(GlWidgetBase):
     def __init__(self, parent):
 
         self._logger.debug('Initialise GlWidget')
-        
+
         super(GlWidget, self).__init__(parent)
-        
+
         self._application = QtWidgets.QApplication.instance()
-        
+
         # Setup OpenGL 
         self.clear_colour = (1, 1, 1, 0)
         # self.clear_bit = GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT
         
         # Setup navigation
         self.zoom_step = 1.25
-        
+
         self._painter_manager = None
-        
+
         self._contextual_menu = QtWidgets.QMenu()
-        
+
         self._page_manager = None
         self._page_interval = None
-        
+
         self._previous_position = None
         self._previous_position_screen = None
-        
+
         self._current_tool = None
         self._sketcher = None
         self._pointer_type = None
@@ -193,9 +193,9 @@ class GlWidget(GlWidgetBase):
         # Set max_area so as to correspond to max_binning zoom centered at the origin
         area_size = 10**5
         max_area = IntervalInt2D([-area_size, area_size], [-area_size, area_size])
-        
+
         super(GlWidget, self).init_glortho2d(max_area, zoom_manager=ZoomManager())
-        
+
         self.scene = GraphicScene(self.glortho2d)
 
     ##############################################
@@ -204,7 +204,7 @@ class GlWidget(GlWidgetBase):
 
         self._logger.debug('Initialise GL')
         super(GlWidget, self).initializeGL()
-        
+
         # GL.glEnable(GL.GL_DEPTH_TEST) # Fixme: cf. clear_bit
         
         GL.glEnable(GL.GL_BLEND)
@@ -212,7 +212,7 @@ class GlWidget(GlWidgetBase):
         # alpha: 0: complete transparency, 1: complete opacity
         # Set (Sf, Df) for transparency: O = Sa*S + (1-Sa)*D 
         GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-        
+
         self._init_shader()
         self._ready = False
 
@@ -240,11 +240,11 @@ class GlWidget(GlWidgetBase):
     def _init_shader(self):
 
         self._logger.debug('Initialise Shader')
-        
+
         from Elbrea.GraphicEngine import ShaderProgrames as ShaderProgrames
         self.shader_manager = ShaderProgrames.shader_manager
         self.position_shader_interface = ShaderProgrames.position_shader_program_interface
-        
+
         # Fixme: share interface
         self._viewport_uniform_buffer = GlUniformBuffer()
         viewport_uniform_block = self.position_shader_interface.uniform_blocks.viewport
@@ -384,7 +384,7 @@ class GlWidget(GlWidgetBase):
     def mouseReleaseEvent(self, event):
 
         self._logger.info("")
-        
+
         button = event.button()
         if button & QtCore.Qt.RightButton:
             self._contextual_menu.exec_(event.globalPos())
@@ -407,7 +407,7 @@ class GlWidget(GlWidgetBase):
 
         if not (event.buttons() & QtCore.Qt.LeftButton):
             return
-        
+
         position = self.window_to_gl_coordinate(event, round_to_integer=False)
         if self._sketcher is not None:
             tablet_event = TabletEvent(TabletEventType.move, self._pointer_type, position)
@@ -441,7 +441,7 @@ class GlWidget(GlWidgetBase):
     def tabletEvent(self, event):
 
         self._logger.info("")
-        
+
         event.accept()
         # event.ignore()
         

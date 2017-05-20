@@ -48,7 +48,7 @@ class IslandPainter(object):
     ##############################################
 
     def _paint_pixel(self, x, y):
-        
+
         self._pixels[self.number_of_pixels,:3] = (y, x, self.intensity_level)
         self.number_of_pixels += 1
 
@@ -134,25 +134,25 @@ class TestIsland(unittest.TestCase):
 
             self.assertEqual(island.intensity_min, island.intensity_max)
             self.assertEqual(island.intensity_min, island_parameters['intensity_level'])
-             
+
             # Fixme: check r/c inversion
             self.assertAlmostEqual(island.cm_r_weighted, island_parameters['cm_c'], places=1)
             self.assertAlmostEqual(island.cm_c_weighted, island_parameters['cm_r'], places=1)
             self.assertAlmostEqual(island.cm_r_unweighted, island_parameters['cm_c'], places=1)
             self.assertAlmostEqual(island.cm_c_unweighted, island_parameters['cm_r'], places=1)
-             
+
             angle = island_parameters['angle']
             # Fixme
             if angle == 90:
                 angle = -angle
             self.assertAlmostEqual(island.major_axis_angle_weighted, angle, delta=1.)
             self.assertAlmostEqual(island.major_axis_angle_unweighted, angle, delta=1.)
-             
+
             def check_length(ref_value, test_value):
                 print('Check Length: %.3f versus %.3f' % (ref_value, test_value))
                 ref_value, test_value = [.1*x for x in (ref_value, test_value)]
                 self.assertAlmostEqual(ref_value, test_value, places=0)
-                
+
             check_length(island.major_axis_weighted, 2*island_parameters['a'])
             check_length(island.minor_axis_weighted, 2*island_parameters['b'])
 

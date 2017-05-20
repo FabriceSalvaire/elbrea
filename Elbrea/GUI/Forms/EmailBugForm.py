@@ -46,7 +46,7 @@ class EmailBugForm(QtWidgets.QDialog):
         from_address = str(form.from_line_edit.text())
         if not from_address:
             from_address = Config.Email.from_address
-        
+
         # Fixme: test field ?
         # QtWidgets.QMessageBox.critical(None, title, message)
 
@@ -72,7 +72,7 @@ Elbrea Version:
         # Fixme: singleton ?
         platform = Platform(application)
         platform.query_opengl()
-       
+
         message = template_message % {'description': str(form.description_plain_text_edit.toPlainText()),
                                       'elbrea_version': str(Version.elbrea),
                                       'platform': str(platform),

@@ -26,11 +26,11 @@ class SketcherApplication(GuiApplicationBase):
 
         super(SketcherApplication, self).__init__(args=args)
         self._logger.debug(str(args))
-        
+
         from .SketcherMainWindow import SketcherMainWindow
         self._main_window = SketcherMainWindow()
         self._main_window.showMaximized()
-        
+
         self.post_init()
 
     ##############################################
@@ -44,7 +44,7 @@ class SketcherApplication(GuiApplicationBase):
     def post_init(self):
 
         super(SketcherApplication, self).post_init()
-        
+
         journal_path = self.args.journal
         if os.path.exists(journal_path):
             pages = self.load_journal(journal_path)
@@ -53,7 +53,7 @@ class SketcherApplication(GuiApplicationBase):
         from .PageManager import PageManager
         self.page_manager = PageManager(self, pages)
         self._main_window.sketcher_tool_bar.init_sketcher_state()
-        
+
         glwidget = self._main_window.glwidget
         glwidget.init_tools() # Fixme: for shader
         glwidget._ready = True
@@ -65,7 +65,7 @@ class SketcherApplication(GuiApplicationBase):
 
         if not os.path.exists(journal_path):
             raise NameError()
-        
+
         if journal_path.endswith('.hdf5'):
             from .Importer.Hdf import HdfImporter
             return HdfImporter(journal_path).read_pages()
@@ -81,10 +81,10 @@ class SketcherApplication(GuiApplicationBase):
 
         if journal_path is None:
             journal_path = self.args.journal
-        
+
         from .Importer.Hdf import HdfWriter
         HdfWriter(journal_path).save_pages(self.page_manager.pages)
-        
+
         from .Importer.Xournal import XournalWriter
         # journal_path = journal_path.replace('.hdf5', '.xml')
         journal_path = journal_path.replace('.hdf5', '.xoj')

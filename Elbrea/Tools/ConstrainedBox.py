@@ -25,13 +25,13 @@ class ConstrainedValue(object):
     def __bool__(self):
 
         return self.constrained
-        
+
     ##############################################
         
     def _get_value(self):
 
         return self._value
-        
+
     ##############################################
     
     def _set_value(self, value):
@@ -40,9 +40,9 @@ class ConstrainedValue(object):
             raise NameError("Value is constrained")
         else:
             self._value = value
-    
+
     value = property(_get_value, _set_value)
-            
+
 ####################################################################################################
 
 class ConstrainedPoint(object):
@@ -61,7 +61,7 @@ class ConstrainedPoint(object):
     def number_of_constrains(self):
 
         return self._number_of_constrains
-        
+
     ##############################################
 
     @property
@@ -97,7 +97,7 @@ class ConstrainedPoint(object):
             self._x.value = x
         if not self._y:
             self._y.value = y
-    
+
 ####################################################################################################
 
 class ConstrainedBox(object):
@@ -127,13 +127,13 @@ class ConstrainedBox(object):
     ##############################################
 
     def set_p1(self, x, y):
-        
+
         self._p1.set_point(x, y)
 
     ##############################################
 
     def set_p2(self, x, y):
-        
+
         self._p2.set_point(x, y)
 
     ##############################################
@@ -150,7 +150,7 @@ class ConstrainedBox(object):
     def size(self):
 
         return self.interval.size()
-        
+
 ####################################################################################################
 #
 #

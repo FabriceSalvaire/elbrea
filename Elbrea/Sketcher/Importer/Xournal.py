@@ -34,11 +34,11 @@ class XournalImporter(object):
     # http://xournal.sourceforge.net/manual.html#file-format
 
     _logger = _module_logger.getChild('XournalImporter')
-    
+
     ##############################################
 
     def __init__(self, file_path):
-        
+
         # Xournal stores its data in gzipped XML-like files. The gzipped data consists of a
         # succession of XML tags describing the document. By convention, the file header and trailer
         # look like this:
@@ -57,7 +57,7 @@ class XournalImporter(object):
 
         page_format = PageFormat('a4', 297, 210) # Fixme: size is per page
         self._pages = Pages(page_format) 
-        
+
         for node in root:
             self._logger.debug(type(node), node.tag)
             if node.tag == 'title':
@@ -70,14 +70,14 @@ class XournalImporter(object):
     @property
     def pages(self):
         return self._pages
-                    
+
     ##############################################
 
     def _parse_title(self, node):
 
         self._title = node.text
         self._logger.debug('Title: ' + self._title)
-                
+
     ##############################################
 
     def _parse_page(self, page_node):
@@ -90,7 +90,7 @@ class XournalImporter(object):
         self._logger.debug('Page {}'.format(kwargs))
 
         self._page = self._pages.add_page()
-        
+
         for node in page_node:
             self._logger.debug(type(node), node.tag)
             if node.tag == 'background':
@@ -138,7 +138,7 @@ class XournalImporter(object):
         
         kwargs = dict(node.attrib)
         self._logger.debug('Background {}'.format(kwargs))
-                
+
     ##############################################
 
     def _parse_layer(self, layer_node):
@@ -224,7 +224,7 @@ class XournalImporter(object):
 
         path = Path(colour, pencil_size, points)
         self._page.add_item(path)
-        
+
     ##############################################
 
     def _parse_text(self, node):
@@ -267,7 +267,7 @@ class XournalWriter(object):
     ##############################################
 
     def __init__(self, file_path):
-    
+
         # self._file = open(file_path, 'w')
         self._file = gzip.open(file_path, 'wb')
 
@@ -276,13 +276,13 @@ class XournalWriter(object):
     def write_line(self, text):
 
         self._file.write((text + '\n').encode('utf-8'))
-    
+
     ##############################################
 
     def __del__(self):
 
         self._file.close()
-    
+
     ##############################################
 
     def save_path(self, path, height_pt):
@@ -313,7 +313,7 @@ class XournalWriter(object):
         points[:,1] = height_pt - points[:,1] # invert y axis
         self.write_line(' '.join([str(x) for x in points.flatten()]) + '')
         self.write_line('</stroke>')
-        
+
     ##############################################
 
     def save_page(self, page, width_pt, height_pt):
@@ -321,14 +321,14 @@ class XournalWriter(object):
         self.write_line('<page width="{:.2f}" height="{:.2f}">'.format(width_pt, height_pt))
         self.write_line('<background type="solid" color="white" style="lined" />')
         self.write_line('<layer>')
-        
+
         for item in page:
             if isinstance(item, (Segment, Path)):
                 self.save_path(item, height_pt)
-        
+
         self.write_line('</layer>')
         self.write_line('</page>')
-            
+
     ##############################################
 
     def save_pages(self, pages):
@@ -340,12 +340,12 @@ class XournalWriter(object):
         page_format = pages.page_format
         width_pt = mm2pt(page_format.width)
         height_pt = mm2pt(page_format.height)
-        
+
         for page in pages:
             self.save_page(page, width_pt, height_pt)
 
         self.write_line('</xournal>')
-            
+
 ####################################################################################################
 # 
 # End

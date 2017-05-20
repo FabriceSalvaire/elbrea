@@ -69,7 +69,7 @@ class LineIntensityProfileForm(IntensityProfileBaseForm):
 
         self._x_intensity_profile = x_intensity_profile
         self._y_intensity_profile = y_intensity_profile
-        
+
         self._draw()
 
     ##############################################

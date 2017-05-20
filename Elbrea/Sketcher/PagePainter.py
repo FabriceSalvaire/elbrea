@@ -39,10 +39,10 @@ class PagePainter(Painter):
     def __init__(self, painter_manager, z_value=-1, status=True, step=10):
 
         super(PagePainter, self).__init__(painter_manager, z_value=z_value, status=status)
-        
+
         self._shader_program = self._glwidget.shader_manager.segment_shader_program
         self.reset()
-        
+
         self._page_interval = None
         self.set_page(step)
 
@@ -78,11 +78,11 @@ class PagePainter(Painter):
     def set_page(self, step=10):
 
         self._page_interval = self._glwidget.page_interval
-        
+
         self._glwidget.makeCurrent()
-        
+
         interval =  self._page_interval
-        
+
         # Paint grid
         colour = RgbIntColour(64, 160, 255).normalise() # xournal
         pencil_size = 1 # > 1
@@ -90,14 +90,14 @@ class PagePainter(Painter):
             self._add_horizontal_segment(colour, pencil_size, y)
         for x in np.arange(interval.x.inf + step, interval.x.sup, step):
             self._add_vertical_segment(colour, pencil_size, x)
-        
+
         # Paint page border
         pencil_size = 3 # > 1
         for y in (interval.y.inf, interval.y.sup):
             self._add_horizontal_segment(colour, pencil_size, y)
         for x in (interval.x.inf, interval.x.sup):
             self._add_vertical_segment(colour, pencil_size, x)
-        
+
         self._glwidget.doneCurrent()
 
     ##############################################

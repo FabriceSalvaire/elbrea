@@ -39,7 +39,7 @@ class TexturePainter(Painter):
     def __init__(self, *args, **kwargs):
 
         super(TexturePainter, self).__init__(*args, **kwargs)
-        
+
         self._shader_program = self._glwidget.shader_manager.texture_shader_program
         self._texture_vertex_array = None
 
@@ -83,7 +83,7 @@ class DynamicTexturePainter(Painter, ObjectWithTimeStamp):
 
         ObjectWithTimeStamp.__init__(self)
         Painter.__init__(self, *args, **kwargs)
-        
+
         self._glwidget = self._painter_manager.glwidget
         self._source = None
         # self._shader_program = shader_manager.texture_shader_program
@@ -150,14 +150,14 @@ class DynamicTexturePainter(Painter, ObjectWithTimeStamp):
         if (self._status
             and self._texture_vertex_array is not None
             and self._shader_program is not None):
-            
+
             # self._logger.info("uploaded {}".format(self._uploaded))
             
             # if self.source > self: # timestamp
             # print(self._uploaded, self.source._modified_time, self._modified_time)
             if not self._uploaded or self.source._modified_time > self._modified_time:
                 self.upload_data()
-            
+
             shader_program = self._shader_program
             shader_program.bind()
             self._texture_vertex_array.draw()
